@@ -1,0 +1,25 @@
+{
+  "created_at": "2026-10-30T04:52:23.522Z",
+  "tables": {
+    "seo_keywords": {
+      "file": "seo_keywords.jsonl.gz",
+      "rows": 31114,
+      "sha256": "f68ed1403b9934e6bec673294b8c87ec229e0f06596997a38578abe19cdf43bf"
+    },
+    "seo_imports": {
+      "file": "seo_imports.jsonl.gz",
+      "rows": 2,
+      "sha256": "ab58dfd27dd64f8220266c29d6c81f4dae5d1d9f98a20ce1c379b09a3a6fa50f"
+    },
+    "seo_records": {
+      "file": "seo_records.jsonl.gz",
+      "rows": 17523,
+      "sha256": "a964c6770d618884786a72368b0b849b5c4b43dd486751cd7c6ff30d49faf8ae"
+    },
+    "seo_batches": {
+      "file": "seo_batches.jsonl.gz",
+      "rows": 0,
+      "sha256": "abfbb86f9f5ddfbd9fc1a72c43ab384702ce8bae86b60f3324748485e235e61e"
+    }
+  }
+}

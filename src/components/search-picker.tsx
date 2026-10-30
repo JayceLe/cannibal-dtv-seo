@@ -1,0 +1,19 @@
+'use client';
+import {useEffect,useId,useRef,useState} from 'react';
+import {Check,ChevronDown,Search} from 'lucide-react';
+
+export type PickerOption={value:string;label:string;color?:string};
+export default function SearchPicker({options:choices,value,onChange,label,placeholder='Chọn',searchLabel,disabled=false}:{options:PickerOption[];value:string;onChange:(name:string)=>void;label:string;placeholder?:string;searchLabel?:string;disabled?:boolean}){
+ const [open,setOpen]=useState(false),[search,setSearch]=useState(''),[active,setActive]=useState(0);
+ const id=useId(),root=useRef<HTMLDivElement>(null),trigger=useRef<HTMLButtonElement>(null),input=useRef<HTMLInputElement>(null),list=useRef<HTMLDivElement>(null);
+ const options=choices.filter(c=>c.label.toLocaleLowerCase('vi').includes(search.toLocaleLowerCase('vi').trim()));
+ const selected=choices.find(c=>c.value===value);
+ useEffect(()=>{if(open){input.current?.focus();const close=(e:PointerEvent)=>{if(e.target instanceof Node&&!root.current?.contains(e.target))setOpen(false);};document.addEventListener('pointerdown',close);return()=>document.removeEventListener('pointerdown',close);}},[open]);
+ useEffect(()=>{const row=list.current?.children[active] as HTMLElement|undefined;if(row&&list.current){const box=list.current;if(row.offsetTop<box.scrollTop)box.scrollTop=row.offsetTop;else if(row.offsetTop+row.offsetHeight>box.scrollTop+box.clientHeight)box.scrollTop=row.offsetTop+row.offsetHeight-box.clientHeight;}},[active]);
+ function choose(name:string){onChange(name);setOpen(false);trigger.current?.focus();}
+ function show(){setSearch('');setActive(Math.max(0,choices.findIndex(c=>c.value===value)));setOpen(true);}
+ return <div className="dmc3-picker" ref={root} onBlur={e=>{if(e.relatedTarget instanceof Node&&!root.current?.contains(e.relatedTarget))setOpen(false);}}>
+  <span className="picker-label" id={`${id}-label`}>{label}</span><button ref={trigger} type="button" disabled={disabled||!choices.length} className="picker-trigger" aria-labelledby={`${id}-label ${id}-value`} aria-haspopup="listbox" aria-expanded={open} aria-controls={`${id}-list`} onClick={()=>open?setOpen(false):show()} onKeyDown={e=>{if(e.key==='ArrowDown'){e.preventDefault();show();}}}><i style={{background:selected?.color||'#8bb4ff'}}/><span id={`${id}-value`} title={selected?.label}>{selected?.label||placeholder}</span><ChevronDown size={18}/></button>
+  {open?<div className="picker-popover"><div className="picker-search"><Search size={17}/><input ref={input} value={search} placeholder={`Tìm ${searchLabel||label}…`} role="combobox" aria-label={`Tìm ${searchLabel||label}`} aria-expanded="true" aria-autocomplete="list" aria-controls={`${id}-list`} aria-activedescendant={options[active]?`${id}-option-${active}`:undefined} onChange={e=>{setSearch(e.target.value);setActive(0);}} onKeyDown={e=>{if(e.key==='Escape'){e.preventDefault();setOpen(false);trigger.current?.focus();}else if(['ArrowDown','ArrowUp','Home','End'].includes(e.key)){e.preventDefault();setActive(n=>e.key==='Home'?0:e.key==='End'?Math.max(0,options.length-1):Math.max(0,Math.min(options.length-1,n+(e.key==='ArrowDown'?1:-1))));}else if(e.key==='Enter'&&options[active]){e.preventDefault();choose(options[active].value);}}}/></div><div className="picker-list" ref={list} id={`${id}-list`} role="listbox" aria-label={label}>{options.map((c,index)=><button type="button" tabIndex={-1} role="option" aria-selected={value===c.value} key={c.value} id={`${id}-option-${index}`} className={active===index?'is-active':''} onPointerMove={()=>setActive(index)} onMouseDown={e=>e.preventDefault()} onClick={()=>choose(c.value)}><i style={{background:c.color||'#8bb4ff'}}/><span>{c.label}</span>{value===c.value?<Check size={16}/>:null}</button>)}</div>{!options.length?<p className="picker-empty">Không có lựa chọn phù hợp.</p>:null}</div>:null}
+ </div>;
+}
