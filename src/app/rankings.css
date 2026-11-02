@@ -2,3 +2,5 @@
 @media(max-width:1100px){.rank-toolbar{grid-template-columns:1fr 1fr}.rank-band-grid{gap:10px}.ranking-report .panel{padding:22px}.rank-band{padding:12px}.rank-band strong{font-size:23px}}
 @media(max-width:760px){.rank-grid{grid-template-columns:1fr}.rank-toolbar{grid-template-columns:1fr 1fr;gap:14px}.ranking-report h2{font-size:19px}.ranking-report .panel{padding:18px}.rank-card-title{gap:12px}.rank-toolbar .picker-trigger{font-size:13px;padding:12px}.rank-keyword{gap:16px}.ranking-report .section-title{flex-wrap:wrap;gap:18px}}
 @media(prefers-reduced-motion:reduce){.rank-band{transition:none}.rank-band:hover{transform:none}}
+
+.rank-serp-value{white-space:nowrap}.rank-serp-value small{font-size:.75em;font-weight:650}

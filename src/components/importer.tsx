@@ -40,9 +40,7 @@ export default function Importer({demo,onDone,onLogin}:{demo:boolean;onDone:(imp
    const client=db();const size=1000,total=Math.ceil(preview.data.length/size);let id='';
    if(kind==='weekly'){
     const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await file.arrayBuffer()))).map(x=>x.toString(16).padStart(2,'0')).join('')+`:${locale}:${sheet??0}`;
-    const {data:existing,error:ee}=await client.from('seo_imports').select('id,status').eq('week_start',week).eq('fingerprint',hash).maybeSingle();if(ee)throw ee;
-    if(existing?.status==='ready')throw new Error('File này đã được lưu cho ngày đã chọn. Xem lại trong tab So sánh.');
-    if(existing)id=existing.id;else{const {data,error}=await client.from('seo_imports').insert({week_start:week,file_name:file.name,fingerprint:hash,expected_batches:total,quality:preview.quality}).select('id').single();if(error)throw error;id=data.id;}
+    const {data,error}=await client.from('seo_imports').insert({week_start:week,file_name:file.name,fingerprint:hash+':'+crypto.randomUUID(),expected_batches:total,quality:preview.quality}).select('id').single();if(error)throw error;id=data.id;
    }
    for(let i=0;i<total;i++){
     const part=preview.data.slice(i*size,(i+1)*size);
@@ -54,7 +52,7 @@ export default function Importer({demo,onDone,onLogin}:{demo:boolean;onDone:(imp
    if(active.current){setProgress(100);setPhase('');setDone(true);onDone(id||undefined);}
   }catch(e){if(active.current){setError(e instanceof Error?e.message:(e as {message?:string}).message||'Không lưu được dữ liệu. Chọn lại cùng file để tiếp tục các lô chưa hoàn tất.');setPhase('');}}
  }
- return <div className="import-layout"><section className="panel import-main"><div className="section-heading"><div><h2>Đưa dữ liệu vào hệ thống</h2><p>Kiểm tra trước khi lưu. Chọn ngày dữ liệu. Hệ thống chỉ lưu query khớp bộ từ khóa gốc.</p></div><FileSpreadsheet size={28}/></div>
+ return <div className="import-layout"><section className="panel import-main"><div className="section-heading"><div><h2>Đưa dữ liệu vào hệ thống</h2><p>Kiểm tra trước khi lưu. Chọn ngày dữ liệu. Import hoàn tất sẽ thay bản cũ của ngày đó; mỗi ngày chỉ có một bản.</p></div><FileSpreadsheet size={28}/></div>
   <div className="segmented"><button className={kind==='weekly'?'active':''} disabled={!!phase} onClick={()=>{setKind('weekly');setPreview(null);setFile(null);setError('');}}>Import Query–URL</button><button className={kind==='base'?'active':''} disabled={!!phase} onClick={()=>{setKind('base');setPreview(null);setFile(null);setError('');}}>Danh sách từ khóa gốc</button></div>
   <div className="form-grid">{kind==='weekly'?<label>Ngày dữ liệu<input type="date" value={week} disabled={!!phase} onChange={e=>{setWeek(e.target.value);setDone(false);}}/></label>:<p className="muted">Gộp theo từ khóa chuẩn hóa; cập nhật DMC3. Từ khóa cũ và lịch sử dữ liệu được giữ lại.</p>}<label>Định dạng số trong file<select disabled={!!phase} value={locale} onChange={e=>{setLocale(e.target.value);setPreview(null);}}><option value="vi-VN">Việt Nam · 1.234,5</option><option value="en-US">Quốc tế · 1,234.5</option></select></label></div>
   <input ref={input} type="file" hidden accept=".xlsx,.csv,.tsv" onChange={e=>{if(e.target.files?.[0])analyze(e.target.files[0]);e.target.value='';}}/>
