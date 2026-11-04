@@ -56,7 +56,7 @@ function ReportCard({
     <>
       <span className="report-card-label">
         {label}
-        {icon}
+        <span aria-hidden="true">{icon}</span>
       </span>
       <strong
         className="report-card-value"
@@ -66,7 +66,7 @@ function ReportCard({
       </strong>
       <span className="report-card-detail">
         {detail}
-        {onClick ? <ArrowUpRight size={14} /> : null}
+        {onClick ? <ArrowUpRight size={14} aria-hidden="true" /> : null}
       </span>
     </>
   );

@@ -52,7 +52,7 @@ export default function FocusDialog({
           aria-label={closeLabel}
           onClick={close}
         >
-          <X size={22} />
+          <X size={22} aria-hidden="true" />
         </button>
       </header>
       {children}

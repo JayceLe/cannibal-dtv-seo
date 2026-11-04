@@ -43,3 +43,12 @@ test('filter state is absent when empty and uses labelled controls for every rem
  assert.match(html,/aria-label="Bỏ lọc Nhóm có tên rất dài"/);
  assert.match(html,/<ul>/);assert.match(html,/Xóa tất cả/);
 });
+
+test('import retains source types, date, locale, format limits and all four visible steps',async()=>{
+ const {default:Importer}=await import('../src/components/importer');
+ const html=render(React.createElement(Importer,{demo:false,onDone:noop,onLogin:noop}));
+ for(const label of ['Đưa dữ liệu vào hệ thống','Import Query–URL','Danh sách từ khóa gốc','Ngày dữ liệu','Định dạng số trong file','XLSX, CSV, TSV','150 MB','Chọn file','Kiểm tra','Nạp dữ liệu','Hoàn tất','Tải file CSV mẫu','Keywords + DMC3','URL chứa #']) assert.ok(html.includes(label),label);
+ assert.match(html,/aria-label="Tiến trình import"/);
+ assert.match(html,/aria-current="step"/);
+ assert.match(html,/aria-pressed="true"/);
+});

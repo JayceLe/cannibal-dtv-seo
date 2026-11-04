@@ -233,21 +233,49 @@ export default function Importer({
       }
     }
   }
+  const currentStep = done
+    ? 3
+    : preview && phase
+      ? 2
+      : preview || phase
+        ? 1
+        : 0;
   return (
     <div className="import-layout">
       <section className="panel import-main">
         <div className="section-heading">
           <div>
-            <h2>Đưa dữ liệu vào hệ thống</h2>
+            <h3>Đưa dữ liệu vào hệ thống</h3>
             <p>
               Kiểm tra trước khi lưu. Chọn ngày dữ liệu. Import hoàn tất sẽ thay
               bản cũ của ngày đó; mỗi ngày chỉ có một bản.
             </p>
           </div>
-          <FileSpreadsheet size={28} />
+          <FileSpreadsheet size={24} aria-hidden="true" />
         </div>
-        <div className="segmented">
+        <ol className="import-steps" aria-label="Tiến trình import">
+          {["Chọn file", "Kiểm tra", "Nạp dữ liệu", "Hoàn tất"].map(
+            (step, index) => (
+              <li
+                key={step}
+                aria-current={index === currentStep ? "step" : undefined}
+                data-complete={index < currentStep}
+              >
+                <span aria-hidden="true">
+                  {index < currentStep ? <Check size={13} /> : index + 1}
+                </span>
+                {step}
+              </li>
+            ),
+          )}
+        </ol>
+        <div
+          className="segmented"
+          role="group"
+          aria-label="Loại dữ liệu import"
+        >
           <button
+            aria-pressed={kind === "weekly"}
             className={kind === "weekly" ? "active" : ""}
             disabled={!!phase}
             onClick={() => {
@@ -260,6 +288,7 @@ export default function Importer({
             Import Query–URL
           </button>
           <button
+            aria-pressed={kind === "base"}
             className={kind === "base" ? "active" : ""}
             disabled={!!phase}
             onClick={() => {
@@ -278,6 +307,7 @@ export default function Importer({
               Ngày dữ liệu
               <input
                 type="date"
+                name="import-date"
                 value={week}
                 disabled={!!phase}
                 onChange={(e) => {
@@ -358,7 +388,7 @@ export default function Importer({
         <ImportProgress value={progress} phase={phase} done={done} />
         {error ? (
           <p role="alert" className="error-message">
-            <AlertCircle size={16} />
+            <AlertCircle size={16} aria-hidden="true" />
             {error}
           </p>
         ) : null}
@@ -439,11 +469,11 @@ export default function Importer({
       </section>
       <aside>
         <section className="panel import-guide">
-          <h2>
+          <h3>
             Một nguồn gốc.
             <br />
             Nhiều ngày đối chiếu.
-          </h2>
+          </h3>
           {[
             [
               "01",
@@ -469,7 +499,7 @@ export default function Importer({
             <div className="guide-step" key={n}>
               <span>{n}</span>
               <div>
-                <h3>{t}</h3>
+                <h4>{t}</h4>
                 <p>{d}</p>
               </div>
             </div>

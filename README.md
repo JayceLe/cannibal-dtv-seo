@@ -1,6 +1,6 @@
-## UI polish hiện hành
+## UX rebuild hiện hành
 
-Nhánh local `ui-polish`. Mô tả sản phẩm và quy tắc hiện hành: [PRODUCT.md](PRODUCT.md); hệ thống giao diện và chuyển động: [DESIGN.md](DESIGN.md). Các ghi chú triển khai cũ bên dưới là lịch sử.
+Nhánh local `ux-rebuild`. Baseline `5d3bf0b`. Checklist chức năng và kiểm chứng: [docs/ux-parity-checklist.md](docs/ux-parity-checklist.md). Mô tả sản phẩm và quy tắc hiện hành: [PRODUCT.md](PRODUCT.md); hệ thống giao diện và chuyển động: [DESIGN.md](DESIGN.md). Các ghi chú triển khai cũ bên dưới là lịch sử.
 
 ### Chuyển động
 
@@ -19,11 +19,11 @@ Tái dùng GSAP, ECharts và Three đã cài. Chỉ số trong bảng/tooltip kh
 
 # Cannibal Query
 
-Dashboard SEO dùng Next.js, Supabase Postgres và Apache ECharts. Điều hướng phân tích có đúng hai tab: Tổng quan và So sánh. Giao diện doanh nghiệp tối: nền xanh navy trung tính, bốn thẻ tổng quan DMC3, hai biểu đồ phân bổ và cột chọn DMC3 bên trái khu phân tích. Mỗi DMC3 có một màu riêng, dùng nhất quán trên biểu đồ, chú giải và bộ chọn. Xanh lá / vàng / đỏ chỉ mức độ an toàn / trung bình / nguy hiểm. Top 1 và Top 2 được nhấn riêng trong chi tiết URL. Toàn bộ UI, số liệu và biểu đồ dùng một font Be Vietnam Pro, tải từ cùng website; không phụ thuộc Google Fonts hay Google Sheets.
+Dashboard SEO dùng Next.js, Supabase Postgres và Apache ECharts. Điều hướng cannibal gồm Tổng quan và So sánh; tab Thứ hạng được giữ nguyên. Giao diện doanh nghiệp tối: nền than đen trung tính, bốn thẻ tổng quan DMC3, hai biểu đồ phân bổ và cột chọn DMC3 bên trái khu phân tích. Mỗi DMC3 có một màu riêng, dùng nhất quán trên biểu đồ, chú giải và bộ chọn. Xanh lá / vàng / đỏ chỉ mức độ an toàn / trung bình / nguy hiểm. Top 1 và Top 2 được nhấn riêng trong chi tiết URL. Toàn bộ UI, số liệu và biểu đồ dùng một font Be Vietnam Pro, tải từ cùng website; không phụ thuộc Google Fonts hay Google Sheets.
 
 ## Chạy tại máy
 
-Node.js 24. Chạy `npm ci`, sao chép `.env.example` thành `.env.local`, điền URL và publishable key Supabase. Chạy `npm run dev` hoặc `npm run build` rồi `npm start`.
+Node.js 24. Chạy `npm ci`, sao chép `.env.example` thành `.env.local`, điền URL và publishable key Supabase. Kiểm tra giao diện bằng `npm run build` rồi `npm start`; chạy tuần tự test/build/trình duyệt để tiết kiệm tài nguyên.
 
 ## Bộ từ khóa gốc dùng chung
 
@@ -97,7 +97,7 @@ Các số thống kê dùng AnimatedNumber: đếm từ 0 lần đầu xuất hi
 Chi tiết query hiện mở bằng dialog riêng, làm tối nền và giữ trạng thái lọc/phân trang khi đóng. Top1 dùng xanh, Top2 đỏ, URL tiếp theo đủ ngưỡng dùng vàng; chữ mô tả vẫn cho biết có được tính cannibal hay không. Bảng và chi tiết không chạy count-up. Kiểm tra bổ sung modal close/Escape/scroll lock, SVG tỷ trọng và ranh giới URL≥20%.
 
 
-Gap rank trong bảng, chi tiết và CSV lấy chênh lệch tuyệt đối giữa rank gốc của Top1/Top2 theo impression. Chỉ làm tròn lúc hiển thị, thống nhất một chữ số thập phân cho Rank/Gap; không lấy hai rank đã làm tròn để tính. Ví dụ3.33121424030515−2.65379494007989=0.67741930022526, hiển thị0,7; không suy ra0,6 từ hai nhãn3,3và2,7. Quy tắc phân loại vẫn dùng số gốc.
+Gap rank dùng chênh lệch tuyệt đối giữa hai rank Top1/Top2 đã làm tròn một chữ số thập phân, đúng với các giá trị người dùng đang đọc. Top1/Top2 vẫn xếp theo impression. Quy tắc hiện hành ở PRODUCT.md; đoạn này thay thế ghi chú lịch sử về tính gap từ rank chưa làm tròn.
 
 
 Bộ lọc mức độ hỗ trợ chọn đồng thời safe/medium/danger theo phép OR. Bấm lại một mức để bỏ chọn; Tất cả xóa toàn bộ lựa chọn. RPC seo_overview giữ chữ ký cũ, p_status chấp nhận chuỗi phân cách dấu phẩy; điều kiện lọc chạy trước phân trang. Số đếm mức độ không bị ảnh hưởng bởi mức đã chọn. CSV dùng cùng quy tắc OR. Migration multi_level_filters đã áp dụng, không thay dữ liệu hay quyền RLS. Kiểm tra dữ liệu19/10: medium93 + danger386 =479 query.
@@ -131,3 +131,10 @@ Tham khảo Spotify đã được nhập bằng `npx getdesign@latest add spotif
 
 Token CSS nằm trong `globals.css`, các quy tắc bề mặt trong `theme.css`, màu biểu đồ dùng `src/lib/design.ts` và danh mục dùng `src/lib/categories.ts`. Chữ và màu trạng thái đạt tương phản tối thiểu4,5:1 trên bề mặt tiêu chuẩn. `npm test`:50 bài đạt; `npm run build`:đạt.
 
+
+
+## Bố cục mới
+
+Bốn thẻ toàn site đứng đầu Tổng quan. Cột DMC3 điều khiển chung tỷ lệ, donut và danh sách bên phải. Bộ lọc bảng được gom trong một vùng, có chip để bỏ từng điều kiện và đặt lại toàn bộ. So sánh giữ đủ sáu thẻ nhóm, bốn nhận định, ba biểu đồ và hợp query hai ngày. Không loại query chỉ có dữ liệu một ngày. Import/chi tiết dùng cùng kiểu dialog và không làm mất bộ lọc khi đóng.
+
+Kiểm thử UI dùng fixture tại `tests/ux-fixtures.ts`, không ghi Supabase. Ảnh đối chiếu local nằm trong `.ux-baseline/` và không được commit. Không tự push hoặc deploy.

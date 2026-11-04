@@ -6,7 +6,7 @@ Sản phẩm và quy tắc dữ liệu ở `PRODUCT.md`. Đây là nguồn quy�
 
 Giao diện phục vụ thao tác đọc báo cáo SEO mỗi tuần. Phân cấp bằng phạm vi, tiêu đề, nhóm nội dung và số liệu; mỗi màu có một vai trò. Dùng bề mặt than đen, typography rõ, biểu đồ mang màu dữ liệu và các cụm thao tác gọn.
 
-Luồng Tổng quan: tỷ lệ theo phạm vi → bốn nhóm nổi bật → tỷ trọng DMC3 → danh sách query để xử lý. Luồng So sánh: hai ngày → biến động nhóm → insight theo phạm vi → ba biểu đồ → bảng query và đối chiếu URL. Giữ nguyên thứ tự/nội dung bên trong Thứ hạng.
+Luồng Tổng quan: bốn thẻ toàn site → khu phân tích có DMC3 bên trái, tỷ lệ và hai donut bên phải → bảng query. Sidebar dùng chung phạm vi cho cả khu phân tích, không chỉ cho bảng. Luồng So sánh: hai ngày → biến động nhóm → insight theo phạm vi → ba biểu đồ → bảng query và đối chiếu URL. Giữ nguyên thứ tự/nội dung bên trong Thứ hạng.
 
 ## Token và chữ
 
@@ -50,8 +50,20 @@ Tính cách: chính xác, điềm tĩnh, đáng tin. Không phóng chữ, không
 | Xuất hiện / số KPI lần đầu | 480ms | power3.out |
 | Stagger nhóm | 70ms, tổng delay ≤280ms | power3.out |
 
-Header → tỷ lệ theo phạm vi → KPI → phân bố → danh sách. Nội dung ban đầu luôn có thể đọc; reveal chỉ bắt đầu khi phần tử vào viewport. GSAP sở hữu transform/opacity của thẻ và lớp spotlight riêng; CSS sở hữu màu nền, viền, focus và backdrop. SVG tỷ lệ giữ nguyên cung đúng số liệu, không đổi độ dày khi hover. Thanh URL scaleX theo tỷ lệ hiện có và có mốc 20%; số đứng yên. Tick hoàn tất import dùng stroke SVG một lần, không dùng cho dữ liệu.
+Header → KPI toàn site → tỷ lệ theo phạm vi → phân bố → danh sách. Nội dung ban đầu luôn có thể đọc; reveal chỉ bắt đầu khi phần tử vào viewport. GSAP sở hữu transform/opacity của thẻ và lớp spotlight riêng; CSS sở hữu màu nền, viền, focus và backdrop. SVG tỷ lệ giữ nguyên cung đúng số liệu, không đổi độ dày khi hover. Thanh URL scaleX theo tỷ lệ hiện có và có mốc 20%; số đứng yên. Tick hoàn tất import dùng stroke SVG một lần, không dùng cho dữ liệu.
 
 Dấu chọn tab/DMC3 dùng Flip, không tạo hai chỉ báo. ScrollTrigger chỉ tải khi có phần so sánh cần reveal; không pin hay đổi cuộn. ECharts giữ quyền điều khiển series. Three giữ lazy-load desktop, pointer parallax có giới hạn và intro dưới một giây; không có RAF vô hạn.
 
 Menu giữ mounted cho lượt đóng, đảo chiều từ trạng thái hiện tại; bàn phím mở/đóng ngay. Dialog giữ top layer, focus trap và scroll lock tới hết lượt đóng, rồi trả focus. Reduced motion thay đổi trực tiếp: kết thúc tween, hiện trạng thái cuối, bỏ WebGL. Unmount dọn observer, listener, tween và chỉ báo.
+
+## UX rebuild — nhánh `ux-rebuild`
+
+Nguồn đối chiếu chức năng: `docs/ux-parity-checklist.md`. Baseline `5d3bf0b`. Giữ toàn bộ ba tab hiện có; Thứ hạng không thay đổi báo cáo. Phần điều hướng cannibal vẫn gồm Tổng quan và So sánh.
+
+`OverviewWorkspace` chỉ tổ chức trình bày; Dashboard vẫn sở hữu auth, dữ liệu, bộ lọc và CSV. Bảng giữ đủ cột, cuộn riêng tối đa720px, header dính và số căn phải. Không dùng cuộn của toàn trang để che bớt cột. Nhóm query, tìm kiếm, mức độ và sort nằm trong một toolbar. `FilterSummary` phản ánh điều kiện đang chọn; từng chip gọi callback hiện có, Xóa tất cả trả về bộ lọc mặc định.
+
+KPI gồm cùng ba hàng: tiêu đề, giá trị/nhóm, chỉ số phụ. Dùng dữ liệu đồng hạng đã có, không đổi cách xếp hạng. Cặp donut vẫn đồng bộ hover/focus và click để lọc; kích thước vùng vẽ theo lưới, tránh lấn chú giải. Màu DMC3 chỉ đặt ở dấu nhận diện/biểu đồ, màu trạng thái giữ nghĩa cũ.
+
+Token chữ trong `globals.css`: page28 / section24 / panel19 / body15 / label14 / caption13px. `--table-row-padding:16px`; nền, màu dữ liệu và font giữ nguyên. Các token này áp dụng dần theo phạm vi component, không ghi đè biểu đồ Thứ hạng.
+
+Import dùng `FocusDialog` chung với chi tiết query: tiêu đề dính, nút đóng44px, focus/Escape/scroll lock cùng vòng đời. Bốn bước chỉ hiển thị trạng thái import đã có. Hướng dẫn và file mẫu vẫn truy cập được khi màn hẹp; không ẩn nội dung. Đăng nhập vẫn chỉ dùng mật khẩu workspace.

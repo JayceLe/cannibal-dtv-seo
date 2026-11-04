@@ -2,7 +2,7 @@
 import EntryMotion from "./entry-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { ArrowRight, Check, LockKeyhole, X } from "lucide-react";
+import { ArrowRight, Check, LockKeyhole } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import {
   cannibalImpressions,
@@ -34,56 +34,11 @@ import {
 import DashboardHeader, { type DashboardView } from "./dashboard-header";
 import DashboardMotion from "./dashboard-motion";
 import CannibalRules from "./cannibal-rules";
-import { useDialogMotion } from "./use-dialog-motion";
+import FocusDialog from "./focus-dialog";
 const RankingsReport = dynamic(() => import("./rankings-report"));
 const Importer = dynamic(() => import("./importer"), {
   loading: () => <p className="muted">Đang nạp trình import…</p>,
 });
-function Dialog({
-  title,
-  wide = false,
-  onClose,
-  children,
-}: {
-  title: string;
-  wide?: boolean;
-  onClose: () => void;
-  children: React.ReactNode;
-}) {
-  const { ref, close } = useDialogMotion(onClose);
-  return (
-    <dialog
-      ref={ref}
-      className={`modal ${wide ? "wide-modal" : ""}`}
-      aria-label={title}
-      onCancel={(e) => {
-        e.preventDefault();
-        close();
-      }}
-      onClick={(e) => {
-        if (e.target === ref.current) {
-          const r = ref.current!.getBoundingClientRect();
-          if (
-            e.clientX < r.left ||
-            e.clientX > r.right ||
-            e.clientY < r.top ||
-            e.clientY > r.bottom
-          )
-            close();
-        }
-      }}
-    >
-      <button
-        aria-label="Đóng"
-        className="icon-button modal-close"
-        onClick={close}
-      >
-        <X size={20} />
-      </button>
-      {children}
-    </dialog>
-  );
-}
 const defaultData = overviewFromRecords([], initialFilters);
 function csvCell(value: unknown) {
   let v = String(value ?? "");
@@ -526,7 +481,7 @@ export default function Dashboard() {
                 disabled={authBusy || !configured}
               >
                 {authBusy ? "Đang mở…" : "Mở workspace"}
-                <ArrowRight size={16} />
+                <ArrowRight size={16} aria-hidden="true" />
               </button>
             </form>
           ) : (
@@ -622,25 +577,28 @@ export default function Dashboard() {
 
       {showRules ? <CannibalRules onClose={() => setShowRules(false)} /> : null}
       {showImport ? (
-        <Dialog
-          wide
+        <FocusDialog
+          className="import-dialog"
+          closeLabel="Đóng import dữ liệu"
           title="Import dữ liệu"
           onClose={() => setShowImport(false)}
         >
-          <Importer
-            demo={false}
-            onDone={(id) => {
-              if (id) setSelected(id);
-              setRefresh((r) => r + 1);
-              setToast("Đã lưu dữ liệu vào Supabase.");
-            }}
-            onLogin={() => void db().auth.signOut()}
-          />
-        </Dialog>
+          <div className="import-dialog-body">
+            <Importer
+              demo={false}
+              onDone={(id) => {
+                if (id) setSelected(id);
+                setRefresh((r) => r + 1);
+                setToast("Đã lưu dữ liệu vào Supabase.");
+              }}
+              onLogin={() => void db().auth.signOut()}
+            />
+          </div>
+        </FocusDialog>
       ) : null}
       {toast ? (
         <div className="toast" role="status" data-motion-reveal>
-          <Check size={16} />
+          <Check size={16} aria-hidden="true" />
           {toast}
         </div>
       ) : null}
