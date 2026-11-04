@@ -418,3 +418,41 @@ test('import presentation keeps real progress accessible, smooths updates and cl
  await act(async()=>root.render(render(100,true)));assert.ok(host.textContent?.includes('Đã lưu thành công'));assert.equal(host.querySelector('[role="progressbar"]'),null);
  await act(async()=>root.unmount());assert.equal(gsap.getTweensOf(bar).length,0);host.remove();await preference(false);gsap.ticker.sleep();
 });
+
+test('metric icons follow trend direction, reverse cleanly and never scale values',async()=>{
+ await preference(false);
+ const {mountMetricMotion}=await import('../src/lib/metric-motion');
+ const root=win.document.createElement('div');root.innerHTML='<button data-metric-surface><span class="highlight-main">592</span><span class="metric-icon" data-motion-direction="down">arrow</span></button>';
+ win.document.body.append(root);const stop=mountMetricMotion(root as unknown as HTMLElement),card=root.querySelector('button')!,icon=root.querySelector('.metric-icon')!,value=root.querySelector('.highlight-main')!;
+ card.getBoundingClientRect=()=>new win.DOMRect(0,0,300,180);
+ card.dispatchEvent(new win.PointerEvent('pointerover',{bubbles:true,pointerType:'mouse',clientX:120,clientY:80}));
+ gsap.getTweensOf(icon).forEach(t=>t.progress(1));
+ assert.equal(gsap.getProperty(icon,'x'),2);assert.equal(gsap.getProperty(icon,'y'),2);
+ assert.equal(gsap.getProperty(value,'scaleX'),1);
+ card.dispatchEvent(new win.PointerEvent('pointerout',{bubbles:true,pointerType:'mouse'}));
+ gsap.getTweensOf(icon).forEach(t=>t.progress(1));
+ assert.equal(gsap.getProperty(icon,'x'),0);assert.equal(gsap.getProperty(icon,'y'),0);
+ card.dispatchEvent(new win.PointerEvent('pointerover',{bubbles:true,pointerType:'mouse'}));
+ await preference(true);assert.equal(gsap.getTweensOf(icon).length,0);assert.equal((icon as unknown as HTMLElement).style.transform,'');
+ stop();root.remove();await preference(false);gsap.ticker.sleep();
+});
+
+test('state-change washes run once per visible row and clean on reduced motion and unmount',async()=>{
+ await preference(false);
+ const {mountReportMotion}=await import('../src/lib/report-motion');
+ const root=win.document.createElement('div');root.innerHTML='<table><tbody><tr class="query-row" data-status-change="true"><td>query</td><td>none</td><td>danger</td><td>100</td></tr><tr class="query-row"><td>unchanged</td></tr></tbody></table>';
+ win.document.body.append(root);const row=root.querySelector('tr')!;
+ const stop=mountReportMotion(root as unknown as HTMLElement),observer=Intersections.instances.at(-1)!;
+ observer.emit(row as unknown as Element);assert.equal(root.querySelectorAll('.row-change-wash').length,4);
+ observer.emit(row as unknown as Element);assert.equal(root.querySelectorAll('.row-change-wash').length,4);
+ assert.equal(row.textContent,'querynonedanger100');
+ const updated=root.querySelectorAll('tr')[1]!;updated.classList.add('danger');await wait();
+ assert.ok(observer.targets.has(updated as unknown as Element));observer.emit(updated as unknown as Element);
+ assert.equal(root.querySelectorAll('.row-change-wash').length,5);
+ await preference(true);assert.equal(root.querySelectorAll('.row-change-wash').length,0);assert.equal(observer.targets.size,0);
+ await preference(false);Intersections.instances.at(-1)!.emit(row as unknown as Element);assert.equal(root.querySelectorAll('.row-change-wash').length,0);
+ stop();
+ const again=mountReportMotion(root as unknown as HTMLElement);Intersections.instances.at(-1)!.emit(row as unknown as Element);
+ assert.equal(root.querySelectorAll('.row-change-wash').length,4);again();assert.equal(root.querySelectorAll('.row-change-wash').length,0);
+ root.remove();gsap.ticker.sleep();
+});

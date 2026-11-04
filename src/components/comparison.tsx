@@ -292,6 +292,10 @@ export default function Comparison({
                           <tr
                             className={`query-row ${detail?.key === r.key ? "expanded" : ""}`}
                             key={r.key}
+                            data-status-change={
+                              r.old_status !== r.new_status ? "true" : undefined
+                            }
+                            data-new-status={r.new_status}
                           >
                             <td>
                               <button

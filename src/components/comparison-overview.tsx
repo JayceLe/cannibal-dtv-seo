@@ -56,7 +56,13 @@ function ReportCard({
     <>
       <span className="report-card-label">
         {label}
-        <span aria-hidden="true">{icon}</span>
+        <span
+          className="metric-icon"
+          aria-hidden="true"
+          data-motion-direction={tone === "safe" ? "down" : "up"}
+        >
+          {icon}
+        </span>
       </span>
       <strong
         className="report-card-value"
@@ -66,7 +72,11 @@ function ReportCard({
       </strong>
       <span className="report-card-detail">
         {detail}
-        {onClick ? <ArrowUpRight size={14} aria-hidden="true" /> : null}
+        {onClick ? (
+          <span className="metric-action-icon" aria-hidden="true">
+            <ArrowUpRight size={14} />
+          </span>
+        ) : null}
       </span>
     </>
   );

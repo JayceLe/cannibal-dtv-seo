@@ -2,6 +2,7 @@ import { gsap } from "gsap";
 import { motionTiming, motionEase } from "./motion-tokens";
 
 const surface = "[data-metric-surface]";
+const icons = ".metric-icon,.metric-action-icon";
 const content =
   ".highlight-label,.highlight-main,.highlight-footer,.report-card-label,.report-card-value,.report-card-detail,.ratio-visual,.ratio-copy > *";
 
@@ -84,6 +85,15 @@ export function mountMetricMotion(root: HTMLElement) {
           ease: motionEase.ui,
           overwrite: "auto",
         });
+        el.querySelectorAll<HTMLElement>(icons).forEach((icon) => {
+          animate(icon, {
+            x: active ? 2 : 0,
+            y: active ? (icon.dataset.motionDirection === "down" ? 2 : -2) : 0,
+            duration: active ? motionTiming.update : motionTiming.release,
+            ease: motionEase.ui,
+            overwrite: "auto",
+          });
+        });
         const light = lightFor(el);
         animate(light.node, {
           opacity: active ? 1 : 0,
@@ -134,6 +144,13 @@ export function mountMetricMotion(root: HTMLElement) {
         pressed = el;
         styled.add(el);
         el.setAttribute("data-metric-pressed", "");
+        animate(el.querySelectorAll(icons), {
+          x: 0,
+          y: 0,
+          duration: motionTiming.press,
+          ease: motionEase.ui,
+          overwrite: "auto",
+        });
         animate(el, {
           y: 0,
           duration: motionTiming.press,
@@ -202,7 +219,11 @@ export function mountMetricMotion(root: HTMLElement) {
         const light = lights.get(el);
         light?.x.tween.kill();
         light?.y.tween.kill();
-        const targets = [el, light?.node, ...el.querySelectorAll(content)];
+        const targets = [
+          el,
+          light?.node,
+          ...el.querySelectorAll(`${content},${icons}`),
+        ];
         tweens.forEach((t) => {
           if (
             t
@@ -216,7 +237,7 @@ export function mountMetricMotion(root: HTMLElement) {
         light?.node.remove();
         lights.delete(el);
         gsap.set(el, { clearProps: "transform" });
-        gsap.set(el.querySelectorAll(content), {
+        gsap.set(el.querySelectorAll(`${content},${icons}`), {
           clearProps: "opacity,transform",
         });
         el.removeAttribute("data-metric-active");

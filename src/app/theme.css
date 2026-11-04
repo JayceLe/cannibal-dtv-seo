@@ -1108,7 +1108,7 @@ th,
   opacity: 0;
   background: radial-gradient(
     ellipse at center,
-    color-mix(in srgb, var(--hover-color), transparent 85%),
+    color-mix(in srgb, var(--hover-color), transparent 76%),
     transparent 72%
   );
 }
@@ -1127,8 +1127,8 @@ th,
     transform var(--motion-update) var(--ease-ui);
 }
 [data-metric-surface]:is([data-metric-active], :focus-visible) {
-  border-color: color-mix(in srgb, var(--hover-color), transparent 45%);
-  background: color-mix(in srgb, var(--hover-base), white 4%);
+  border-color: color-mix(in srgb, var(--hover-color), transparent 20%);
+  background: color-mix(in srgb, var(--hover-base), white 6%);
   box-shadow: 0 8px 20px -12px #000b;
 }
 [data-metric-surface]:is([data-metric-active], :focus-visible)::after {

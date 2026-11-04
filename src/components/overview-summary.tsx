@@ -78,7 +78,15 @@ export default function OverviewSummary({
           >
             <span className="highlight-label" data-motion-text>
               {c.label}
-              <Icon size={16} aria-hidden="true" />
+              <span
+                className="metric-icon"
+                aria-hidden="true"
+                data-motion-direction={
+                  c.tone === "overview-low" ? "down" : "up"
+                }
+              >
+                <Icon size={16} />
+              </span>
             </span>
             <strong className="highlight-main" data-motion-text>
               {!isTotal && c.name ? (

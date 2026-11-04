@@ -4840,3 +4840,34 @@ progress {
     transition: none;
   }
 }
+
+/* Icons and one-shot state washes have their own transform/opacity owners. */
+.metric-icon,
+.metric-action-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+:is(.query-table, .comparison-query-table) td {
+  position: relative;
+  isolation: isolate;
+}
+.query-row {
+  --row-motion-color: var(--danger);
+}
+.query-row[data-new-status="safe"] {
+  --row-motion-color: var(--safe);
+}
+.query-row[data-new-status="medium"] {
+  --row-motion-color: var(--medium);
+}
+.query-row[data-new-status="none"] {
+  --row-motion-color: var(--safe);
+}
+.query-row:is([data-new-status="no_data"], [data-new-status="unknown"], [data-new-status="data_issue"]) { --row-motion-color: var(--review); }
+.row-change-wash {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--row-motion-color);
+  pointer-events: none;
+}
