@@ -9,3 +9,5 @@ supabase/.temp/
 
 .DS_Store
 .vercel
+
+.ux-baseline/
