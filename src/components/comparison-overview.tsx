@@ -287,7 +287,6 @@ export default function ComparisonOverview({
           <header>
             <div>
               <h3>Cannibal giữa hai ngày</h3>
-              <span>{scope}</span>
             </div>
             <MetricToggle
               value={metric}
@@ -322,10 +321,6 @@ export default function ComparisonOverview({
           <header>
             <div>
               <h3>Query theo mức độ</h3>
-              <span>
-                {scope} · {number(data.old.counts.danger || 0)} →{" "}
-                {number(data.new.counts.danger || 0)} query nguy hiểm
-              </span>
             </div>
             <span className="report-count">
               {number(data.report.transitions.changed)} thay đổi

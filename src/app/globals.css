@@ -4904,3 +4904,5 @@ progress {
 .report-status-periods > span { display:inline-flex; align-items:center; gap:8px; }
 .report-status-periods i { width:10px; height:10px; border-radius:2px; background:var(--text); }
 .report-status-periods .period-before { opacity:.4; }
+
+.comparison-chart-grid > .report-chart-card > header h3 { font-size: 24px; font-weight: 700; line-height: 1.35; }
