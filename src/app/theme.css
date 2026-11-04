@@ -1160,8 +1160,9 @@ button[data-metric-surface][data-metric-pressed] {
 .overview-metrics .cannibal-ratios { padding: 20px; }
 .overview-metrics .ratio-section-heading { margin-bottom: 16px; }
 .overview-metrics .ratio-groups { gap: 20px; }
-.overview-metrics .ratio-metric { grid-template-columns: 112px minmax(0, 1fr); padding: 18px; gap: 18px; }
-.overview-metrics .ratio-visual { width: 112px; height: 112px; }
+.overview-metrics .ratio-metric { grid-template-columns: 152px minmax(0, 1fr); padding: 18px; gap: 24px; }
+.overview-metrics .ratio-visual { width: 152px; height: 152px; }
+.overview-metrics .ratio-visual circle { stroke-width: 12; }
 .overview-metrics .ratio-visual > strong { font-size: 23px; }
 .overview-metrics .ratio-fraction { margin: 6px 0 4px; }
 .overview-metrics .ratio-fraction > strong { font-size: 28px; }
@@ -1175,8 +1176,9 @@ button[data-metric-surface][data-metric-pressed] {
  .overview-metrics .distribution-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
- .overview-metrics .ratio-metric { grid-template-columns: 96px minmax(0, 1fr); padding: 14px; gap: 12px; }
- .overview-metrics .ratio-visual { width: 96px; height: 96px; }
+ .overview-metrics .ratio-metric { grid-template-columns: 120px minmax(0, 1fr); padding: 14px; gap: 12px; }
+ .overview-metrics .ratio-visual { width: 120px; height: 120px; }
+ .overview-metrics .ratio-visual > strong { font-size: 21px; }
  .overview-metrics .ratio-fraction > strong { font-size: 24px; }
  .overview-metrics .ratio-denominator { font-size: 18px; }
  .overview-metrics .distribution-body { grid-template-columns: 1fr; }
