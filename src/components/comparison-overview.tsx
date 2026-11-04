@@ -152,9 +152,6 @@ export default function ComparisonOverview({
     () => categoryChangeOption(data.categories, groupMetric, category),
     [data.categories, groupMetric, category],
   );
-  const impressionGroup = category
-    ? (data.categories.find((c) => c.name === category) ?? null)
-    : groups.impression;
   const oldImpact = rate(
       data.old.affectedImpressions,
       data.report.site_old.impressions,
@@ -259,20 +256,15 @@ export default function ComparisonOverview({
           icon={<CheckCheck size={17} />}
         />
         <ReportCard
-          label={category ? "Impression của nhóm" : "Impression đổi nhiều nhất"}
-          title={impressionGroup?.name.replaceAll("_", " ")}
-          value={<>{category ? number(impressionGroup?.new_affected ?? 0) : signed(impressionGroup?.affected_delta ?? 0, number)}<small>impression</small></>}
+          label="Impression cannibal"
+          title={scope}
+          value={<>{number(data.new.affectedImpressions)}<small>impression</small></>}
           tone={
-            impressionGroup?.affected_delta
-              ? impressionGroup.affected_delta > 0
+            data.new.affectedImpressions !== data.old.affectedImpressions
+              ? data.new.affectedImpressions > data.old.affectedImpressions
                 ? "danger"
                 : "safe"
               : "neutral"
-          }
-          onClick={
-            impressionGroup
-              ? () => onCategory(impressionGroup!.name)
-              : undefined
           }
           icon={<Target size={17} />}
         />
