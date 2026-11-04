@@ -1,7 +1,7 @@
 import type {EChartsOption} from 'echarts';
 import {number,labels,colors,type Summary,type Status} from './engine';
 import {uiColors,semanticColors} from './design';
-import type {ComparisonCategory,ComparisonFlow} from './comparison';
+import type {ComparisonCategory} from './comparison';
 import type {ComparisonMetric} from './comparison-report';
 const font='Be Vietnam Pro',increase=semanticColors.danger,decrease=semanticColors.safe,neutral=uiColors.muted;
 const base:EChartsOption={textStyle:{fontFamily:font},aria:{enabled:true,decal:{show:false}},tooltip:{confine:true,renderMode:'richText',backgroundColor:uiColors.elevated,borderColor:uiColors.line,textStyle:{fontFamily:font,color:uiColors.text,fontSize:12}},animationDuration:480,animationDurationUpdate:320};
@@ -14,12 +14,6 @@ export function categoryChangeOption(categories:ComparisonCategory[],metric:Comp
  const limit=Math.max(1,...sorted.map(c=>Math.abs(value(c))))*1.25;
  return {...base,media:[{query:{maxWidth:520},option:{grid:{left:132,right:46},yAxis:{axisLabel:{width:114,fontSize:11}}}}],grid:{top:36,right:68,bottom:12,left:190},xAxis:{type:'value',position:'top',minInterval:1,min:-limit,max:limit,axisLabel:{color:uiColors.soft,fontSize:11,formatter:(n:number)=>number(n)},splitNumber:4,splitLine:{lineStyle:{color:uiColors.line,type:'dashed'}}},yAxis:{type:'category',inverse:true,data:sorted.map(c=>c.name),axisLine:{show:false},axisTick:{show:false},axisLabel:{color:uiColors.muted,fontWeight:600,fontSize:12,width:172,overflow:'truncate',formatter:(name:string)=>name.replaceAll('_',' ')}},tooltip:{...base.tooltip,trigger:'item',formatter:(raw:unknown)=>{const p=raw as {name:string};const c=sorted.find(c=>c.name===p.name);if(!c)return '';const a=metric==='query'?c.old:c.old_affected,b=metric==='query'?c.new:c.new_affected;return `${c.name.replaceAll('_',' ')}\n${number(a)} → ${number(b)} ${metric==='query'?'query':'impression'}\n${value(c)>0?'+':''}${number(value(c))}`;}},series:[{id:'dmc3-changes',type:'bar',barWidth:14,data:sorted.map(c=>({name:c.name,value:value(c),itemStyle:{color:value(c)>0?increase:value(c)<0?decrease:neutral,opacity:selected&&selected!==c.name?.45:1,borderRadius:3},label:{position:value(c)<0?'left':'right'}})),label:{show:true,color:uiColors.text,fontFamily:font,fontSize:12,fontWeight:600,formatter:p=>`${Number(p.value)>0?'+':''}${number(Number(p.value))}`},emphasis:{focus:'self',itemStyle:{opacity:1,borderColor:uiColors.focus,borderWidth:1}},blur:{itemStyle:{opacity:.25}}}]};
 }
-export function transitionOption(flows:ComparisonFlow[]):EChartsOption{
- const nodes=[...new Set(flows.flatMap(f=>[`old:${f.from}`,`new:${f.to}`]))].map(name=>{const status=name.split(':')[1] as keyof typeof labels;return {name,depth:name.startsWith('old:')?0:1,itemStyle:{color:colors[status],borderWidth:0},label:{position:name.startsWith('old:')?'left' as const:'right' as const}};});
- return {...base,media:flows.length?[{query:{maxWidth:380},option:{series:[{left:90,right:94,label:{fontSize:11}}]}}]:[],tooltip:{...base.tooltip,trigger:'item',formatter:(raw:unknown)=>{const p=raw as {data:{source?:string;target?:string;value?:number;name?:string}};const from=p.data.source?.split(':')[1] as keyof typeof labels,to=p.data.target?.split(':')[1] as keyof typeof labels;return from&&to?`${labels[from]} → ${labels[to]}\n${number(p.data.value??0)} query`:labels[p.data.name?.split(':')[1] as keyof typeof labels]||'';}},series:flows.length?[{id:'status-changes',type:'sankey',left:104,right:112,top:18,bottom:18,nodeWidth:10,nodeGap:18,nodeAlign:'justify',draggable:false,layoutIterations:32,data:nodes,links:flows.map(f=>({source:`old:${f.from}`,target:`new:${f.to}`,value:f.value})),label:{color:uiColors.text,fontFamily:font,fontSize:12,fontWeight:600,formatter:p=>labels[p.name.split(':')[1] as keyof typeof labels]},lineStyle:{color:'gradient',curveness:.45,opacity:.4},emphasis:{focus:'adjacency',lineStyle:{opacity:.85}},blur:{lineStyle:{opacity:.12},itemStyle:{opacity:.35}}}]:[]};
-}
-
-
 /** Compare measured totals for each level, rather than only queries that changed level. */
 export function statusComparisonOption(old:Summary,next:Summary,dates:[string,string]):EChartsOption{
  const levels:Status[]=['danger','safe','none','medium'];

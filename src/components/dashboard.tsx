@@ -20,8 +20,6 @@ import {
   type QueryFilters,
 } from "@/lib/overview";
 import { configured, db } from "@/lib/supabase";
-import OverviewWorkspace from "./overview-workspace";
-import Comparison from "./comparison";
 import {
   comparisonFilters,
   comparisonFromRecords,
@@ -33,8 +31,10 @@ import {
 } from "@/lib/comparison";
 import DashboardHeader, { type DashboardView } from "./dashboard-header";
 import DashboardMotion from "./dashboard-motion";
-import CannibalRules from "./cannibal-rules";
 import FocusDialog from "./focus-dialog";
+const OverviewWorkspace = dynamic(() => import("./overview-workspace"));
+const Comparison = dynamic(() => import("./comparison"));
+const CannibalRules = dynamic(() => import("./cannibal-rules"));
 const RankingsReport = dynamic(() => import("./rankings-report"));
 const Importer = dynamic(() => import("./importer"), {
   loading: () => <p className="muted">Đang nạp trình import…</p>,
@@ -190,7 +190,7 @@ export default function Dashboard() {
   );
   useEffect(() => {
     const seq = ++requestId.current;
-    if (!user) return;
+    if (!user || view !== "overview" || !selected) return;
     setLoading(true);
     setError("");
     db()
@@ -212,6 +212,7 @@ export default function Dashboard() {
       });
   }, [
     user,
+    view,
     selected,
     filters.category,
     filters.tab,
@@ -585,13 +586,11 @@ export default function Dashboard() {
         >
           <div className="import-dialog-body">
             <Importer
-              demo={false}
               onDone={(id) => {
                 if (id) setSelected(id);
                 setRefresh((r) => r + 1);
                 setToast("Đã lưu dữ liệu vào Supabase.");
               }}
-              onLogin={() => void db().auth.signOut()}
             />
           </div>
         </FocusDialog>

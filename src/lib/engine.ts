@@ -59,12 +59,18 @@ export function buildRecords(base: Keyword[], metrics: Metric[]): RecordRow[] {
   return {...k,urls,invalid_rows,...classify(urls,invalid_rows),impressions:urls.reduce((s,u)=>s+u.impressions,0),clicks:urls.reduce((s,u)=>s+u.clicks,0),position:roundRank(urls[0]?.position??null)};
  });
 }
-// Count only secondary URLs meeting the query-volume threshold; always exclude Top 1.
-// Sorting a copy also keeps legacy snapshots and imported URL order consistent.
+// Find Top 1 without sorting or allocating another URL array for every snapshot.
 export function cannibalImpressions(record: Pick<RecordRow,'urls'>): number {
- const urls=record.urls.slice().sort((a,b)=>b.impressions-a.impressions);
- const leader=urls[0]?.impressions||0,total=urls.reduce((sum,u)=>sum+u.impressions,0);
- return leader>0?urls.slice(1).reduce((sum,u)=>sum+(qualifiesCannibal(u.impressions,leader,total)?u.impressions:0),0):0;
+ const urls=record.urls;
+ let leader=0,total=0,leaderIndex=-1;
+ for(let i=0;i<urls.length;i++){
+  const impressions=urls[i].impressions;total+=impressions;
+  if(impressions>leader){leader=impressions;leaderIndex=i;}
+ }
+ if(leader<=0)return 0;
+ let affected=0;
+ for(let i=0;i<urls.length;i++)if(i!==leaderIndex&&qualifiesCannibal(urls[i].impressions,leader,total))affected+=urls[i].impressions;
+ return affected;
 }
 export function summary(records: RecordRow[]) {
  const counts = Object.fromEntries(Object.keys(labels).map(k=>[k,0])) as Record<Status,number>;

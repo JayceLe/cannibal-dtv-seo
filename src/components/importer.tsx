@@ -26,13 +26,9 @@ type Preview = {
   };
 };
 export default function Importer({
-  demo,
   onDone,
-  onLogin,
 }: {
-  demo: boolean;
   onDone: (importId?: string) => void;
-  onLogin: () => void;
 }) {
   const [kind, setKind] = useState<"base" | "weekly">("weekly"),
     [file, setFile] = useState<File | null>(null),
@@ -84,7 +80,7 @@ export default function Importer({
     setProgress(0);
     worker.current?.terminate();
     let keys: string[] | undefined;
-    if (kind === "weekly" && !demo) {
+    if (kind === "weekly") {
       setPhase("Đang lấy bộ từ khóa gốc để map…");
       try {
         if (!baseKeys.current) {
@@ -140,10 +136,6 @@ export default function Importer({
     w.postMessage({ file: f, kind, locale, sheet: index, baseKeys: keys });
   }
   async function save() {
-    if (demo) {
-      onLogin();
-      return;
-    }
     if (!preview || !file) return;
     if (!preview.data.length) {
       setError(
@@ -464,9 +456,7 @@ export default function Importer({
               {done ? <Check size={16} /> : <ArrowRight size={16} />}{" "}
               {done
                 ? "Đã lưu thành công"
-                : demo
-                  ? "Đăng nhập để lưu vào Supabase"
-                  : `Xác nhận import ${kind === "base" ? "từ khóa gốc" : "ngày " + week.split("-").reverse().join("/")}`}
+                : `Xác nhận import ${kind === "base" ? "từ khóa gốc" : "ngày " + week.split("-").reverse().join("/")}`}
             </button>
           </div>
         ) : null}

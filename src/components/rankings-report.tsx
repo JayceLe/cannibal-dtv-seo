@@ -22,8 +22,8 @@ export default function RankingsReport(){
  const sources=useMemo(()=>[...new Set(rows.map(r=>`${r.domain}|${r.engine}`))].sort(),[rows]);
  const selectedSource=sources[0]||'';
  const sourceRows=useMemo(()=>rows.filter(r=>`${r.domain}|${r.engine}`===selectedSource),[rows,selectedSource]);
- const categories=useMemo(()=>[...new Set(sourceRows.flatMap(r=>r.categories))].sort((a,b)=>a.localeCompare(b,'vi')),[sourceRows]);
- const dates=useMemo(()=>[...new Set(sourceRows.flatMap(r=>Object.keys(r.positions)))].sort(),[sourceRows]);
+ const categories=useMemo(()=>{const names=new Set<string>();for(const row of sourceRows)for(const name of row.categories)names.add(name);return [...names].sort((a,b)=>a.localeCompare(b,'vi'));},[sourceRows]);
+ const dates=useMemo(()=>{const days=new Set<string>();for(const row of sourceRows)for(const date of Object.keys(row.positions))days.add(date);return [...days].sort();},[sourceRows]);
  const first=dates.includes(start)?start:dates[0]||'',last=dates.includes(end)?end:dates.at(-1)||'';
  const shownDates=useMemo(()=>dates.filter(d=>d>=first&&d<=last),[dates,first,last]);
  useEffect(()=>{const el=historyScroll.current;if(el)el.scrollLeft=el.scrollWidth-el.clientWidth;},[shownDates,loading]);

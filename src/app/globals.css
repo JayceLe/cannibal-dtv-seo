@@ -3936,19 +3936,7 @@ progress {
   overflow-wrap: anywhere;
   font-variant-numeric: tabular-nums;
 }
-.report-card-detail {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.6;
-}
-.report-card-detail svg {
-  flex-shrink: 0;
-  color: var(--hover-color);
-}
+
 .report-card-value small {
   color: var(--muted);
   font-size: 14px;
@@ -3979,9 +3967,7 @@ progress {
   font-size: 24px;
   min-height: 0;
 }
-.comparison-insights .report-card-detail {
-  font-size: 13px;
-}
+
 .report-impact-pair {
   display: flex;
   flex-wrap: wrap;
@@ -4103,18 +4089,7 @@ progress {
   font-weight: 600;
   white-space: nowrap;
 }
-.report-flow-dates {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  min-height: 36px;
-  margin-top: 20px;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
+
 .report-data-details {
   border-top: 1px solid var(--line);
   margin-top: 12px;
@@ -4304,9 +4279,7 @@ progress {
     font-size: 21px;
     min-height: 44px;
   }
-  .report-card-detail {
-    font-size: 12px;
-  }
+
   .comparison-insights .report-card-label {
     font-size: 14px;
   }

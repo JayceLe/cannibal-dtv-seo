@@ -1,14 +1,14 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import * as echarts from 'echarts/core';
-import {BarChart,SankeyChart} from 'echarts/charts';
+import {BarChart} from 'echarts/charts';
 import {GridComponent,TooltipComponent,AriaComponent} from 'echarts/components';
 import {SVGRenderer} from 'echarts/renderers';
 import {comparisonFromRecords,comparisonFilters,type ComparisonCategory} from '../src/lib/comparison';
 import {groupChanges,snapshotValues,rate,pointChange} from '../src/lib/comparison-report';
-import {snapshotOption,categoryChangeOption,transitionOption} from '../src/lib/comparison-chart-options';
+import {snapshotOption,categoryChangeOption,statusComparisonOption} from '../src/lib/comparison-chart-options';
 import {olderRecords,newerRecords} from './comparison-fixtures';
-echarts.use([BarChart,SankeyChart,GridComponent,TooltipComponent,AriaComponent,SVGRenderer]);
+echarts.use([BarChart,GridComponent,TooltipComponent,AriaComponent,SVGRenderer]);
 const category=(name:string,old:number,next:number,total=10,oldAffected=50,newAffected=100):ComparisonCategory=>({name,old,new:next,delta:next-old,old_total:total,new_total:total,old_affected:oldAffected,new_affected:newAffected,affected_delta:newAffected-oldAffected});
 test('DMC3 overview includes observed groups, improvement, remaining groups and deterministic largest changes',()=>{
  const stats=groupChanges([category('DROP',9,2),category('RISE',1,6),category('STABLE',1,1),category('ZERO',0,0),category('NO DATA',0,0,0),category('IMPRESSION',1,2,10,1000,0)]);
@@ -29,10 +29,10 @@ test('query/impression snapshots and impact use precise totals and do not double
 });
 test('three chart models render finite SVG at phone, tablet and desktop widths with empty and large values',()=>{
  const data=comparisonFromRecords(olderRecords,newerRecords),groups=[category('DECREASE',10,2),category('INCREASE',1,15),category('ZERO',0,0)];
- for(const width of [280,390,768,1440])for(const option of [snapshotOption(24850,25887,['12/10/2026','19/10/2026']),categoryChangeOption(groups,'query','INCREASE'),categoryChangeOption(groups,'impression',''),transitionOption(data.report.flows),snapshotOption(0,0,['12/10/2026','19/10/2026']),snapshotOption(1e9,1e12,['12/10/2026','19/10/2026'])]){
+ for(const width of [280,390,768,1440])for(const option of [snapshotOption(24850,25887,['12/10/2026','19/10/2026']),categoryChangeOption(groups,'query','INCREASE'),categoryChangeOption(groups,'impression',''),statusComparisonOption(data.old,data.new,['12/10/2026','19/10/2026']),snapshotOption(0,0,['12/10/2026','19/10/2026']),snapshotOption(1e9,1e12,['12/10/2026','19/10/2026'])]){
   const chart=echarts.init(null,undefined,{renderer:'svg',ssr:true,width,height:300});chart.setOption({...option,animation:false});const svg=chart.renderToSVGString();assert.ok(svg.includes('<svg'));assert.ok(!/NaN|Infinity/.test(svg));chart.dispose();
  }
- assert.deepEqual(transitionOption([]).series,[]);
+
 });
 
 test('percentage point changes never display a signed zero for small real changes',()=>{

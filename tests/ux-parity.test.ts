@@ -40,7 +40,7 @@ test('comparison preserves reports, union rows, transitions, full taxonomy and c
  assert.match(html,/Query có dữ liệu ở ít nhất một ngày/);
  assert.ok(html.includes('group-movement-counts'));
  assert.ok(html.includes('group-movement-extremes'));
- assert.ok(!html.includes('class="report-card-detail"')); 
+ assert.ok(!html.includes('class="report-card-detail"'));
 });
 
 test('filter state is absent when empty and uses labelled controls for every removable chip',()=>{
@@ -52,7 +52,7 @@ test('filter state is absent when empty and uses labelled controls for every rem
 
 test('import retains source types, date, locale, format limits and all four visible steps',async()=>{
  const {default:Importer}=await import('../src/components/importer');
- const html=render(React.createElement(Importer,{demo:false,onDone:noop,onLogin:noop}));
+ const html=render(React.createElement(Importer,{onDone:noop}));
  for(const label of ['Đưa dữ liệu vào hệ thống','Import Query–URL','Danh sách từ khóa gốc','Ngày dữ liệu','Định dạng số trong file','XLSX, CSV, TSV','150 MB','Chọn file','Kiểm tra','Nạp dữ liệu','Hoàn tất','Tải file CSV mẫu','Keywords + DMC3','URL chứa #']) assert.ok(html.includes(label),label);
  assert.match(html,/aria-label="Tiến trình import"/);
  assert.match(html,/aria-current="step"/);

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef } from "react";
 import * as echarts from "echarts/core";
-import { LineChart, PieChart, BarChart, SankeyChart } from "echarts/charts";
+import { LineChart, PieChart, BarChart } from "echarts/charts";
 import {
   GridComponent,
   TooltipComponent,
@@ -15,7 +15,6 @@ echarts.use([
   LineChart,
   PieChart,
   BarChart,
-  SankeyChart,
   GridComponent,
   TooltipComponent,
   LegendComponent,
@@ -56,7 +55,6 @@ export default function Chart({
       });
       if (mq.matches) chart.getZr().animation.clear();
     };
-    motion();
     mq.addEventListener("change", motion);
     chart.on("click", (p) => {
       if (typeof p.name === "string") callback.current.onPick?.(p.name);
@@ -66,7 +64,13 @@ export default function Chart({
         callback.current.onHover?.(p.name);
     });
     chart.on("globalout", () => callback.current.onHover?.(null));
-    const resize = new ResizeObserver(() => chart.resize());
+    let width = el.current!.clientWidth, height = el.current!.clientHeight;
+    const resize = new ResizeObserver(() => {
+      const nextWidth = el.current!.clientWidth, nextHeight = el.current!.clientHeight;
+      if (nextWidth === width && nextHeight === height) return;
+      width = nextWidth; height = nextHeight;
+      chart.resize();
+    });
     resize.observe(el.current!);
     return () => {
       resize.disconnect();

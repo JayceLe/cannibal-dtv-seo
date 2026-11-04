@@ -4,7 +4,7 @@ import { motionTiming, motionEase } from "./motion-tokens";
 const surface = "[data-metric-surface]";
 const icons = ".metric-icon,.metric-action-icon";
 const content =
-  ".highlight-label,.highlight-main,.highlight-footer,.report-card-label,.report-card-value,.report-card-detail,.ratio-visual,.ratio-copy > *";
+  ".highlight-label,.highlight-main,.highlight-footer,.report-card-label,.report-card-value,.ratio-visual,.ratio-copy > *";
 
 /** Surface transform and spotlight belong to GSAP; readable children reveal only once. */
 export function mountMetricMotion(root: HTMLElement) {

@@ -149,3 +149,7 @@ Thẻ KPI/tỷ lệ/so sánh có hover rõ hơn và icon phản hồi theo chi�
 Nhánh `original-targeted-updates` lấy đúng commit production `307bb3b` làm nền. Thu gọn thẻ tổng quan, tỷ lệ và donut; cột DMC3 chỉ bám trong khu bảng query. Thay thẻ website ở tab Thứ hạng bằng biểu đồ tổng Top theo tối đa 5 ngày gần nhất trong khoảng chọn: chọn nhiều dải Top để cộng tổng, dùng cùng bộ lọc DMC3 phía trên. Các báo cáo thứ hạng khác giữ nguyên.
 
 Migration `20261104135328_low_impression_cannibal_threshold.sql` tính lại snapshot cũ và áp dụng rule mới tại điểm ghi cho các lần import sau. Cần áp dụng migration này cùng lần phát hành frontend; không phát hành riêng giao diện trước khi cập nhật rule database. Kiểm chứng và phạm vi xem [docs/original-targeted-updates.md](docs/original-targeted-updates.md).
+
+### Tối ưu tải và xử lý (04/11/2026)
+
+Các tab báo cáo tải theo nhu cầu; Tổng quan không truy vấn ở tab khác. Loại mã Sankey/demo và CSS không còn dùng; cộng impression cannibal không cần sort URL. JavaScript trang đầu giảm khoảng 67 KB (6,2% gzip); 86 test đạt. Chi tiết phép đo và phạm vi tại [docs/performance-audit.md](docs/performance-audit.md).
