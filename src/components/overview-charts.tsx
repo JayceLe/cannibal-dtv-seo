@@ -128,7 +128,7 @@ export function CategoryDonut({
           <Chart
             option={option}
             label={`${unit} cannibal theo DMC3: ${shares.map((c) => `${c.name}: ${decimal(c.percent, 2)}%`).join(", ")}`}
-            height={244}
+            height={224}
             onPick={onSelect}
             onHover={hover}
             highlightedName={active?.name ?? null}

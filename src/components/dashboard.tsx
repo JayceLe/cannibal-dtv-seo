@@ -1,6 +1,5 @@
 "use client";
 import EntryMotion from "./entry-motion";
-import AnimatedNumber from "./animated-number";
 import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { ArrowRight, Check, LockKeyhole, X } from "lucide-react";
@@ -21,11 +20,7 @@ import {
   type QueryFilters,
 } from "@/lib/overview";
 import { configured, db } from "@/lib/supabase";
-import { CategoryDistributions } from "./overview-charts";
-import CannibalRatios from "./cannibal-ratios";
-import OverviewSummary from "./overview-summary";
-import CategorySidebar from "./category-sidebar";
-import QueryTable from "./query-table";
+import OverviewWorkspace from "./overview-workspace";
 import Comparison from "./comparison";
 import {
   comparisonFilters,
@@ -551,8 +546,6 @@ export default function Dashboard() {
         <p className="entry-footer">Cannibal Query · Asia/Ho_Chi_Minh</p>
       </main>
     );
-  const s = data.summary,
-    site = data.siteSummary;
   return (
     <div className="app-shell" ref={motionRoot}>
       <DashboardMotion root={motionRoot} />
@@ -592,64 +585,14 @@ export default function Dashboard() {
           </div>
         ) : null}
         {view === "overview" ? (
-          <>
-            <CannibalRatios
-              scoped={s}
-              site={site}
-              category={filters.category}
-              categories={data.categories}
-              loading={loading}
-              onSelect={(name) => updateFilters({ category: name })}
-            />
-            <section
-              className="overview-section"
-              aria-label="Tổng quan toàn site"
-              aria-busy={loading}
-            >
-              <div className="section-title" data-motion-reveal>
-                <h2>Tổng quan toàn site</h2>
-                <span>
-                  <AnimatedNumber value={site.withData} /> query đã map trong kỳ
-                </span>
-              </div>
-              <OverviewSummary
-                categories={data.categories}
-                siteCannibal={data.siteSummary.cannibal}
-                onSelect={openCategory}
-              />
-              <CategoryDistributions
-                categories={data.categories}
-                selected={filters.category}
-                onSelect={openCategory}
-              />
-            </section>
-            <section
-              id="query-analysis"
-              className="analysis-section"
-              aria-label="Phân tích theo DMC3"
-            >
-              <div className="section-title" data-motion-reveal>
-                <h2>Query và URL cạnh tranh</h2>
-              </div>
-              <div className="analysis-layout">
-                <CategorySidebar
-                  categories={data.categories}
-                  selected={filters.category}
-                  total={site.cannibal}
-                  onSelect={(name) => updateFilters({ category: name })}
-                />
-                <div className="query-workspace">
-                  <QueryTable
-                    key={`${selected}:${filters.category}`}
-                    data={data}
-                    filters={filters}
-                    onFilter={updateFilters}
-                    loading={loading}
-                  />
-                </div>
-              </div>
-            </section>
-          </>
+          <OverviewWorkspace
+            data={data}
+            filters={filters}
+            loading={loading}
+            onFilter={updateFilters}
+            onSelect={openCategory}
+            periodId={selected}
+          />
         ) : view === "rankings" ? (
           <RankingsReport />
         ) : (

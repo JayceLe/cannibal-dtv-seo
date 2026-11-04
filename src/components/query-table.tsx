@@ -1,4 +1,5 @@
 "use client";
+import FilterSummary, { type FilterChip } from "./filter-summary";
 import LoadingRows from "./loading-rows";
 import { useState } from "react";
 import FocusDialog from "./focus-dialog";
@@ -203,36 +204,69 @@ export default function QueryTable({
     { key: "danger", label: "Nguy hiểm", count: data.levelCounts.danger },
   ];
   const activeRecord = data.rows.find((r) => r.key === expanded);
+  const chips: FilterChip[] = [];
+  if (filters.category)
+    chips.push({
+      key: "category",
+      label: filters.category.replaceAll("_", " "),
+      clear: () => onFilter({ category: "" }),
+    });
+  if (filters.tab !== "all")
+    chips.push({
+      key: "tab",
+      label: tabs.find((t) => t.key === filters.tab)!.label,
+      clear: () => onFilter({ tab: "all" }),
+    });
+  for (const level of selectedLevels(filters.status))
+    chips.push({
+      key: level,
+      label: levels.find((l) => l.key === level)?.label || level,
+      clear: () => onFilter({ status: toggleLevel(filters.status, level) }),
+    });
+  if (filters.search)
+    chips.push({
+      key: "search",
+      label: `Từ khóa: ${filters.search}`,
+      clear: () => onFilter({ search: "" }),
+    });
+  if (filters.exact)
+    chips.push({
+      key: "exact",
+      label: "Khớp chính xác",
+      clear: () => onFilter({ exact: false }),
+    });
   return (
     <section
       className="panel query-panel"
       data-motion-reveal
       aria-busy={loading}
     >
-      <div className="query-tabs" role="group" aria-label="Nhóm query">
-        {tabs
-          .filter(
-            (t) =>
-              t.key !== "review" || t.count > 0 || filters.tab === "review",
-          )
-          .map((t) => (
-            <button
-              key={t.key}
-              aria-pressed={filters.tab === t.key}
-              className={filters.tab === t.key ? "active" : ""}
-              onClick={() => onFilter({ tab: t.key, status: "" })}
-            >
-              {t.label}
-              <span>{number(t.count)}</span>
-            </button>
-          ))}
-      </div>
       <div className="query-controls">
+        <div className="query-tabs" role="group" aria-label="Nhóm query">
+          {tabs
+            .filter(
+              (t) =>
+                t.key !== "review" || t.count > 0 || filters.tab === "review",
+            )
+            .map((t) => (
+              <button
+                key={t.key}
+                aria-pressed={filters.tab === t.key}
+                className={filters.tab === t.key ? "active" : ""}
+                onClick={() => onFilter({ tab: t.key, status: "" })}
+              >
+                {t.label}
+                <span>{number(t.count)}</span>
+              </button>
+            ))}
+        </div>
         <div className="search-sort-row">
           <label className="search-field">
             <Search size={18} />
             <input
               aria-label="Tìm từ khóa SEO"
+              autoComplete="off"
+              name="query-search"
               value={filters.search}
               onChange={(e) => onFilter({ search: e.target.value })}
               placeholder="Nhập từ khóa SEO cần tìm…"
@@ -290,6 +324,7 @@ export default function QueryTable({
             Xóa bộ lọc
           </button>
         </div>
+        <FilterSummary chips={chips} onClear={() => onFilter(initialFilters)} />
       </div>
       <div className="results-scope" data-motion-update>
         <span>
@@ -298,7 +333,12 @@ export default function QueryTable({
         </span>
         <span>Mở query để xem URL chính và URL cạnh tranh</span>
       </div>
-      <div className="table-scroll">
+      <div
+        className="table-scroll"
+        tabIndex={0}
+        role="region"
+        aria-label="Bảng query, cuộn để xem đầy đủ"
+      >
         <table
           className="query-table"
           aria-label="Danh sách query và URL cạnh tranh"
@@ -309,6 +349,9 @@ export default function QueryTable({
               <th>Mức độ</th>
               <th className="numeric">URL</th>
               <th
+                aria-sort={
+                  filters.sort === "impressions" ? "descending" : "none"
+                }
                 className={`numeric ${filters.sort === "impressions" ? "sorted" : ""}`}
               >
                 <button onClick={() => onFilter({ sort: "impressions" })}>

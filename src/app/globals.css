@@ -359,7 +359,10 @@ main {
   min-width: 0;
   list-style: none;
 }
-.filter-summary li { min-width: 0; max-width: 100%; }
+.filter-summary li {
+  min-width: 0;
+  max-width: 100%;
+}
 .filter-summary li button {
   display: inline-flex;
   align-items: center;
@@ -373,10 +376,19 @@ main {
   color: var(--text);
   text-align: left;
 }
-.filter-summary li span { overflow-wrap: anywhere; }
-.filter-summary li svg { flex-shrink: 0; color: var(--muted); }
-.filter-summary > .text-link { min-height: 44px; }
-.filter-summary li button:hover { border-color: var(--border-strong); }
+.filter-summary li span {
+  overflow-wrap: anywhere;
+}
+.filter-summary li svg {
+  flex-shrink: 0;
+  color: var(--muted);
+}
+.filter-summary > .text-link {
+  min-height: 44px;
+}
+.filter-summary li button:hover {
+  border-color: var(--border-strong);
+}
 .section-title {
   display: flex;
   align-items: baseline;
@@ -396,21 +408,21 @@ main {
   text-align: right;
 }
 .overview-section {
-  margin-bottom: var(--space-12);
+  margin-bottom: 0;
   container-type: inline-size;
 }
 .overview-highlights {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 0;
 }
 .highlight-card {
   --tone: var(--muted);
   --edge: var(--border);
   --card-bg: var(--surface-up);
   display: grid;
-  grid-template-rows: minmax(40px, auto) minmax(40px, auto) auto;
+  grid-template-rows: auto minmax(72px, 1fr) minmax(48px, auto);
   align-content: start;
   gap: 12px;
   min-width: 0;
@@ -459,7 +471,8 @@ main {
 }
 .highlight-main {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  align-self: start;
   gap: 10px;
   min-width: 0;
   width: 100%;
@@ -628,6 +641,98 @@ main {
   color: var(--muted);
   font-size: 13px;
 }
+/* One scope rail serves the charts, ratios and query workspace. */
+.overview-workspace {
+  display: grid;
+  gap: var(--space-8);
+}
+.overview-analysis .query-workspace {
+  container-type: inline-size;
+}
+.overview-analysis .distribution-body {
+  grid-template-columns: minmax(148px, 0.85fr) minmax(0, 1.15fr);
+  gap: var(--space-4);
+}
+.overview-analysis .panel-heading {
+  min-height: 56px;
+  margin-bottom: var(--space-3);
+}
+.overview-analysis .distribution-legend {
+  max-height: 216px;
+}
+.overview-analysis .distribution-detail {
+  margin-top: var(--space-4);
+}
+.overview-analysis .distribution-ring {
+  width: 100%;
+  max-width: 224px;
+  margin: 0;
+  justify-self: center;
+}
+.overview-analysis .donut-center {
+  padding-inline: 12px;
+}
+.overview-analysis .donut-center strong {
+  font-size: 24px;
+}
+.overview-analysis .distribution-value {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.overview-analysis .distribution-value > span:not(.animated-number) {
+  font-size: 12px;
+}
+.highlight-ties {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: var(--type-caption);
+}
+.query-list-section {
+  min-width: 0;
+}
+.query-list-section .section-title h2 {
+  font-size: var(--type-section);
+}
+.query-panel .table-scroll,
+.comparison-query-panel .table-scroll {
+  max-height: 720px;
+  scroll-padding-top: 64px;
+}
+.query-panel thead,
+.comparison-query-panel thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.query-panel td,
+.comparison-query-panel td {
+  padding-block: var(--table-row-padding);
+}
+.query-panel th,
+.comparison-query-panel th {
+  font-size: var(--type-caption);
+}
+@container (max-width: 900px) {
+  .overview-analysis .distribution-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .overview-analysis .distribution-body {
+    grid-template-columns: minmax(180px, 0.7fr) minmax(0, 1.3fr);
+  }
+  .overview-analysis .panel-heading {
+    min-height: 0;
+  }
+}
+@container (max-width: 480px) {
+  .overview-analysis .distribution-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .overview-analysis .distribution-ring {
+    width: min(240px, 100%);
+    justify-self: center;
+  }
+}
 .analysis-section {
   scroll-margin-top: 32px;
 }
@@ -752,7 +857,7 @@ main {
   min-width: 0;
   container-type: inline-size;
   padding: 24px;
-  margin-bottom: 40px;
+  margin-bottom: 0;
   scroll-margin-top: 24px;
 }
 .ratio-section-heading {
@@ -762,8 +867,8 @@ main {
   gap: 24px;
   margin-bottom: 24px;
 }
-.ratio-section-heading h1 {
-  font-size: 28px;
+.ratio-section-heading h2 {
+  font-size: var(--type-section);
   font-weight: 700;
 }
 .ratio-section-heading p {
@@ -943,7 +1048,7 @@ main {
 .query-tabs {
   display: flex;
   gap: 8px;
-  padding: 0 24px;
+  padding: 0;
   border-bottom: 1px solid var(--line);
   overflow-x: auto;
   scrollbar-width: thin;
@@ -953,8 +1058,8 @@ main {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  min-height: 58px;
-  padding: 14px 12px;
+  min-height: 44px;
+  padding: 10px 12px;
   border: 0;
   border-bottom: 2px solid transparent;
   background: transparent;
@@ -2111,7 +2216,7 @@ progress {
   .cannibal-ratios {
     padding: 24px 20px;
   }
-  .ratio-section-heading h1 {
+  .ratio-section-heading h2 {
     font-size: 24px;
   }
   .query-details {
@@ -3150,6 +3255,12 @@ progress {
   color: var(--muted);
   font-size: 13px;
 }
+.comparison-date-notice {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--type-caption);
+}
 .period-selectors {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 20px minmax(0, 1fr);
@@ -3206,7 +3317,7 @@ progress {
 .comparison-scope-heading > span {
   color: var(--muted);
   font-size: 13px;
-  white-space: nowrap;
+  text-align: right;
   font-variant-numeric: tabular-nums;
 }
 .comparison-sidebar .category-list {
@@ -3242,6 +3353,7 @@ progress {
   gap: 20px;
   padding: 20px 24px;
 }
+.comparison-query-controls > .filter-summary { grid-column: 1 / -1; }
 .comparison-transition-filters {
   grid-column: 1 / -1;
   display: flex;
@@ -3251,7 +3363,7 @@ progress {
 }
 .comparison-transition-filters .level-chip {
   font-size: 13px;
-  min-height: 42px;
+  min-height: 44px;
 }
 .comparison-query-table {
   min-width: 740px;
@@ -3672,7 +3784,7 @@ progress {
   --hover-base: var(--surface);
   --hover-color: var(--muted);
   display: grid;
-  grid-template-rows: 40px minmax(40px, auto) auto;
+  grid-template-rows: auto minmax(48px, 1fr) auto;
   align-content: start;
   gap: 12px;
   min-width: 0;

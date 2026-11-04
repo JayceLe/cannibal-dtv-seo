@@ -1,12 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
 import { ChevronRight, ChevronLeft, Search } from "lucide-react";
+import FilterSummary, { type FilterChip } from "./filter-summary";
 import ComparisonOverview from "./comparison-overview";
 import { number } from "@/lib/engine";
 import { formatDataDate } from "@/lib/dates";
 import { categoryColor } from "@/lib/categories";
 import {
   validComparisonDays,
+  comparisonFilters,
   type Week,
   type ComparisonData,
   type ComparisonFilters,
@@ -60,6 +62,25 @@ export default function Comparison({
     valid = validComparisonDays(weeks, older, newer);
   const ready = valid && data?.valid,
     scope = category.replaceAll("_", " ") || "Toàn site";
+  const chips: FilterChip[] = [];
+  if (category)
+    chips.push({
+      key: "category",
+      label: category.replaceAll("_", " "),
+      clear: () => onCategory(""),
+    });
+  if (filters.transition)
+    chips.push({
+      key: "transition",
+      label: changes.find((c) => c.key === filters.transition)!.label,
+      clear: () => onFilter({ transition: "" }),
+    });
+  if (filters.search)
+    chips.push({
+      key: "search",
+      label: `Từ khóa: ${filters.search}`,
+      clear: () => onFilter({ search: "" }),
+    });
   return (
     <div className="comparison-workspace">
       <ComparisonPeriods
@@ -155,8 +176,9 @@ export default function Comparison({
           </aside>
           <div className="comparison-results" aria-busy={loading}>
             <div className="comparison-scope-heading">
-              <h2>{scope}</h2>
+              <h2>Query và URL cạnh tranh</h2>
               <span>
+                {scope} ·{" "}
                 {oldDay && newDay
                   ? `${weekLabel(oldDay)} → ${weekLabel(newDay)}`
                   : ""}
@@ -190,6 +212,8 @@ export default function Comparison({
                       <input
                         aria-label="Tìm query so sánh"
                         placeholder="Tìm query…"
+                        autoComplete="off"
+                        name="comparison-search"
                         value={filters.search}
                         onChange={(e) => onFilter({ search: e.target.value })}
                       />
@@ -229,6 +253,13 @@ export default function Comparison({
                         </button>
                       ))}
                     </div>
+                    <FilterSummary
+                      chips={chips}
+                      onClear={() => {
+                        onCategory("");
+                        onFilter(comparisonFilters);
+                      }}
+                    />
                   </div>
                   <div className="results-scope">
                     <span>
@@ -236,8 +267,16 @@ export default function Comparison({
                     </span>
                     <span>Query có dữ liệu ở ít nhất một ngày</span>
                   </div>
-                  <div className="table-scroll">
-                    <table className="comparison-query-table">
+                  <div
+                    className="table-scroll"
+                    tabIndex={0}
+                    role="region"
+                    aria-label="Bảng query so sánh, cuộn để xem đầy đủ"
+                  >
+                    <table
+                      className="comparison-query-table"
+                      aria-label="Query giữa hai ngày"
+                    >
                       <thead>
                         <tr>
                           <th>Query / DMC3</th>
@@ -248,11 +287,15 @@ export default function Comparison({
                       </thead>
                       <tbody>
                         {data.rows.map((r) => (
-                          <tr className="query-row" key={r.key}>
+                          <tr
+                            className={`query-row ${detail?.key === r.key ? "expanded" : ""}`}
+                            key={r.key}
+                          >
                             <td>
                               <button
                                 className="query-toggle"
                                 aria-haspopup="dialog"
+                                aria-expanded={detail?.key === r.key}
                                 onClick={() => setDetail(r)}
                               >
                                 <ChevronRight size={18} />

@@ -23,6 +23,7 @@ export default function OverviewSummary({
       name: "",
       tone: "overview-total",
       icon: Layers3,
+      ties: 1,
     },
     {
       label: "Nhóm cannibal cao nhất",
@@ -32,6 +33,7 @@ export default function OverviewSummary({
       name: h.highest?.name || "",
       tone: "overview-high",
       icon: TrendingUp,
+      ties: h.highest?.ties ?? 1,
     },
     {
       label: "Nhóm cannibal thấp nhất",
@@ -41,6 +43,7 @@ export default function OverviewSummary({
       name: h.lowest?.name || "",
       tone: "overview-low",
       icon: TrendingDown,
+      ties: h.lowest?.ties ?? 1,
     },
     {
       label: "Impression cannibal lớn nhất",
@@ -50,6 +53,13 @@ export default function OverviewSummary({
       name: h.topImpressions?.name || "",
       tone: "overview-impression",
       icon: Eye,
+      ties: h.topImpressions
+        ? categories.filter(
+            (g) =>
+              g.total > 0 &&
+              g.cannibalImpressions === h.topImpressions!.cannibalImpressions,
+          ).length
+        : 1,
     },
   ];
   return (
@@ -93,6 +103,11 @@ export default function OverviewSummary({
                     suffix={c.tone === "overview-impression" ? "" : "%"}
                   />
                   {c.tone === "overview-impression" ? " impression" : ""}
+                  {c.ties > 1 ? (
+                    <small className="highlight-ties">
+                      {c.ties} nhóm đồng hạng
+                    </small>
+                  ) : null}
                 </>
               )}
             </span>

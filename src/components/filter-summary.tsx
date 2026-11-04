@@ -4,7 +4,10 @@ import { X } from "lucide-react";
 export type FilterChip = { key: string; label: string; clear: () => void };
 
 /** A view of existing filter state; it owns no filtering or data logic. */
-export default function FilterSummary({ chips, onClear }: {
+export default function FilterSummary({
+  chips,
+  onClear,
+}: {
   chips: FilterChip[];
   onClear: () => void;
 }) {
@@ -15,13 +18,20 @@ export default function FilterSummary({ chips, onClear }: {
       <ul>
         {chips.map((chip) => (
           <li key={chip.key}>
-            <button type="button" onClick={chip.clear} aria-label={`Bỏ lọc ${chip.label}`}>
-              <span>{chip.label}</span><X size={13} aria-hidden="true" />
+            <button
+              type="button"
+              onClick={chip.clear}
+              aria-label={`Bỏ lọc ${chip.label}`}
+            >
+              <span>{chip.label}</span>
+              <X size={13} aria-hidden="true" />
             </button>
           </li>
         ))}
       </ul>
-      <button type="button" className="text-link" onClick={onClear}>Xóa tất cả</button>
+      <button type="button" className="text-link" onClick={onClear}>
+        Xóa tất cả
+      </button>
     </div>
   );
 }

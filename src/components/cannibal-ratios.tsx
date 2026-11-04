@@ -27,9 +27,9 @@ export default function CannibalRatios({
       aria-busy={loading}
     >
       <div className="ratio-section-heading">
-        <h1 id="ratios-title" data-motion-text>
+        <h2 id="ratios-title" data-motion-text>
           Tỷ lệ cannibal
-        </h1>
+        </h2>
         <Dmc3Picker
           categories={categories}
           value={category}

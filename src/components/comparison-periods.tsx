@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import { ArrowRight, Upload } from "lucide-react";
 import {
   distinctDays,
@@ -21,6 +22,17 @@ export default function ComparisonPeriods({
   onChange: (pair: { older: string; newer: string }) => void;
   onImport: () => void;
 }) {
+  const [notice, setNotice] = useState("");
+  const choose = (side: "older" | "newer", id: string) => {
+    const pair = selectComparisonDay(weeks, { older, newer }, side, id);
+    const other = side === "older" ? "newer" : "older";
+    setNotice(
+      pair[other] !== (other === "older" ? older : newer)
+        ? `${other === "older" ? "Ngày trước" : "Ngày sau"} đã tự điều chỉnh để giữ đúng thứ tự thời gian.`
+        : "",
+    );
+    onChange(pair);
+  };
   const days = distinctDays(weeks),
     valid = validComparisonDays(weeks, older, newer);
   const options = days.map((w) => ({
@@ -45,9 +57,7 @@ export default function ComparisonPeriods({
           placeholder="Chọn ngày trước"
           options={options.filter((o) => o.value !== days[0]?.id)}
           value={older}
-          onChange={(id) =>
-            onChange(selectComparisonDay(weeks, { older, newer }, "older", id))
-          }
+          onChange={(id) => choose("older", id)}
         />
         <ArrowRight size={20} aria-hidden="true" />
         <SelectMenu
@@ -57,11 +67,14 @@ export default function ComparisonPeriods({
             (o) => days.length < 2 || o.value !== days.at(-1)?.id,
           )}
           value={newer}
-          onChange={(id) =>
-            onChange(selectComparisonDay(weeks, { older, newer }, "newer", id))
-          }
+          onChange={(id) => choose("newer", id)}
         />
       </div>
+      {notice ? (
+        <p className="comparison-date-notice" role="status">
+          {notice}
+        </p>
+      ) : null}
       {!valid ? (
         <div className="comparison-notice">
           <span>
