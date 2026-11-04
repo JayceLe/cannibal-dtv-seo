@@ -4899,3 +4899,8 @@ progress {
   background: var(--row-motion-color);
   pointer-events: none;
 }
+
+.report-status-periods { display:flex; flex-wrap:wrap; gap:12px 24px; margin: 8px 0 16px; color:var(--muted); font-size:12px; }
+.report-status-periods > span { display:inline-flex; align-items:center; gap:8px; }
+.report-status-periods i { width:10px; height:10px; border-radius:2px; background:var(--text); }
+.report-status-periods .period-before { opacity:.4; }

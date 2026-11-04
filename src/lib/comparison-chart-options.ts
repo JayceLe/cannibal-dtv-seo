@@ -1,5 +1,5 @@
 import type {EChartsOption} from 'echarts';
-import {number,labels,colors} from './engine';
+import {number,labels,colors,type Summary,type Status} from './engine';
 import {uiColors,semanticColors} from './design';
 import type {ComparisonCategory,ComparisonFlow} from './comparison';
 import type {ComparisonMetric} from './comparison-report';
@@ -17,4 +17,25 @@ export function categoryChangeOption(categories:ComparisonCategory[],metric:Comp
 export function transitionOption(flows:ComparisonFlow[]):EChartsOption{
  const nodes=[...new Set(flows.flatMap(f=>[`old:${f.from}`,`new:${f.to}`]))].map(name=>{const status=name.split(':')[1] as keyof typeof labels;return {name,depth:name.startsWith('old:')?0:1,itemStyle:{color:colors[status],borderWidth:0},label:{position:name.startsWith('old:')?'left' as const:'right' as const}};});
  return {...base,media:flows.length?[{query:{maxWidth:380},option:{series:[{left:90,right:94,label:{fontSize:11}}]}}]:[],tooltip:{...base.tooltip,trigger:'item',formatter:(raw:unknown)=>{const p=raw as {data:{source?:string;target?:string;value?:number;name?:string}};const from=p.data.source?.split(':')[1] as keyof typeof labels,to=p.data.target?.split(':')[1] as keyof typeof labels;return from&&to?`${labels[from]} → ${labels[to]}\n${number(p.data.value??0)} query`:labels[p.data.name?.split(':')[1] as keyof typeof labels]||'';}},series:flows.length?[{id:'status-changes',type:'sankey',left:104,right:112,top:18,bottom:18,nodeWidth:10,nodeGap:18,nodeAlign:'justify',draggable:false,layoutIterations:32,data:nodes,links:flows.map(f=>({source:`old:${f.from}`,target:`new:${f.to}`,value:f.value})),label:{color:uiColors.text,fontFamily:font,fontSize:12,fontWeight:600,formatter:p=>labels[p.name.split(':')[1] as keyof typeof labels]},lineStyle:{color:'gradient',curveness:.45,opacity:.4},emphasis:{focus:'adjacency',lineStyle:{opacity:.85}},blur:{lineStyle:{opacity:.12},itemStyle:{opacity:.35}}}]:[]};
+}
+
+
+/** Compare measured totals for each level, rather than only queries that changed level. */
+export function statusComparisonOption(old:Summary,next:Summary,dates:[string,string]):EChartsOption{
+ const levels:Status[]=['danger','safe','none','medium'];
+ for(const status of ['unknown','data_issue'] as const)if(old.counts[status]||next.counts[status])levels.push(status);
+ return {...base,
+  grid:{top:16,right:52,bottom:24,left:132},
+  xAxis:{type:'value',min:0,minInterval:1,axisLabel:{color:uiColors.soft,formatter:(value:number)=>number(value)},splitLine:{lineStyle:{color:uiColors.line,type:'dashed'}}},
+  yAxis:{type:'category',inverse:true,data:levels.map(s=>labels[s]),axisTick:{show:false},axisLine:{show:false},axisLabel:{color:uiColors.text,fontSize:12,fontWeight:600}},
+  tooltip:{...base.tooltip,trigger:'axis',axisPointer:{type:'shadow'},valueFormatter:value=>number(Number(value))+' query'},
+  series:([old,next] as const).map((summary,index)=>({
+   id:index?'status-after':'status-before',name:dates[index],type:'bar',barMaxWidth:14,barGap:'20%',barCategoryGap:'35%',
+   data:levels.map(status=>({value:summary.counts[status]||0,itemStyle:{color:colors[status],opacity:index?1:.4}})),
+   itemStyle:{borderRadius:[0,3,3,0]},
+   label:{show:true,position:'right',color:index?uiColors.text:uiColors.muted,fontSize:12,fontWeight:index?700:500,formatter:p=>number(Number(p.value))},
+   emphasis:{focus:'self',itemStyle:{opacity:1}},blur:{itemStyle:{opacity:.22}}
+  })),
+  media:[{query:{maxWidth:400},option:{grid:{left:112,right:40},yAxis:{axisLabel:{fontSize:11}}}}]
+ };
 }

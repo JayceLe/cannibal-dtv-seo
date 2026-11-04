@@ -21,7 +21,7 @@ import {
 import {
   snapshotOption,
   categoryChangeOption,
-  transitionOption,
+  statusComparisonOption,
 } from "@/lib/comparison-chart-options";
 import { formatDataDate } from "@/lib/dates";
 import type { ComparisonData, ComparisonFilter, Week } from "@/lib/comparison";
@@ -145,8 +145,8 @@ export default function ComparisonOverview({
     [snapshot.old, snapshot.next, dates[0], dates[1]],
   );
   const flow = useMemo(
-    () => transitionOption(data.report.flows),
-    [data.report.flows],
+    () => statusComparisonOption(data.old, data.new, dates),
+    [data.old, data.new, dates[0], dates[1]],
   );
   const bars = useMemo(
     () => categoryChangeOption(data.categories, groupMetric, category),
@@ -321,7 +321,7 @@ export default function ComparisonOverview({
         <section className="panel report-chart-card" data-scroll-reveal>
           <header>
             <div>
-              <h3>Query đổi mức độ</h3>
+              <h3>Query theo mức độ</h3>
               <span>
                 {scope} · {number(data.old.counts.danger || 0)} →{" "}
                 {number(data.new.counts.danger || 0)} query nguy hiểm
@@ -331,20 +331,15 @@ export default function ComparisonOverview({
               {number(data.report.transitions.changed)} thay đổi
             </span>
           </header>
-          <div className="report-flow-dates">
-            <span>{dates[0]}</span>
-            <ArrowRight size={16} />
-            <span>{dates[1]}</span>
+          <div className="report-status-periods">
+            <span><i className="period-before"/>Ngày trước · {dates[0]}</span>
+            <span><i/>Ngày sau · {dates[1]}</span>
           </div>
-          {data.report.flows.length ? (
-            <Chart
-              option={flow}
-              height={238}
-              label={`Chuyển trạng thái ${scope}: ${data.report.flows.map((f) => `${labels[f.from]} sang ${labels[f.to]}: ${f.value} query`).join("; ")}`}
-            />
-          ) : (
-            <div className="report-chart-empty">Không có query đổi mức độ.</div>
-          )}
+          <Chart
+            option={flow}
+            height={Math.max(280, (4 + Number(Boolean(data.old.counts.unknown || data.new.counts.unknown)) + Number(Boolean(data.old.counts.data_issue || data.new.counts.data_issue))) * 64)}
+            label={`So sánh query theo mức độ ${scope}: ${dates[0]} và ${dates[1]}`}
+          />
           <details className="report-data-details">
             <summary>Xem số liệu chuyển trạng thái</summary>
             <div className="report-flow-list">

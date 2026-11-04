@@ -38,3 +38,13 @@ test('three chart models render finite SVG at phone, tablet and desktop widths w
 test('percentage point changes never display a signed zero for small real changes',()=>{
  assert.equal(pointChange(0),'Kh\u00f4ng \u0111\u1ed5i');assert.equal(pointChange(.002),'T\u0103ng <0,01 \u0111i\u1ec3m %');assert.equal(pointChange(-.002),'Gi\u1ea3m <0,01 \u0111i\u1ec3m %');assert.equal(pointChange(.017),'+0,02 \u0111i\u1ec3m %');
 });
+
+test('paired level columns compare full daily totals, including unchanged queries',async()=>{
+ const {statusComparisonOption}=await import('../src/lib/comparison-chart-options');
+ const {summary}=await import('../src/lib/engine');
+ const a=summary([]),b=summary([]);a.counts.danger=7;b.counts.danger=9;a.counts.safe=2;b.counts.safe=2;
+ const option=statusComparisonOption(a,b,['12/10/2026','19/10/2026']);
+ const series=option.series as {id:string;data:{value:number}[]}[];
+ assert.equal(series.length,2);assert.deepEqual(series.map(s=>s.data.map(d=>d.value)),[[7,2,0,0],[9,2,0,0]]);
+ assert.deepEqual(series.map(s=>s.id),['status-before','status-after']);
+});

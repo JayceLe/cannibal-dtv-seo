@@ -35,7 +35,7 @@ test('selected overview retains both denominators and removable OR filter state'
 test('comparison preserves reports, union rows, transitions, full taxonomy and chart alternatives',()=>{
  const data=comparisonFromRecords(uxOldRecords,uxNewRecords,'',comparisonFilters,knownCategories);
  const html=render(React.createElement(Comparison,{weeks:uxWeeks,older:'ux-old',newer:'ux-new',onDates:noop,category:'',onCategory:noop,data,loading:false,filters:comparisonFilters,onFilter:noop,onImport:noop}));
- for(const label of ['Ngày trước','Ngày sau','Biến động DMC3','Nhóm cải thiện','Nhóm tăng cannibal','Nhóm không đổi','Giảm nhiều nhất','Tăng nhiều nhất','Nhóm còn cannibal','Mới bị cannibal','Đã hết cannibal','Cannibal giữa hai ngày','Query đổi mức độ','Biến động theo DMC3','An toàn → Trung bình','Trung bình → Nguy hiểm','Đổi mức độ','Mới có dữ liệu ngày sau','Trang so sánh sau']) assert.ok(html.includes(label),label);
+ for(const label of ['Ngày trước','Ngày sau','Biến động DMC3','Nhóm cải thiện','Nhóm tăng cannibal','Nhóm không đổi','Giảm nhiều nhất','Tăng nhiều nhất','Nhóm còn cannibal','Mới bị cannibal','Đã hết cannibal','Cannibal giữa hai ngày','Query theo mức độ','Biến động theo DMC3','An toàn → Trung bình','Trung bình → Nguy hiểm','Đổi mức độ','Mới có dữ liệu ngày sau','Trang so sánh sau']) assert.ok(html.includes(label),label);
  for(const name of knownCategories) assert.ok(html.includes(name.replaceAll('_',' ')),name);
  assert.match(html,/Query có dữ liệu ở ít nhất một ngày/);
  assert.ok(html.includes('group-movement-counts'));
