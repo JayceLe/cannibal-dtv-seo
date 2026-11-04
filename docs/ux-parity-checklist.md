@@ -97,7 +97,7 @@ Audit dialog/import: dùng lại FocusDialog, giảm code trùng; Escape/focus/s
 - vercel-react-best-practices: chỉ tách phần trình bày OverviewWorkspace/FilterSummary; chart/Sankey/Three vẫn tải động, hover nằm trong cụm donut. Không thêm request/dependency.
 - web-design-guidelines: rà focus/label/combobox/độ dài nội dung, vùng bấm44px, tabular numbers, reduced-motion và màu nền trình duyệt. Sửa mục tiêu chạm của bộ đổi chỉ số/summary số liệu và focus vùng cuộn bảng.
 
-Giữ nguyên việc trạng thái lọc nằm trong workspace, chưa đồng bộ URL; thêm deep-link sẽ vượt phạm vi không thêm tính năng. Không thay đổi ngưỡng, làm tròn hoặc lời giải thích nghiệp vụ. `signIn`, `exportCsv`, `analyze`, `save` đối chiếu nguyên vẹn với baseline. Không có diff trong src/lib, workers, Supabase hay file Thứ hạng.
+Giữ nguyên việc trạng thái lọc nằm trong workspace, chưa đồng bộ URL; thêm deep-link sẽ vượt phạm vi không thêm tính năng. Không thay đổi ngưỡng, làm tròn hoặc lời giải thích nghiệp vụ. `signIn`, `exportCsv`, `analyze`, `save` đối chiếu nguyên vẹn với baseline. Không sửa engine, overview/comparison, parser, workers, Supabase hay file Thứ hạng. Phần bổ sung lib motion được ghi riêng trong plans/README.md.
 
 Kiểm chứng trình duyệt: OR medium+danger, bỏ riêng chip, xóa tất cả, focus liên kết hai donut; Escape và trả focus về query; Escape menu; khách không thấy bảng; lỗi mật khẩu có thông báo. Đã xem ảnh1440/390, trọng tâm desktop. Không đánh giá WebGL/FPS bằng mắt vì bật reduced-motion theo yêu cầu; vòng đời đã có test. Không thử import ghi Supabase; parser và trạng thái import dùng test/fixture.
 

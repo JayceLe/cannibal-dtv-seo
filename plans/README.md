@@ -44,3 +44,20 @@ P0/P1 implementation complete. Core tests increased 64 → 71, covering pointer 
 Review fixes: remove duplicate legacy tab underline; retain target cleanup through fast scope changes; remove React autofocus before native dialog focus capture. The static SVG percentage arcs deliberately do not animate their stroke or thickness.
 
 Visual evidence: local Chrome signed in successfully; Overview and Comparison rendered with real read-only data, and no app runtime error appeared in the console. Device toolbar controls were unreliable through native automation, while the dedicated browser connection reports disabled. Exact 320/390/768/1440 visual verification and a measured 60fps trace remain unverified. Existing chart SVG tests cover these widths mechanically, not visual layout. No import was submitted, no data changed, no push/deployment performed.
+
+## Follow-up: motion clarity after UX rebuild
+
+The earlier pass primarily completed lifecycle, interruption and accessibility work. This pass makes the visible feedback clearer on the existing `ux-rebuild` branch; it does not redesign the layout again.
+
+| Before | After | Why |
+| --- | --- | --- |
+| Card spotlight at15%, subdued edge | Spotlight24%, clearer role-colored edge and6% surface lift | Make hover perceptible without scaling text |
+| KPI/report arrows static | Icon wrapper moves2px in trend direction in240ms, returns180ms; press resets120ms | A small secondary action reinforces the existing hover |
+| Changed/danger rows have no one-shot feedback | Independent cell layers fade from24% to0 over480ms when visible | Direct attention to affected rows while values and geometry stay still |
+| Three header settles after intro | Intro960ms followed by a finite2400ms drift, then stops | Add ambient depth without an infinite RAF/tween |
+
+Review verdict: **Approve** for implementation/lifecycle. Each animated property has one owner; icon wrappers isolate their transform from text reveal. Row feedback runs once per mounted row, ignores keyboard-driven updates and does not replay when reduced-motion is turned off again. Added row status is presentation metadata only. Existing dialog/menu/number/chart motion is retained.
+
+Browser fixture check at1440px: normal-motion hover reaches cardY−2px, iconX2px, value scale1; numeric text stays identical. Visible danger rows create highlight layers; live reduced-motion removes every layer and spotlight, with no runtime error. WebGL was disabled for this headless check, so physical GPU smoothness/Three appearance is not visually certified. No live data writes, push or deployment.
+
+Final checks: TypeScript, **79/79 tests**, production build pass. Review locations: `src/lib/metric-motion.ts:79` (hover), `src/lib/report-motion.ts:50` (one-shot state feedback), `src/lib/header-scene.ts:94` (finite drift). Tests additionally cover a reused row becoming dangerous, quick hover reversal, live preference changes and unmount cleanup. Business data modules and Rankings are unchanged.

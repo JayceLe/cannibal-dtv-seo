@@ -67,3 +67,5 @@ KPI gồm cùng ba hàng: tiêu đề, giá trị/nhóm, chỉ số phụ. Dùng
 Token chữ trong `globals.css`: page28 / section24 / panel19 / body15 / label14 / caption13px. `--table-row-padding:16px`; nền, màu dữ liệu và font giữ nguyên. Các token này áp dụng dần theo phạm vi component, không ghi đè biểu đồ Thứ hạng.
 
 Import dùng `FocusDialog` chung với chi tiết query: tiêu đề dính, nút đóng44px, focus/Escape/scroll lock cùng vòng đời. Bốn bước chỉ hiển thị trạng thái import đã có. Hướng dẫn và file mẫu vẫn truy cập được khi màn hẹp; không ẩn nội dung. Đăng nhập vẫn chỉ dùng mật khẩu workspace.
+
+Motion bổ sung: hover thẻ có spotlight24% và viền theo vai trò; wrapper icon dịch2px/240ms, trở về180ms, nhấn120ms. Chữ và số không scale. Dòng Nguy hiểm/vừa đổi trạng thái có lớp nền nhấn480ms đúng một lần khi vào vùng nhìn; bàn phím và reduced-motion không chạy. Header Three có đoạn trôi chậm hữu hạn2400ms sau intro960ms rồi đứng yên. Mọi observer/tween/lớp tạm được dọn khi unmount hoặc đổi reduced-motion. Chi tiết audit ở `plans/README.md`.

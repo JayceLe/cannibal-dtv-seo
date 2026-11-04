@@ -91,12 +91,9 @@ export function createHeaderScene(host: HTMLElement, header: HTMLElement) {
     toX(0);
     toY(0);
   };
-  const intro = gsap.to(pose, {
-    spin: 0.12,
-    duration: 0.96,
-    ease: "power2.out",
-    onUpdate: render,
-  });
+  const intro = gsap.timeline()
+    .to(pose, { spin: 0.12, duration: 0.96, ease: "power2.out", onUpdate: render })
+    .to(pose, { spin: 0.18, duration: 2.4, ease: "power2.out", onUpdate: render });
   const observer = new ResizeObserver(resize);
   observer.observe(host);
   header.addEventListener("pointermove", pointer, { passive: true });

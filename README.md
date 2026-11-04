@@ -138,3 +138,7 @@ Token CSS nằm trong `globals.css`, các quy tắc bề mặt trong `theme.css`
 Bốn thẻ toàn site đứng đầu Tổng quan. Cột DMC3 điều khiển chung tỷ lệ, donut và danh sách bên phải. Bộ lọc bảng được gom trong một vùng, có chip để bỏ từng điều kiện và đặt lại toàn bộ. So sánh giữ đủ sáu thẻ nhóm, bốn nhận định, ba biểu đồ và hợp query hai ngày. Không loại query chỉ có dữ liệu một ngày. Import/chi tiết dùng cùng kiểu dialog và không làm mất bộ lọc khi đóng.
 
 Kiểm thử UI dùng fixture tại `tests/ux-fixtures.ts`, không ghi Supabase. Ảnh đối chiếu local nằm trong `.ux-baseline/` và không được commit. Không tự push hoặc deploy.
+
+### Bổ sung hiệu ứng
+
+Thẻ KPI/tỷ lệ/so sánh có hover rõ hơn và icon phản hồi theo chiều tăng/giảm. Dòng Nguy hiểm hoặc vừa đổi trạng thái được nhấn nền một lần; số và cột đứng yên. Header Three thêm đoạn trôi hữu hạn rồi dừng. Các hiệu ứng đều tuân theo reduced-motion và hủy sạch khi rời màn. Bản kiểm tra và giới hạn GPU được ghi trong [plans/README.md](plans/README.md).
