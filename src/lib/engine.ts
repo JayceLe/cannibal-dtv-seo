@@ -65,7 +65,14 @@ export function summary(records: RecordRow[]) {
  return {total:records.length,counts,impressions,clicks,cannibal,withData,affectedImpressions,ctr:impressions?clicks/impressions*100:0};
 }
 export type Summary = ReturnType<typeof summary>;
-export const number = (v: number) => new Intl.NumberFormat('vi-VN',{maximumFractionDigits:0}).format(v);
-export const decimal = (v: number | null, digits=1) => v==null?'—':new Intl.NumberFormat('vi-VN',{maximumFractionDigits:digits}).format(v);
+const countFormat = new Intl.NumberFormat('vi-VN',{maximumFractionDigits:0});
+export const number = (v: number) => countFormat.format(v);
+const decimalFormats = new Map<number,Intl.NumberFormat>();
+export function decimal(v:number|null,digits=1){
+ if(v==null)return '—';
+ let format=decimalFormats.get(digits);
+ if(!format){format=new Intl.NumberFormat('vi-VN',{maximumFractionDigits:digits});decimalFormats.set(digits,format);}
+ return format.format(v);
+}
 
 export const rankDisplay = (v:number|null) => {const rank=roundRank(v);return rank==null?'—':new Intl.NumberFormat('vi-VN',{minimumFractionDigits:1,maximumFractionDigits:1}).format(rank);};

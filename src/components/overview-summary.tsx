@@ -1,7 +1,7 @@
 'use client';
 import AnimatedNumber from './animated-number';
 import {Layers3,TrendingDown,TrendingUp,Eye} from 'lucide-react';
-import {decimal,number} from '@/lib/engine';
+import {number} from '@/lib/engine';
 import {overviewHighlights,type CategoryStat} from '@/lib/overview';
 import {categoryColor} from '@/lib/categories';
 export default function OverviewSummary({categories,siteCannibal,onSelect}:{categories:CategoryStat[];siteCannibal:number;onSelect:(name:string)=>void}){

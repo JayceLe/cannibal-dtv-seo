@@ -29,3 +29,9 @@ test('cannibal impressions exclude Top 1 and every below-threshold secondary URL
  const [record]=buildRecords([{key:'a',query:'A',categories:['PIN']}],[{key:'a',url:'https://example.test',impressions:100,clicks:0,weighted_position:225,position_weight:100,missing_rank:0,invalid_rows:0}]);
  assert.equal(record.position,2.3);assert.equal(record.urls[0].position,2.25,'Keep the raw source rank available');
  });
+
+test('cached formatters preserve Vietnamese rounding and missing values',async()=>{
+ const {number,decimal}=await import('../src/lib/engine');
+ assert.equal(number(1234567.5),'1.234.568');assert.equal(number(-1.5),'-2');assert.equal(number(0),'0');
+ assert.equal(decimal(null),'—');assert.equal(decimal(1234.56),'1.234,6');assert.equal(decimal(1234.56,2),'1.234,56');assert.equal(decimal(1234.56,0),'1.235');
+});

@@ -29,3 +29,13 @@ test('band changes reconcile NA entry without counting -2 as a lost rank',()=>{
  assert.deepEqual(rankingBandChanges(data,'a','b',101,Infinity),{entered:0,left:2});
  assert.equal(rankingSummary(data,'b').missing,1);
 });
+
+test('summary preserves every rank boundary, missing date and N/A',()=>{
+ const values=[1,3,4,5,6,10,11,20,21,30,31,50,51,100,101,null,-2];
+ const rows=values.map(p=>row(p,p));rows.push({...row(1,1),positions:{a:1}});
+ const s=rankingSummary(rows,'b');
+ assert.deepEqual(s.counts,[2,2,2,4,4,1]);assert.deepEqual(s.tableCounts,[2,2,2,2,4,2]);
+ assert.equal(s.total,15);assert.equal(s.ranked,14);assert.equal(s.missing,3);
+ assert.equal(s.coverage,14/18*100);
+ assert.deepEqual(rankingSummary([],'b'),{total:0,missing:0,ranked:0,coverage:0,average:null,counts:[0,0,0,0,0,0],tableCounts:[0,0,0,0,0,0]});
+});

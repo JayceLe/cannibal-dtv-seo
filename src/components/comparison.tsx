@@ -1,6 +1,6 @@
 'use client';
 import {useEffect,useState} from 'react';
-import {ArrowRight,ChevronRight,ChevronLeft,Search} from 'lucide-react';
+import {ChevronRight,ChevronLeft,Search} from 'lucide-react';
 import ComparisonOverview from './comparison-overview';
 import {number} from '@/lib/engine';
 import {formatDataDate} from '@/lib/dates';
