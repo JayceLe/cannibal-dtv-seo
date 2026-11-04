@@ -22,7 +22,7 @@ export default function RankingTopTrend({dates,timeline,category,domain,total,on
  return <section className="panel rank-top-trend" data-motion-reveal>
   <div className="rank-card-title"><h2>Thứ hạng theo ngày</h2><span>{category.replaceAll('_',' ')||'Tất cả DMC3'}</span></div>
   <div className="rank-top-filters" role="group" aria-label="Chọn nhóm Top để cộng tổng">
-   <button type="button" aria-pressed={selected.length===tableBands.length} onClick={()=>setSelected(tableBands.map((_,i)=>i))}>Tất cả</button>
+   <button type="button" aria-pressed={selected.length===tableBands.length} onClick={()=>setSelected(current=>current.length===tableBands.length?[]:tableBands.map((_,i)=>i))}>Tất cả</button>
    {tableBands.map((band,i)=><button type="button" key={band.name} aria-pressed={selected.includes(i)} onClick={()=>setSelected(old=>old.includes(i)?old.filter(n=>n!==i):[...old,i])}><i style={{background:band.color}}/>{band.name}</button>)}
   </div>
   <div className="rank-top-chart"><Chart label="Tổng số từ khóa của các nhóm Top đã chọn theo 5 ngày gần nhất trong khoảng ngày" option={option} height={280}/></div>
