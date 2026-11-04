@@ -78,8 +78,10 @@ Dark enterprise data product: giữ nền #0b0b0b / bề mặt #171717 / nâng #
 ## Kiểm chứng
 
 - [x] TypeScript của thay đổi phiên trước đạt trước khi lưu checkpoint.
-- [ ] Mốc (a): nền + khung.
+- [x] Mốc (a): nền + khung — TypeScript, 71/71 test, production build đạt.
 - [ ] Mốc (b): Tổng quan + So sánh.
 - [ ] Mốc (c): dialog/import/login.
 - [ ] Cuối: parity + tests + build + audit giao diện.
 - [ ] Ảnh1440/390; overflow768/320. Chỉ dùng fixture trong tests, không kết nối dữ liệu thật.
+
+Audit nền: dùng token có sẵn, không thêm font/thư viện; chip có nút thật, tên truy cập, vùng bấm44px; header ngày không bị co. Baseline headless fixture đã lưu local1440/390, overflow768/320 đạt.

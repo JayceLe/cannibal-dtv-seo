@@ -904,7 +904,8 @@ th,
 }
 .header-date-menu {
   margin-left: 0;
-  width: 164px;
+  width: 176px;
+  flex-shrink: 0;
 }
 .header-actions {
   margin-left: 0;

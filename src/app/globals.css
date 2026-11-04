@@ -41,6 +41,13 @@
   --space-14: 56px;
   --page-gutter: 40px;
   --panel-padding: 24px;
+  --type-page: 28px;
+  --type-section: 24px;
+  --type-panel: 19px;
+  --type-body: 15px;
+  --type-label: 14px;
+  --type-caption: 13px;
+  --table-row-padding: 16px;
   --motion-press: 120ms;
   --motion-hover: 180ms;
   --motion-update: 240ms;
@@ -330,6 +337,46 @@ main {
   border-radius: 12px;
   background: var(--surface);
 }
+/* Shared filter state, used by both cannibal reports. */
+.filter-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  min-width: 0;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: var(--type-caption);
+}
+.filter-summary ul {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+  list-style: none;
+}
+.filter-summary li { min-width: 0; max-width: 100%; }
+.filter-summary li button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  max-width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--surface-up);
+  color: var(--text);
+  text-align: left;
+}
+.filter-summary li span { overflow-wrap: anywhere; }
+.filter-summary li svg { flex-shrink: 0; color: var(--muted); }
+.filter-summary > .text-link { min-height: 44px; }
+.filter-summary li button:hover { border-color: var(--border-strong); }
 .section-title {
   display: flex;
   align-items: baseline;
@@ -1011,10 +1058,10 @@ main {
   display: flex;
   align-items: center;
   gap: 8px;
-  min-height: 40px;
+  min-height: 44px;
   padding: 8px 12px;
   border: 1px solid var(--border);
-  border-radius: 7px;
+  border-radius: var(--radius-control);
   background: transparent;
   color: var(--muted);
   font-size: 13px;
