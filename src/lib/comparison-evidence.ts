@@ -1,4 +1,4 @@
-import {cannibalImpressions,decimal,labels,number,rankDisplay,roundRank,type RecordRow} from './engine';
+import {cannibalThresholdLabel,cannibalImpressions,decimal,labels,number,rankDisplay,roundRank,type RecordRow} from './engine';
 import {rankedUrls,topTwoRankGap} from './overview';
 export function evidenceSnapshot(record:RecordRow){
  const urls=rankedUrls(record),leader=urls[0],second=urls[1];
@@ -21,7 +21,7 @@ function currentRule(record:RecordRow,s:ReturnType<typeof evidenceSnapshot>){
  if(!record.cannibal){
   if(s.urlCount<2)return 'Chưa có URL phụ cạnh tranh.';
   if(s.ratio==null)return 'Impression Top 1 bằng 0; chưa đủ điều kiện cannibal.';
-  return `URL phụ cao nhất chỉ đạt ${ratioDisplay(s.ratio)} impression Top 1, dưới ngưỡng 20%.`;
+  return `URL phụ cao nhất chỉ đạt ${ratioDisplay(s.ratio)} impression Top 1, chưa đạt ngưỡng ${cannibalThresholdLabel(record)}.`;
  }
  if(s.rank!=null&&s.rank>3)return 'Đã đạt ngưỡng cannibal và rank Top 1 lớn hơn 3.';
  if(s.gap==null||s.rank==null)return 'Đã đạt ngưỡng cannibal nhưng thiếu rank để phân mức.';
@@ -31,7 +31,8 @@ function currentRule(record:RecordRow,s:ReturnType<typeof evidenceSnapshot>){
 export function comparisonEvidence(previous:RecordRow,current:RecordRow){
  const old=evidenceSnapshot(previous),next=evidenceSnapshot(current),changedLeader=Boolean(old.leader&&next.leader&&old.leader!==next.leader);
  const thresholdOld=old.eligible>0,thresholdNew=next.eligible>0;
- const thresholdNote=!thresholdOld&&thresholdNew?'Đạt ngưỡng ≥ 20%: phát sinh cannibal.':thresholdOld&&!thresholdNew?'Không còn đạt 20%: hết cannibal.':thresholdNew?'URL phụ vẫn đạt ≥ 20% impression Top 1.':next.ratio==null?'Chưa xác định tỷ lệ URL phụ / Top 1.':'Chưa có URL phụ đạt 20% impression Top 1.';
+ const threshold=cannibalThresholdLabel(current);
+ const thresholdNote=!thresholdOld&&thresholdNew?`Đạt ngưỡng ${threshold}: phát sinh cannibal.`:thresholdOld&&!thresholdNew?`Không còn đạt ngưỡng ${threshold}: hết cannibal.`:thresholdNew?`URL phụ vẫn đạt ngưỡng ${threshold} impression Top 1.`:next.ratio==null?'Chưa xác định tỷ lệ URL phụ / Top 1.':`Chưa có URL phụ đạt ngưỡng ${threshold} impression Top 1.`;
  const rankNote=current.status==='data_issue'?'Có dữ liệu lỗi; chưa dùng rank để kết luận.':changedLeader?'Top 1 đã đổi URL; rank được lấy theo URL dẫn đầu mỗi ngày.':!current.cannibal?'Chưa đạt cannibal; rank chưa quyết định mức độ.':next.rank==null?'Thiếu rank Top 1 để phân mức.':next.rank>3?'Rank Top 1 > 3: xếp mức Nguy hiểm.':'Rank Top 1 ≤ 3: tiếp tục xét gap rank.';
  let gapNote=current.status==='data_issue'?'Cần kiểm tra dữ liệu trước khi phân mức.':!current.cannibal?'Chưa đạt cannibal; gap lớn cũng không tự tạo cannibal.':next.rank!=null&&next.rank>3?'Rank Top 1 > 3 được ưu tiên xếp Nguy hiểm.':next.gap==null?'Cần rank của cả Top 1 và Top 2.':Number(next.gap.toFixed(10))>1?'Gap > 1: mức Nguy hiểm.':Number(next.gap.toFixed(10))>=.5?'Gap từ 0,5 đến 1: mức Trung bình.':'Gap < 0,5: mức An toàn.';
  if(current.cannibal&&current.status!=='data_issue'&&next.rank!=null&&next.rank<=3&&old.gap!=null&&next.gap!=null){
@@ -41,7 +42,7 @@ export function comparisonEvidence(previous:RecordRow,current:RecordRow){
  let verdict=previous.status===current.status?`Giữ trạng thái ${labels[current.status].toLocaleLowerCase('vi')}. `:`${labels[previous.status]} → ${labels[current.status]}. `;
  verdict+=currentRule(current,next);
  const result={old,next,changedLeader,verdict,metrics:[
-  {key:'impressions',label:'Impression cannibal',before:number(old.affected),after:number(next.affected),delta:next.affected-old.affected,change:change(old.affected,next.affected,0,'impression'),note:old.eligible!==next.eligible?`Số URL phụ đạt 20%: ${old.eligible} → ${next.eligible}.`:next.eligible?`Có ${next.eligible} URL phụ đạt ngưỡng 20%.`:'Chưa có URL phụ đạt ngưỡng 20%.'},
+  {key:'impressions',label:'Impression cannibal',before:number(old.affected),after:number(next.affected),delta:next.affected-old.affected,change:change(old.affected,next.affected,0,'impression'),note:old.eligible!==next.eligible?`Số URL phụ đạt ngưỡng: ${old.eligible} → ${next.eligible}.`:next.eligible?`Có ${next.eligible} URL phụ đạt ngưỡng ${threshold}.`:`Chưa có URL phụ đạt ngưỡng ${threshold}.`},
   {key:'ratio',label:'URL phụ cao nhất / Top 1',before:ratioDisplay(old.ratio,thresholdOld),after:ratioDisplay(next.ratio,thresholdNew),delta:old.ratio==null||next.ratio==null?null:next.ratio-old.ratio,change:change(old.ratio,next.ratio,2,'điểm %'),note:thresholdNote},
   {key:'rank',label:'Rank Top 1',before:rankDisplay(old.rank),after:rankDisplay(next.rank),delta:old.rank==null||next.rank==null?null:roundRank(next.rank-old.rank),change:change(old.rank,next.rank,1),note:rankNote},
   {key:'gap',label:'Gap rank',before:rankDisplay(old.gap),after:rankDisplay(next.gap),delta:old.gap==null||next.gap==null?null:roundRank(next.gap-old.gap),change:change(old.gap,next.gap,1),note:gapNote}

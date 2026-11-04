@@ -4,7 +4,7 @@ import {comparisonEvidence,ratioDisplay} from '../src/lib/comparison-evidence';
 const record=(impressions=10,rank:number|null=2,gap=.3,invalid=0):RecordRow=>{const urls=[{url:'https://example.test/main',impressions:100,position:rank,clicks:0,ratio:1},{url:'https://example.test/second',impressions,position:rank==null?null:rank+gap,clicks:0,ratio:impressions/100}];return {key:'pin',query:'pin',categories:['PIN'],urls,impressions:100+impressions,clicks:0,position:rank,invalid_rows:invalid,...classify(urls,invalid)};};
 test('more total impressions cannot create cannibal without the 20% secondary threshold',()=>{
  const a=record(10,2,28.6),b=record(15,2,28.6);b.impressions=12000;
- const result=comparisonEvidence(a,b);assert.equal(result.metrics.length,4);assert.equal(result.next.affected,0);assert.match(result.verdict,/dưới ngưỡng 20%/);assert.match(result.metrics[3].note,/không tự tạo cannibal/);assert.equal(result.metrics[0].change,'Không đổi');
+ const result=comparisonEvidence(a,b);assert.equal(result.metrics.length,4);assert.equal(result.next.affected,0);assert.match(result.verdict,/chưa đạt ngưỡng ≥ 20%/);assert.match(result.metrics[3].note,/không tự tạo cannibal/);assert.equal(result.metrics[0].change,'Không đổi');
 });
 test('the impression ratio threshold is inclusive, and resolved cannibal is explained separately',()=>{
  const a=record(19.99),b=record(20);const start=comparisonEvidence(a,b);assert.equal(start.next.eligible,1);assert.match(start.metrics[1].note,/Đạt ngưỡng/);assert.equal(start.metrics[1].after,'20%');

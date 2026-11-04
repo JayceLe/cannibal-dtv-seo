@@ -5,7 +5,7 @@ import LoadingRows from "./loading-rows";
 import FocusDialog from "./focus-dialog";
 import ComparisonEvidence from "./comparison-evidence";
 import { db } from "@/lib/supabase";
-import { number, rankDisplay, decimal, type RecordRow } from "@/lib/engine";
+import { cannibalThresholdLabel, number, rankDisplay, decimal, type RecordRow } from "@/lib/engine";
 import {
   pairComparisonUrls,
   missingComparisonRecord,
@@ -88,7 +88,7 @@ export function ComparisonDetailView({
                           </span>
                           {url.eligible ? (
                             <span className="period-eligible">
-                              Đạt ngưỡng ≥ 20%
+                              Đạt ngưỡng {cannibalThresholdLabel(side === "old" ? oldRecord : newRecord)}
                             </span>
                           ) : null}
                         </>

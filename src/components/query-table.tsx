@@ -12,6 +12,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import {
+  cannibalThresholdLabel,
   cannibalImpressions,
   decimal,
   rankDisplay,
@@ -49,7 +50,8 @@ export function QueryDetails({
 }) {
   const urls = rankedUrls(r),
     affected = cannibalImpressions(r),
-    gap = topTwoRankGap(r);
+    gap = topTwoRankGap(r),
+    threshold = cannibalThresholdLabel(r);
 
   const impacts = r.categories.map((name) => {
     const total = categories.find((c) => c.name === name)?.impressions || 0;
@@ -146,8 +148,8 @@ export function QueryDetails({
                     {u.order === 1
                       ? "URL chính · Không tính cannibal"
                       : u.reachesThreshold
-                        ? "Tính cannibal · Đạt ngưỡng ≥ 20%"
-                        : "Không tính · Dưới ngưỡng 20%"}
+                        ? `Tính cannibal · Đạt ngưỡng ${threshold}`
+                        : `Không tính · Chưa đạt ngưỡng ${threshold}`}
                   </span>
                 </div>
               </div>
@@ -163,7 +165,7 @@ export function QueryDetails({
                 <strong>
                   {u.percent == null ? "—" : decimal(u.percent, 2) + "%"}
                 </strong>
-                <div className="url-share-track">
+                <div className="url-share-track" style={{"--threshold-position": threshold === "> 60%" ? "60%" : "20%"} as React.CSSProperties}>
                   <i style={{ width: `${Math.min(100, u.percent || 0)}%` }} />
                 </div>
               </div>

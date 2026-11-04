@@ -29,9 +29,17 @@ export function rankGap(first:number|null,second:number|null):number|null{
  const a=roundRank(first),b=roundRank(second);
  return a==null||b==null?null:Math.abs(Math.round(a*10)-Math.round(b*10))/10;
 }
+/** Low-volume queries need a strictly stronger secondary URL; compare integers at the boundary. */
+export function qualifiesCannibal(impressions:number,leader:number,total:number){
+ return leader>0&&(total<20?impressions*5>leader*3:impressions*5>=leader);
+}
+export function cannibalThresholdLabel(record:Pick<RecordRow,'urls'>){
+ return record.urls.reduce((sum,u)=>sum+u.impressions,0)<20?'> 60%':'≥ 20%';
+}
 export function classify(urls: UrlMetric[], invalid = 0): Pick<RecordRow,'status'|'gap'|'cannibal'> {
  const a = urls[0], b = urls[1];
- const cannibal = !!a && a.impressions > 0 && urls.slice(1).some(u => u.impressions >= a.impressions * .2);
+ const total=urls.reduce((sum,u)=>sum+u.impressions,0);
+ const cannibal = !!a && urls.slice(1).some(u => qualifiesCannibal(u.impressions,a.impressions,total));
  const rank=roundRank(a?.position??null),gap=rankGap(a?.position??null,b?.position??null);
  let status: Status = 'none';
  if (invalid) status = 'data_issue'; else if (!a) status = 'no_data'; else if (cannibal) {
@@ -51,12 +59,12 @@ export function buildRecords(base: Keyword[], metrics: Metric[]): RecordRow[] {
   return {...k,urls,invalid_rows,...classify(urls,invalid_rows),impressions:urls.reduce((s,u)=>s+u.impressions,0),clicks:urls.reduce((s,u)=>s+u.clicks,0),position:roundRank(urls[0]?.position??null)};
  });
 }
-// Only secondary URLs at or above 20% of the leading URL count as cannibal impressions.
+// Count only secondary URLs meeting the query-volume threshold; always exclude Top 1.
 // Sorting a copy also keeps legacy snapshots and imported URL order consistent.
 export function cannibalImpressions(record: Pick<RecordRow,'urls'>): number {
  const urls=record.urls.slice().sort((a,b)=>b.impressions-a.impressions);
- const leader=urls[0]?.impressions||0;
- return leader>0?urls.slice(1).reduce((sum,u)=>sum+(u.impressions>=leader*.2?u.impressions:0),0):0;
+ const leader=urls[0]?.impressions||0,total=urls.reduce((sum,u)=>sum+u.impressions,0);
+ return leader>0?urls.slice(1).reduce((sum,u)=>sum+(qualifiesCannibal(u.impressions,leader,total)?u.impressions:0),0):0;
 }
 export function summary(records: RecordRow[]) {
  const counts = Object.fromEntries(Object.keys(labels).map(k=>[k,0])) as Record<Status,number>;

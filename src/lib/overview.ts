@@ -1,4 +1,4 @@
-import {cannibalImpressions,queryKey,summary,roundRank,rankGap,type RecordRow,type Summary} from './engine';
+import {qualifiesCannibal,cannibalImpressions,queryKey,summary,roundRank,rankGap,type RecordRow,type Summary} from './engine';
 export type CategoryStat={name:string;total:number;cannibal:number;danger:number;impressions:number;cannibalImpressions:number};
 export type QueryTab='all'|'cannibal'|'none'|'review';
 export type QueryFilters={category:string;tab:QueryTab;status:string;search:string;exact:boolean;sort:string;page:number};
@@ -40,8 +40,8 @@ export function categoryShares(categories:CategoryStat[],metric:'cannibal'|'cann
 
 export function rankedUrls(record:RecordRow){
  const urls=record.urls.slice().sort((a,b)=>b.impressions-a.impressions);
- const leader=urls[0]?.impressions||0;
- return urls.map((url,index)=>({...url,position:roundRank(url.position),order:index+1,percent:leader>0?url.impressions/leader*100:null,reachesThreshold:index>0&&leader>0&&url.impressions>=leader*.2}));
+ const leader=urls[0]?.impressions||0,total=urls.reduce((sum,u)=>sum+u.impressions,0);
+ return urls.map((url,index)=>({...url,position:roundRank(url.position),order:index+1,percent:leader>0?url.impressions/leader*100:null,reachesThreshold:index>0&&qualifiesCannibal(url.impressions,leader,total)}));
 }
 export function queryCategoryImpact(record:RecordRow,categories:CategoryStat[]){
  return record.categories.map(name=>{const total=categories.find(c=>c.name===name)?.impressions||0;return{name,impressions:record.impressions,total,percent:total>0?record.impressions/total*100:null};});

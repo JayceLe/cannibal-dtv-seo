@@ -1,3 +1,4 @@
+import {rankedUrls} from './overview';
 import {type Summary,type Status,type RecordRow,queryKey,summary} from './engine';
 export type Week={id:string;week_start:string;file_name:string;status:string;created_at:string;summary?:Summary};
 export type ComparisonFilter=''|'new'|'resolved'|'safe_medium'|'medium_danger'|'changed';
@@ -45,7 +46,7 @@ export function comparisonFromRecords(older:RecordRow[],newer:RecordRow[],catego
 }
 
 export function pairComparisonUrls(older:RecordRow,newer:RecordRow){
- const ranked=(r:RecordRow)=>r.urls.slice().sort((a,b)=>b.impressions-a.impressions).map((url,index,all)=>({...url,order:index+1,percent:all[0].impressions>0?url.impressions/all[0].impressions*100:null,eligible:index>0&&all[0].impressions>0&&url.impressions>=all[0].impressions*.2}));
+ const ranked=(r:RecordRow)=>rankedUrls(r).map(u=>({...u,eligible:u.reachesThreshold}));
  const a=new Map(ranked(older).map(u=>[u.url,u])),b=new Map(ranked(newer).map(u=>[u.url,u]));
  return [...new Set([...a.keys(),...b.keys()])].map(url=>({url,old:a.get(url)??null,new:b.get(url)??null})).sort((a,b)=>Math.max(b.old?.impressions??0,b.new?.impressions??0)-Math.max(a.old?.impressions??0,a.new?.impressions??0)||a.url.localeCompare(b.url));
 }
