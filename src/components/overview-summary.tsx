@@ -62,7 +62,6 @@ export default function OverviewSummary({
             type="button"
             key={c.label}
             data-motion-reveal
-            data-hover-surface
             data-metric-surface
             className={`highlight-card ${c.tone}`}
             onClick={() => onSelect(c.name)}

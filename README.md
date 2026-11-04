@@ -1,3 +1,22 @@
+## UI polish hiện hành
+
+Nhánh local `ui-polish`. Mô tả sản phẩm và quy tắc hiện hành: [PRODUCT.md](PRODUCT.md); hệ thống giao diện và chuyển động: [DESIGN.md](DESIGN.md). Các ghi chú triển khai cũ bên dưới là lịch sử.
+
+### Chuyển động
+
+| Token | Thời gian | Easing |
+| --- | --- | --- |
+| Nhấn | 120ms | power2.out |
+| Hover / menu / đóng | 180ms | power2.out |
+| Cập nhật | 240ms | power2.out |
+| Dialog mở | 280ms | power3.out |
+| Reveal | 480ms | power3.out |
+| Stagger | 70ms, delay tối đa 280ms | power3.out |
+
+Tái dùng GSAP, ECharts và Three đã cài. Chỉ số trong bảng/tooltip không đếm lại. Menu/dialog có cleanup và reduced-motion trực tiếp; spotlight dùng lớp transform riêng, vòng tỷ lệ giữ đúng hình học. Chi tiết và kế hoạch kiểm tra: [plans/README.md](plans/README.md). Không tự push hoặc deploy.
+
+---
+
 # Cannibal Query
 
 Dashboard SEO dùng Next.js, Supabase Postgres và Apache ECharts. Điều hướng phân tích có đúng hai tab: Tổng quan và So sánh. Giao diện doanh nghiệp tối: nền xanh navy trung tính, bốn thẻ tổng quan DMC3, hai biểu đồ phân bổ và cột chọn DMC3 bên trái khu phân tích. Mỗi DMC3 có một màu riêng, dùng nhất quán trên biểu đồ, chú giải và bộ chọn. Xanh lá / vàng / đỏ chỉ mức độ an toàn / trung bình / nguy hiểm. Top 1 và Top 2 được nhấn riêng trong chi tiết URL. Toàn bộ UI, số liệu và biểu đồ dùng một font Be Vietnam Pro, tải từ cùng website; không phụ thuộc Google Fonts hay Google Sheets.

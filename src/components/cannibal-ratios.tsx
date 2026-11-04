@@ -36,7 +36,11 @@ export default function CannibalRatios({
           onChange={onSelect}
         />
       </div>
-      <div className="ratio-groups" data-scope={category ? "category" : "site"}>
+      <div
+        className="ratio-groups"
+        data-motion-key={`${category}:${scoped.cannibal}:${scoped.impressions}`}
+        data-scope={category ? "category" : "site"}
+      >
         {groups.map((g) => (
           <div
             className="ratio-comparison"
@@ -96,7 +100,6 @@ function RatioMetric({
     <div
       className={`ratio-metric ${tone}`}
       data-motion-reveal
-      data-hover-surface
       data-metric-surface
     >
       <div

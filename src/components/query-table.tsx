@@ -1,4 +1,5 @@
 "use client";
+import LoadingRows from "./loading-rows";
 import { useState } from "react";
 import FocusDialog from "./focus-dialog";
 import SelectMenu from "./select-menu";
@@ -337,9 +338,11 @@ export default function QueryTable({
         </table>
         {!data.rows.length ? (
           <div className="table-empty">
-            {loading
-              ? "Đang tải dữ liệu…"
-              : "Chưa có query đã map phù hợp. Chọn kỳ khác, đổi bộ lọc hoặc import dữ liệu."}
+            {loading ? (
+              <LoadingRows />
+            ) : (
+              "Chưa có query đã map phù hợp. Chọn kỳ khác, đổi bộ lọc hoặc import dữ liệu."
+            )}
           </div>
         ) : null}
       </div>

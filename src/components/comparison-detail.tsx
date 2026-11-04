@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { ExternalLink } from "lucide-react";
+import LoadingRows from "./loading-rows";
 import FocusDialog from "./focus-dialog";
 import ComparisonEvidence from "./comparison-evidence";
 import { db } from "@/lib/supabase";
@@ -207,9 +208,7 @@ export default function ComparisonDetail({
           newRecord={result.new}
         />
       ) : (
-        <div className="table-empty" role="status">
-          Đang tải chi tiết hai ngày…
-        </div>
+        <LoadingRows label="Đang tải chi tiết hai ngày…" />
       )}
     </FocusDialog>
   );

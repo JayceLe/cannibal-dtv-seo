@@ -30,8 +30,28 @@ Thứ hạng giữ biểu đồ, bảng, bộ lọc và logic hiện tại; ch�
 
 Header dùng một component chung và một bộ quy tắc responsive. Tab hỗ trợ phím mũi tên/Home/End, một tab-stop; có liên kết bỏ qua header đến nội dung. Điều khiển icon có tên truy cập được. Menu dùng portal, có focus, Escape và phím chọn.
 
-Metric card dùng chung motion: nền sáng nhẹ, nhấn vào thông tin, nâng tối đa3px, không phóng to chữ. Panel cấu trúc đứng yên. GSAP chỉ reveal các phần được đánh dấu rõ, không tự animate lại mọi từ trong bảng. ECharts sở hữu motion của series. Hover DMC3 đồng bộ donut/chú giải, cuộn riêng chú giải. Reduced motion giữ trạng thái cuối và dọn tween/listener khi thay đổi preference hoặc unmount.
+Metric card dùng chung motion: nền sáng nhẹ, nhấn vào thông tin, nâng tối đa2px, không phóng to chữ. Panel cấu trúc đứng yên. GSAP chỉ reveal các phần được đánh dấu rõ, không tự animate lại mọi từ trong bảng. ECharts sở hữu motion của series. Hover DMC3 đồng bộ donut/chú giải, cuộn riêng chú giải. Reduced motion giữ trạng thái cuối và dọn tween/listener khi thay đổi preference hoặc unmount.
 
 ## Quyền sở hữu code
 
 `globals.css`: cấu trúc, khoảng cách, responsive nội dung. `theme.css`: màu, bề mặt, trạng thái, header responsive. `rankings.css`: trình bày tab Thứ hạng. `design.ts`: màu biểu đồ. Không thêm lớp CSS ghi đè mới để sửa một cấu trúc đã có.
+
+
+## Chuyển động
+
+Tính cách: chính xác, điềm tĩnh, đáng tin. Không phóng chữ, không nảy, không lặp hiệu ứng trên số liệu bảng. `src/lib/motion-tokens.ts` là nguồn thời gian; CSS dùng token tương ứng. Không thêm thư viện.
+
+| Hành động | Thời gian | Easing |
+| --- | --- | --- |
+| Nhấn bằng con trỏ | 120ms | power2.out |
+| Hover / menu / đóng | 180ms | power2.out |
+| Đổi phạm vi / cập nhật số KPI | 240ms | power2.out |
+| Mở dialog | 280ms | power3.out |
+| Xuất hiện / số KPI lần đầu | 480ms | power3.out |
+| Stagger nhóm | 70ms, tổng delay ≤280ms | power3.out |
+
+Header → tỷ lệ theo phạm vi → KPI → phân bố → danh sách. Nội dung ban đầu luôn có thể đọc; reveal chỉ bắt đầu khi phần tử vào viewport. GSAP sở hữu transform/opacity của thẻ và lớp spotlight riêng; CSS sở hữu màu nền, viền, focus và backdrop. SVG tỷ lệ giữ nguyên cung đúng số liệu, không đổi độ dày khi hover. Thanh URL scaleX theo tỷ lệ hiện có và có mốc 20%; số đứng yên. Tick hoàn tất import dùng stroke SVG một lần, không dùng cho dữ liệu.
+
+Dấu chọn tab/DMC3 dùng Flip, không tạo hai chỉ báo. ScrollTrigger chỉ tải khi có phần so sánh cần reveal; không pin hay đổi cuộn. ECharts giữ quyền điều khiển series. Three giữ lazy-load desktop, pointer parallax có giới hạn và intro dưới một giây; không có RAF vô hạn.
+
+Menu giữ mounted cho lượt đóng, đảo chiều từ trạng thái hiện tại; bàn phím mở/đóng ngay. Dialog giữ top layer, focus trap và scroll lock tới hết lượt đóng, rồi trả focus. Reduced motion thay đổi trực tiếp: kết thúc tween, hiện trạng thái cuối, bỏ WebGL. Unmount dọn observer, listener, tween và chỉ báo.

@@ -25,6 +25,7 @@ class Intersections{
  disconnect(){this.targets.clear();}
  emit(target:Element,isIntersecting=true){this.callback([{target,isIntersecting}]);}
 }
+Object.defineProperty(globalThis,'IS_REACT_ACT_ENVIRONMENT',{configurable:true,writable:true,value:true});
 for(const key of ['document','HTMLElement','Element','Node','SVGElement','MutationObserver'] as const)Object.defineProperty(globalThis,key,{configurable:true,writable:true,value:win[key]});
 Object.defineProperty(globalThis,'getComputedStyle',{configurable:true,writable:true,value:win.getComputedStyle.bind(win)});
 Object.defineProperty(globalThis,'requestAnimationFrame',{configurable:true,writable:true,value:win.requestAnimationFrame.bind(win)});
@@ -81,15 +82,16 @@ test('metric cards coordinate reveal, pointer light and press without changing v
  gsap.getTweensOf(value).forEach(t=>t.progress(1));assert.equal(value.style.transform,'');
  button.dispatchEvent(new win.PointerEvent('pointerover',{bubbles:true,pointerType:'mouse',clientX:160,clientY:45}));
  assert.ok(button.hasAttribute('data-metric-active'));
- gsap.getTweensOf(button).forEach(t=>t.progress(1));
- assert.equal(button.style.getPropertyValue('--metric-light'),'1');assert.equal(Number(button.style.getPropertyValue('--spot-x')),75);
+ const light=button.querySelector('.metric-spotlight') as unknown as HTMLElement;
+ assert.ok(light);gsap.getTweensOf(light).forEach(t=>t.progress(1));
+ assert.equal(light.style.opacity,'1');assert.equal(Number(gsap.getProperty(light,'x')),-10);
  assert.equal(Number(gsap.getProperty(button,'scale')),1);assert.equal(value.textContent,'592');
  button.dispatchEvent(new win.PointerEvent('pointerdown',{bubbles:true,pointerType:'mouse',button:0}));assert.ok(button.hasAttribute('data-metric-pressed'));
  win.dispatchEvent(new win.PointerEvent('pointerup',{button:0}));assert.equal(button.hasAttribute('data-metric-pressed'),false);
  article.dispatchEvent(new win.PointerEvent('pointerdown',{bubbles:true,pointerType:'mouse',button:0}));assert.equal(article.hasAttribute('data-metric-pressed'),false,'Read-only cards do not pretend to be buttons');
  button.dispatchEvent(new win.PointerEvent('pointerout',{bubbles:true,pointerType:'mouse'}));assert.equal(button.hasAttribute('data-metric-active'),false);
  const next=win.document.createElement('article');next.dataset.metricSurface='';root.append(next);await wait();assert.ok(io.targets.has(next as unknown as Element));
- clean();assert.equal(io.targets.size,0);assert.equal(gsap.getTweensOf(button).length,0);assert.equal(button.style.getPropertyValue('--metric-light'),'');
+ clean();assert.equal(io.targets.size,0);assert.equal(gsap.getTweensOf(button).length,0);assert.equal(button.querySelector('.metric-spotlight'),null);
  button.dispatchEvent(new win.PointerEvent('pointerover',{bubbles:true,pointerType:'mouse'}));assert.equal(button.hasAttribute('data-metric-active'),false);
  root.remove();gsap.ticker.sleep();
 });
@@ -238,8 +240,10 @@ test('query dialog isolates detail, supports Escape/close and releases scroll lo
  let closed=0;await act(async()=>root.render(React.createElement(QueryDetailDialog,{record,categories:[],onClose:()=>{closed++;}})));
  const dialog=host.querySelector('dialog')!;assert.equal(dialog.open,true);assert.equal(win.document.documentElement.style.overflow,'hidden');
  assert.equal(host.querySelector('h2')!.textContent,'thay pin iphone');
- await act(async()=>dialog.dispatchEvent(new win.Event('cancel',{bubbles:true,cancelable:true})));assert.equal(closed,1);
- await act(async()=>host.querySelector('button')!.dispatchEvent(new win.MouseEvent('click',{bubbles:true})));assert.equal(closed,2);
+ await act(async()=>dialog.dispatchEvent(new win.Event('cancel',{bubbles:true,cancelable:true})));assert.equal(closed,0);
+ assert.equal(dialog.hasAttribute('data-closing'),true);assert.equal(win.document.documentElement.style.overflow,'hidden');
+ await act(async()=>{gsap.getTweensOf(dialog).forEach(t=>t.progress(1));});assert.equal(closed,1);
+ await act(async()=>host.querySelector('button')!.dispatchEvent(new win.MouseEvent('click',{bubbles:true})));assert.equal(closed,1,'Repeated close is idempotent');
  await act(async()=>root.unmount());assert.equal(win.document.documentElement.style.overflow,'');
  win.HTMLDialogElement.prototype.showModal=originalShow;win.HTMLDialogElement.prototype.close=originalClose;host.remove();gsap.ticker.sleep();
 });
@@ -319,4 +323,98 @@ test('dashboard header preserves actions, keyboard tab order and scoped controls
  assert.equal(host.querySelector('[aria-label="Import dữ liệu"]'),null,'Rankings keeps its dedicated import flow');
  await act(async()=>host.querySelector('[aria-label="Đăng xuất workspace"]')!.dispatchEvent(new win.MouseEvent('click',{bubbles:true})));assert.equal(signouts,1);
  await act(async()=>root.unmount());host.remove();await preference(false);gsap.ticker.sleep();
+});
+
+test('pointer spotlight caches geometry, invalidates on resize and leaves keyboard controls still',async()=>{
+ const {mountMetricMotion}=await import('../src/lib/metric-motion');
+ const {mountDashboardMotion}=await import('../src/lib/dashboard-motion');
+ const root=win.document.createElement('div');root.innerHTML='<button data-metric-surface><strong class="highlight-main">241</strong></button><button class="btn">Import</button>';
+ win.document.body.append(root);const button=root.querySelector('button')!,control=root.querySelector('.btn')!;let reads=0;
+ Object.defineProperty(button,'getBoundingClientRect',{value:()=>{reads++;return {left:0,top:0,width:240,height:120};}});
+ const clean=mountMetricMotion(root as unknown as HTMLElement);
+ button.dispatchEvent(new win.PointerEvent('pointerover',{bubbles:true,pointerType:'mouse',clientX:40,clientY:50}));
+ for(let i=0;i<8;i++)button.dispatchEvent(new win.PointerEvent('pointermove',{bubbles:true,pointerType:'mouse',clientX:70+i,clientY:50}));
+ assert.equal(reads,1,'Pointer movement does not reread layout');
+ win.dispatchEvent(new win.Event('resize'));button.dispatchEvent(new win.PointerEvent('pointermove',{bubbles:true,pointerType:'mouse',clientX:80,clientY:50}));assert.equal(reads,2);
+ clean();const cleanDashboard=mountDashboardMotion(root as unknown as HTMLElement);
+ for(const target of [button,control])target.dispatchEvent(new win.KeyboardEvent('keydown',{key:'Enter',bubbles:true}));
+ assert.equal(gsap.getTweensOf(control).length,0);assert.equal(button.hasAttribute('data-metric-pressed'),false);
+ cleanDashboard();root.remove();gsap.ticker.sleep();
+});
+
+test('pointer menus reverse quickly, keyboard closes immediately and live reduced motion clears pending exits',async()=>{
+ const React=await import('react'),{act}=React,{createRoot}=await import('react-dom/client');
+ const {default:SelectMenu}=await import('../src/components/select-menu');
+ const host=win.document.createElement('div');win.document.body.append(host);const root=createRoot(host as unknown as Element);
+ await act(async()=>root.render(React.createElement(SelectMenu,{label:'Ngày',value:'19',options:[{value:'12',label:'12/10/2026'},{value:'19',label:'19/10/2026'}],onChange:()=>{}})));
+ const trigger=host.querySelector('button')!;
+ const click=()=>trigger.dispatchEvent(new win.MouseEvent('click',{bubbles:true,detail:1}));
+ await act(async()=>{click();});const popup=win.document.querySelector('.select-menu-popup')!;
+ assert.ok(popup);assert.equal(trigger.getAttribute('aria-expanded'),'true');
+ await act(async()=>{click();});assert.equal(popup.getAttribute('inert'),'');assert.equal(trigger.getAttribute('aria-expanded'),'false');
+ await act(async()=>{click();});assert.equal(win.document.querySelectorAll('.select-menu-popup').length,1);assert.equal(popup.hasAttribute('inert'),false);
+ await act(async()=>{await preference(true);});assert.equal((popup as unknown as HTMLElement).style.transform,'');
+ await act(async()=>trigger.dispatchEvent(new win.KeyboardEvent('keydown',{key:'Escape',bubbles:true})));
+ assert.equal(win.document.querySelector('.select-menu-popup'),null);
+ await act(async()=>root.unmount());host.remove();await preference(false);gsap.ticker.sleep();
+});
+
+test('dialog interrupted during entrance closes once, restores focus and releases lock on reduced motion',async()=>{
+ const React=await import('react'),{act}=React,{createRoot}=await import('react-dom/client'),{default:FocusDialog}=await import('../src/components/focus-dialog');
+ const show=win.HTMLDialogElement.prototype.showModal,close=win.HTMLDialogElement.prototype.close;
+ win.HTMLDialogElement.prototype.showModal=function(){this.open=true;};win.HTMLDialogElement.prototype.close=function(){this.open=false;};
+ const host=win.document.createElement('div'),before=win.document.createElement('button');win.document.body.append(before,host);before.focus();
+ const root=createRoot(host as unknown as Element);let closed=0;
+ await act(async()=>root.render(React.createElement(FocusDialog,{title:'Query',onClose:()=>closed++,children:React.createElement('p',null,'URL detail')})));
+ const dialog=host.querySelector('dialog')!;
+ await act(async()=>dialog.dispatchEvent(new win.Event('cancel',{cancelable:true})));
+ assert.equal(closed,0);assert.equal(dialog.open,true);
+ await act(async()=>{await preference(true);});assert.equal(closed,1);assert.equal(gsap.getTweensOf(dialog).length,0);
+ await act(async()=>root.unmount());assert.equal(win.document.documentElement.style.overflow,'');assert.ok(win.document.activeElement===before,'Dialog restores the initiating button');
+ win.HTMLDialogElement.prototype.showModal=show;win.HTMLDialogElement.prototype.close=close;host.remove();before.remove();await preference(false);gsap.ticker.sleep();
+});
+
+test('URL detail motion animates visual bars only and cancels cleanly for live reduced motion',async()=>{
+ const {mountDetailMotion}=await import('../src/lib/detail-motion');
+ const root=win.document.createElement('div');root.innerHTML='<div class="url-metric-row"><strong>1.573</strong><div class="url-share-track"><i style="width:47.91%"></i></div></div>';
+ win.document.body.append(root);const cleanup=mountDetailMotion(root as unknown as HTMLElement),bar=root.querySelector('i')!;
+ assert.equal(bar.style.width,'47.91%');assert.equal(root.querySelector('strong')?.textContent,'1.573');assert.ok(gsap.getTweensOf(bar).length);
+ await preference(true);assert.equal(bar.style.transform,'');assert.equal(bar.style.width,'47.91%');
+ cleanup();assert.equal(gsap.getTweensOf(bar).length,0);root.remove();await preference(false);gsap.ticker.sleep();
+});
+
+test('scope refresh retargets from current state and never animates keyboard navigation',async()=>{
+ const {mountReportMotion}=await import('../src/lib/report-motion');
+ const root=win.document.createElement('div');root.innerHTML='<main data-motion-view="overview"><div data-motion-key="all">592</div></main>';win.document.body.append(root);
+ const clean=mountReportMotion(root as unknown as HTMLElement),main=root.querySelector('main')!,scope=root.querySelector('main > div')!;
+ scope.setAttribute('data-motion-key','camera');await wait();assert.equal(gsap.getTweensOf(scope).length,1);
+ scope.setAttribute('data-motion-key','pin');await wait();assert.equal(gsap.getTweensOf(scope).length,1);
+ await preference(true);assert.equal((scope as unknown as HTMLElement).style.transform,'');assert.equal(scope.textContent,'592');
+ await preference(false);root.dispatchEvent(new win.KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true}));main.setAttribute('data-motion-view','compare');await wait();assert.equal(gsap.getTweensOf(main).length,0);
+ clean();root.remove();gsap.ticker.sleep();
+});
+
+test('selection mark remains unique through keyboard updates and cannot attach after unmount',async()=>{
+ const {mountSelectionMotion}=await import('../src/lib/selection-motion');
+ const root=win.document.createElement('div');root.innerHTML='<nav class="main-navigation"><button aria-selected="true">Tổng quan</button><button aria-selected="false">So sánh</button></nav>';
+ win.document.body.append(root);const clean=mountSelectionMotion(root as unknown as HTMLElement);await wait(60);
+ assert.equal(root.querySelectorAll('.selection-marker').length,1);
+ root.dispatchEvent(new win.KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true}));const buttons=root.querySelectorAll('button');buttons[0].setAttribute('aria-selected','false');buttons[1].setAttribute('aria-selected','true');await wait();
+ assert.equal(root.querySelectorAll('.selection-marker').length,1);assert.equal(root.querySelector('.selection-marker')?.parentElement,buttons[1]);
+ assert.equal(gsap.getTweensOf(root.querySelector('.selection-marker')).length,0);
+ clean();assert.equal(root.querySelector('.selection-marker'),null);const stop=mountSelectionMotion(root as unknown as HTMLElement);stop();await wait();assert.equal(root.querySelector('.selection-marker'),null);
+ root.remove();gsap.ticker.sleep();
+});
+
+test('import presentation keeps real progress accessible, smooths updates and clears completion animation',async()=>{
+ const React=await import('react'),{act}=React,{createRoot}=await import('react-dom/client'),{default:ImportProgress}=await import('../src/components/import-progress');
+ const host=win.document.createElement('div');win.document.body.append(host);const root=createRoot(host as unknown as Element);
+ const render=(value:number,done=false)=>React.createElement(ImportProgress,{value,phase:done?'':'Đang lưu dữ liệu…',done});
+ await act(async()=>root.render(render(20)));const bar=host.querySelector('i')!;
+ gsap.getTweensOf(bar).forEach(t=>t.progress(1));
+ await act(async()=>root.render(render(70)));assert.equal(host.querySelector('[role="progressbar"]')?.getAttribute('aria-valuenow'),'70');
+ assert.ok(Number(gsap.getProperty(bar,'scaleX'))<.7,'React does not jump the bar to the destination before GSAP');
+ await act(async()=>{await preference(true);});assert.equal(Number(gsap.getProperty(bar,'scaleX')),.7);
+ await act(async()=>root.render(render(100,true)));assert.ok(host.textContent?.includes('Đã lưu thành công'));assert.equal(host.querySelector('[role="progressbar"]'),null);
+ await act(async()=>root.unmount());assert.equal(gsap.getTweensOf(bar).length,0);host.remove();await preference(false);gsap.ticker.sleep();
 });

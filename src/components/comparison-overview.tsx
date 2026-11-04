@@ -74,7 +74,6 @@ function ReportCard({
     <button
       type="button"
       className={`comparison-report-card tone-${tone}`}
-      data-hover-surface
       data-metric-surface
       data-motion-reveal
       onClick={onClick}
@@ -84,7 +83,6 @@ function ReportCard({
   ) : (
     <article
       className={`comparison-report-card tone-${tone}`}
-      data-hover-surface
       data-metric-surface
       data-motion-reveal
     >
@@ -168,14 +166,12 @@ export default function ComparisonOverview({
     impactDelta = newImpact - oldImpact;
   const transition = (filter: ComparisonFilter) => {
     onTransition(filter);
-    document
-      .getElementById("comparison-queries")
-      ?.scrollIntoView({
-        behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
-          ? "auto"
-          : "smooth",
-        block: "start",
-      });
+    document.getElementById("comparison-queries")?.scrollIntoView({
+      behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth",
+      block: "start",
+    });
   };
   const groupOptions = [
     { value: "", label: "Tất cả" },
@@ -341,7 +337,7 @@ export default function ComparisonOverview({
         />
       </div>
       <div className="comparison-chart-grid">
-        <section className="panel report-chart-card" data-motion-reveal>
+        <section className="panel report-chart-card" data-scroll-reveal>
           <header>
             <div>
               <h3>Cannibal giữa hai ngày</h3>
@@ -376,7 +372,7 @@ export default function ComparisonOverview({
             </strong>
           </div>
         </section>
-        <section className="panel report-chart-card" data-motion-reveal>
+        <section className="panel report-chart-card" data-scroll-reveal>
           <header>
             <div>
               <h3>Query đổi mức độ</h3>
@@ -421,7 +417,7 @@ export default function ComparisonOverview({
         </section>
         <section
           className="panel report-chart-card report-group-chart"
-          data-motion-reveal
+          data-scroll-reveal
         >
           <header>
             <div>

@@ -1,4 +1,5 @@
 "use client";
+import EntryMotion from "./entry-motion";
 import AnimatedNumber from "./animated-number";
 import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
@@ -38,7 +39,7 @@ import {
 import DashboardHeader, { type DashboardView } from "./dashboard-header";
 import DashboardMotion from "./dashboard-motion";
 import CannibalRules from "./cannibal-rules";
-import { gsap } from "gsap";
+import { useDialogMotion } from "./use-dialog-motion";
 const RankingsReport = dynamic(() => import("./rankings-report"));
 const Importer = dynamic(() => import("./importer"), {
   loading: () => <p className="muted">Đang nạp trình import…</p>,
@@ -54,57 +55,7 @@ function Dialog({
   onClose: () => void;
   children: React.ReactNode;
 }) {
-  const ref = useRef<HTMLDialogElement>(null),
-    animation = useRef<gsap.core.Tween | null>(null),
-    closing = useRef(false),
-    closeCallback = useRef(onClose);
-  closeCallback.current = onClose;
-  useEffect(() => {
-    const node = ref.current!;
-    node.showModal();
-    const mq = matchMedia("(prefers-reduced-motion: reduce)");
-    if (!mq.matches)
-      animation.current = gsap.fromTo(
-        node,
-        { opacity: 0.75, y: 12 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.34,
-          ease: "power3.out",
-          clearProps: "opacity,transform",
-        },
-      );
-    const stop = () => {
-      if (mq.matches) {
-        animation.current?.kill();
-        gsap.set(node, { clearProps: "opacity,transform" });
-        if (closing.current) closeCallback.current();
-      }
-    };
-    mq.addEventListener("change", stop);
-    return () => {
-      animation.current?.kill();
-      mq.removeEventListener("change", stop);
-      if (node.open) node.close();
-    };
-  }, []);
-  function close() {
-    if (closing.current) return;
-    closing.current = true;
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      closeCallback.current();
-      return;
-    }
-    animation.current?.kill();
-    animation.current = gsap.to(ref.current, {
-      opacity: 0,
-      y: 8,
-      duration: 0.2,
-      ease: "power2.in",
-      onComplete: () => closeCallback.current(),
-    });
-  }
+  const { ref, close } = useDialogMotion(onClose);
   return (
     <dialog
       ref={ref}
@@ -549,9 +500,9 @@ export default function Dashboard() {
             Cannibal Query<small>SEO Intelligence</small>
           </span>
         </a>
-        <section className="panel workspace-entry-card">
+        <EntryMotion error={authNote}>
           <span className="entry-icon">
-            <LockKeyhole size={27} />
+            <LockKeyhole size={27} aria-hidden="true" />
           </span>
           <h1>Mở workspace</h1>
           <p className="muted">
@@ -566,6 +517,10 @@ export default function Dashboard() {
                   required
                   type="password"
                   autoComplete="current-password"
+                  name="workspace-password"
+                  aria-describedby={
+                    authNote ? "workspace-auth-note" : undefined
+                  }
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Nhập mật khẩu workspace"
@@ -585,14 +540,14 @@ export default function Dashboard() {
             </div>
           )}
           {authNote ? (
-            <p role="alert" className="error-message">
+            <p id="workspace-auth-note" role="alert" className="error-message">
               {authNote}
             </p>
           ) : null}
           {!configured ? (
             <p className="error-message">Website chưa kết nối được dữ liệu.</p>
           ) : null}
-        </section>
+        </EntryMotion>
         <p className="entry-footer">Cannibal Query · Asia/Ho_Chi_Minh</p>
       </main>
     );
@@ -621,6 +576,7 @@ export default function Dashboard() {
       <main
         role="tabpanel"
         id="analysis-content"
+        data-motion-view={view}
         tabIndex={-1}
         aria-labelledby={view + "-tab"}
       >

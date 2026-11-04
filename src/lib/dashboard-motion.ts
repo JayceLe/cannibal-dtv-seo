@@ -1,21 +1,18 @@
 import { gsap } from "gsap";
 import { mountMetricMotion } from "./metric-motion";
 
-export const motionTiming = {
-  reveal: 0.58,
-  hover: 0.24,
-  press: 0.12,
-  release: 0.24,
-  update: 0.32,
-  open: 0.38,
-  close: 0.26,
-} as const;
+import { motionTiming } from "./motion-tokens";
+import { mountReportMotion } from "./report-motion";
+import { mountSelectionMotion } from "./selection-motion";
+export { motionTiming } from "./motion-tokens";
 const interactiveSelector =
   ".select-menu-trigger, .comparison-report-card:is(button):not([data-metric-surface]), .report-metric-toggle button, .report-category-list button, .comparison-sidebar button, .picker-trigger, .category-list button, .distribution-legend button, .main-navigation button, .header-actions button, .level-chip, .query-tabs button, .pagination button, .btn, .segmented button";
 
 /** Each property has one owner: panels reveal; controls transform; chart series belong to ECharts. */
 export function mountDashboardMotion(root: HTMLElement) {
   const stopMetrics = mountMetricMotion(root);
+  const stopSelection = mountSelectionMotion(root);
+  const stopReports = mountReportMotion(root);
   const seen = new WeakSet<Element>();
   const media = gsap.matchMedia();
   media.add(
@@ -53,12 +50,12 @@ export function mountDashboardMotion(root: HTMLElement) {
             !interactive &&
             !el.classList.contains("highlight-card") &&
             el.dataset.motionReveal !== "rows";
-          gsap.set(el, { opacity: 0.65, ...(movable ? { y: 14 } : {}) });
+          gsap.set(el, { opacity: 0.75, ...(movable ? { y: 14 } : {}) });
           animate(el, {
             opacity: 1,
             ...(movable ? { y: 0 } : {}),
             duration: motionTiming.reveal,
-            delay: Math.min(index * 0.055, 0.165),
+            delay: Math.min(index * motionTiming.stagger, 0.28),
             ease: "power3.out",
             clearProps: movable ? "opacity,transform" : "opacity",
           });
@@ -150,16 +147,7 @@ export function mountDashboardMotion(root: HTMLElement) {
           !(e.relatedTarget instanceof Node && el.contains(e.relatedTarget)) &&
           el !== pressed
         )
-          move(el, false, el.matches(":focus-visible"));
-      };
-      const focus = (e: FocusEvent) => {
-        const el = control(e.target);
-        if (enabled(el) && el !== pressed && el.matches(":focus-visible"))
-          move(el, false, true);
-      };
-      const blur = (e: FocusEvent) => {
-        const el = control(e.target);
-        if (el && root.contains(el)) move(el);
+          move(el, false, false);
       };
       const down = (e: PointerEvent) => {
         if (e.button !== 0) return;
@@ -179,26 +167,11 @@ export function mountDashboardMotion(root: HTMLElement) {
           }
         }
       };
-      const keydown = (e: KeyboardEvent) => {
-        if (e.repeat || !["Enter", " "].includes(e.key)) return;
-        const el = control(e.target);
-        if (enabled(el)) {
-          pressed = el;
-          move(el, true);
-        }
-      };
-      const keyup = (e: KeyboardEvent) => {
-        if (["Enter", " "].includes(e.key)) release();
-      };
       root.addEventListener("pointerover", enter);
       root.addEventListener("pointerout", leave);
       root.addEventListener("pointerdown", down);
-      root.addEventListener("focusin", focus);
-      root.addEventListener("focusout", blur);
-      root.addEventListener("keydown", keydown);
       window.addEventListener("pointerup", release);
       window.addEventListener("pointercancel", release);
-      window.addEventListener("keyup", keyup);
       window.addEventListener("blur", release);
       const changes = new MutationObserver((records) => {
         const updated = new Set<HTMLElement>();
@@ -220,7 +193,7 @@ export function mountDashboardMotion(root: HTMLElement) {
             previous.kill();
             tweens.delete(previous);
           }
-          gsap.set(el, { opacity: 0.65 });
+          gsap.set(el, { opacity: 0.75 });
           updates.set(
             el,
             animate(el, {
@@ -264,12 +237,8 @@ export function mountDashboardMotion(root: HTMLElement) {
         root.removeEventListener("pointerover", enter);
         root.removeEventListener("pointerout", leave);
         root.removeEventListener("pointerdown", down);
-        root.removeEventListener("focusin", focus);
-        root.removeEventListener("focusout", blur);
-        root.removeEventListener("keydown", keydown);
         window.removeEventListener("pointerup", release);
         window.removeEventListener("pointercancel", release);
-        window.removeEventListener("keyup", keyup);
         window.removeEventListener("blur", release);
         tweens.forEach((t) => t.kill());
         active.clear();
@@ -292,5 +261,7 @@ export function mountDashboardMotion(root: HTMLElement) {
   return () => {
     media.revert();
     stopMetrics();
+    stopSelection();
+    stopReports();
   };
 }

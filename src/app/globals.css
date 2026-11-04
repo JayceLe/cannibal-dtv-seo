@@ -40,7 +40,14 @@
   --space-12: 48px;
   --space-14: 56px;
   --page-gutter: 40px;
-  --panel-padding: 28px;
+  --panel-padding: 24px;
+  --motion-press: 120ms;
+  --motion-hover: 180ms;
+  --motion-update: 240ms;
+  --motion-open: 280ms;
+  --motion-reveal: 480ms;
+  --ease-ui: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-reveal: cubic-bezier(0.215, 0.61, 0.355, 1);
 }
 * {
   box-sizing: border-box;
@@ -356,11 +363,11 @@ main {
   --edge: var(--border);
   --card-bg: var(--surface-up);
   display: grid;
-  grid-template-rows: 32px minmax(40px, auto) auto;
+  grid-template-rows: minmax(40px, auto) minmax(40px, auto) auto;
   align-content: start;
   gap: 12px;
   min-width: 0;
-  padding: 22px 24px;
+  padding: 24px;
   border: 1px solid var(--edge);
   border-radius: var(--radius-card);
   background: var(--card-bg);
@@ -1214,6 +1221,10 @@ td > small {
   font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
+  transition:
+    background-color var(--motion-hover) var(--ease-ui),
+    border-color var(--motion-hover) var(--ease-ui),
+    color var(--motion-hover) var(--ease-ui);
 }
 .badge i {
   width: 5px;
@@ -1267,6 +1278,9 @@ td > small {
   text-align: center;
   font-size: 14px;
   line-height: 1.8;
+}
+.table-empty:has(.loading-rows) {
+  padding: 0;
 }
 @container (max-width:760px) {
   .search-sort-row {
@@ -1506,7 +1520,7 @@ td > small {
 .url-share-track {
   height: 5px;
   margin-top: 12px;
-  overflow: hidden;
+  overflow: visible;
   border-radius: 4px;
   background: var(--surface-active);
 }
@@ -1872,6 +1886,7 @@ progress {
   flex-direction: column;
   gap: 32px;
   width: min(100%, 540px);
+  margin-inline: auto;
   min-height: 100dvh;
   padding: 40px 24px;
 }
@@ -2423,7 +2438,7 @@ progress {
   }
 }
 .highlight-card:focus-visible {
-  translate: 0 -2px;
+  outline-offset: 4px;
 }
 .highlight-card:active {
   translate: none;
@@ -2480,22 +2495,6 @@ progress {
   position: relative;
   transition-duration: 0.24s;
 }
-.main-navigation button:after {
-  content: "";
-  position: absolute;
-  bottom: 3px;
-  left: 16px;
-  right: 16px;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--surface-active);
-  transform: scaleX(0);
-  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
-  transform-origin: center;
-}
-.main-navigation button[aria-selected="true"]:after {
-  transform: scaleX(1);
-}
 .query-expansion {
   overflow: hidden;
 }
@@ -2509,7 +2508,7 @@ progress {
   background: var(--surface-up);
 }
 .ratio-progress {
-  transition: stroke-dasharray 0.48s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: none;
 }
 @media (max-width: 767px) {
   .header-scene {
@@ -2682,6 +2681,7 @@ progress {
   background: var(--surface-up);
 }
 .picker-popover {
+  transform-origin: top right;
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
@@ -3629,7 +3629,7 @@ progress {
   align-content: start;
   gap: 12px;
   min-width: 0;
-  padding: 22px 24px;
+  padding: 24px;
   border: 1px solid var(--border);
   border-radius: var(--radius-card);
   background: var(--hover-base);
@@ -4178,7 +4178,7 @@ progress {
   background: var(--surface);
   box-shadow: 0 16px 40px #0008;
   font-family: "Be Vietnam Pro";
-  animation: select-menu-enter 0.18s ease-out;
+  transform-origin: top left;
 }
 .select-menu-heading {
   display: flex;
@@ -4269,16 +4269,6 @@ progress {
 .period-selectors .select-menu-trigger {
   min-height: 50px;
   font-size: 16px;
-}
-@keyframes select-menu-enter {
-  from {
-    opacity: 0.8;
-    translate: 0 4px;
-  }
-  to {
-    opacity: 1;
-    translate: 0 0;
-  }
 }
 @media (prefers-reduced-motion: reduce) {
   .select-menu-popup {
@@ -4469,5 +4459,147 @@ progress {
   }
   .evidence-values > strong {
     font-size: 23px;
+  }
+}
+
+/* Shared, presentation-only feedback. Data and controls keep their final dimensions. */
+.main-navigation button,
+.category-list button {
+  position: relative;
+}
+.selection-marker {
+  position: absolute;
+  pointer-events: none;
+  display: block;
+  background: currentColor;
+  border-radius: 2px;
+}
+.main-navigation button > .selection-marker {
+  left: 16px;
+  right: 16px;
+  bottom: 4px;
+  height: 2px;
+  opacity: 0.65;
+}
+.category-list button > .selection-marker {
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 3px;
+  background: var(--category-color, var(--accent));
+}
+.category-sidebar[data-stuck] {
+  box-shadow: 0 12px 24px -16px #000d;
+}
+.url-share-track {
+  position: relative;
+}
+.url-share-track::after {
+  content: "";
+  position: absolute;
+  left: 20%;
+  top: -2px;
+  bottom: -2px;
+  width: 1px;
+  background: #ffffff90;
+  pointer-events: none;
+}
+.url-share-track i {
+  transform-origin: left center;
+}
+.modal::backdrop,
+.query-detail-dialog::backdrop {
+  opacity: 1;
+  transition: opacity var(--motion-hover) var(--ease-ui);
+}
+.modal[data-closing]::backdrop,
+.query-detail-dialog[data-closing]::backdrop {
+  opacity: 0;
+}
+@starting-style {
+  .modal::backdrop,
+  .query-detail-dialog::backdrop {
+    opacity: 0;
+  }
+}
+.import-progress-track {
+  height: 6px;
+  margin-top: 12px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--surface-active);
+}
+.import-progress-track i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--accent);
+  transform-origin: left center;
+}
+.import-complete {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  margin-block: 20px;
+  border-radius: var(--radius-control);
+  background: var(--safe-bg);
+  color: var(--safe);
+}
+.import-complete svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+.loading-rows {
+  width: 100%;
+  padding: 24px;
+  color: var(--muted);
+  font-size: 14px;
+  text-align: left;
+}
+.loading-rows > span {
+  display: block;
+  margin-bottom: 20px;
+}
+.skeleton-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 24px;
+  padding-block: 16px;
+  border-top: 1px solid var(--line);
+}
+.skeleton-row i {
+  height: 12px;
+  border-radius: 3px;
+  background: var(--surface-active);
+}
+.skeleton-row i:nth-child(2) {
+  width: 65%;
+}
+.skeleton-row:last-child {
+  opacity: 0.6;
+}
+:where(
+  .numeric,
+  .ratio-fraction,
+  .report-card-value,
+  .highlight-main,
+  .highlight-footer,
+  .badge,
+  .table-footer,
+  .progress-block
+) {
+  font-variant-numeric: tabular-nums;
+}
+@media (prefers-reduced-motion: reduce) {
+  .modal::backdrop,
+  .query-detail-dialog::backdrop {
+    transition: none;
   }
 }

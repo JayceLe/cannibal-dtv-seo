@@ -76,9 +76,6 @@ select,
   background: var(--text);
   color: #121212;
 }
-.main-navigation button:after {
-  background: #187d3b;
-}
 .btn {
   background: #262626;
   border-color: #4d4d4d;
@@ -913,9 +910,6 @@ th,
   margin-left: 0;
   gap: 8px;
 }
-.main-navigation button::after {
-  display: none;
-}
 .skip-link {
   position: fixed !important;
   left: 20px;
@@ -1080,131 +1074,70 @@ th,
   }
 }
 
-/* Surface hover and child entrance have separate owners. Keep data at its real size. */
+/* GSAP owns the card and spotlight transforms. CSS owns semantic surface colors. */
 [data-metric-surface] {
   position: relative;
   isolation: isolate;
-  --metric-light: 0;
-  --spot-x: 50;
-  --spot-y: 50;
-  translate: none;
-  scale: 1;
+  overflow: clip;
   transition:
-    translate 0.36s cubic-bezier(0.22, 1, 0.36, 1),
-    background 0.32s ease,
-    border-color 0.32s ease,
-    box-shadow 0.36s ease;
+    background-color var(--motion-hover) var(--ease-ui),
+    border-color var(--motion-hover) var(--ease-ui),
+    box-shadow var(--motion-hover) var(--ease-ui);
 }
-[data-metric-surface] > * {
+[data-metric-surface] > :not(.metric-spotlight) {
   position: relative;
   z-index: 1;
 }
-[data-metric-surface]::before {
-  content: "";
+.metric-spotlight {
   position: absolute;
-  inset: 0;
-  border-radius: inherit;
+  left: 0;
+  top: 0;
+  width: 320px;
+  height: 220px;
   pointer-events: none;
   z-index: 0;
+  opacity: 0;
   background: radial-gradient(
-    ellipse 320px 230px at calc(var(--spot-x) * 1%) calc(var(--spot-y) * 1%),
-    color-mix(in srgb, var(--hover-color), transparent 83%),
-    transparent 78%
+    ellipse at center,
+    color-mix(in srgb, var(--hover-color), transparent 85%),
+    transparent 72%
   );
-  opacity: var(--metric-light);
 }
 [data-metric-surface]::after {
   content: "";
   position: absolute;
   inset: auto 24px 0;
   height: 2px;
-  border-radius: 2px;
   pointer-events: none;
   background: var(--hover-color);
   opacity: 0;
-  transform: scaleX(0.22);
+  transform: scaleX(0.3);
   transform-origin: left;
   transition:
-    opacity 0.3s ease,
-    transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
-}
-[data-metric-surface]:focus-visible {
-  outline: 2px solid var(--hover-color);
-  outline-offset: 4px;
+    opacity var(--motion-hover) var(--ease-ui),
+    transform var(--motion-update) var(--ease-ui);
 }
 [data-metric-surface]:is([data-metric-active], :focus-visible) {
-  border-color: color-mix(in srgb, var(--hover-color), transparent 55%);
+  border-color: color-mix(in srgb, var(--hover-color), transparent 45%);
   background: color-mix(in srgb, var(--hover-base), white 4%);
-  box-shadow: 0 10px 24px -12px #000b;
+  box-shadow: 0 8px 20px -12px #000b;
 }
 [data-metric-surface]:is([data-metric-active], :focus-visible)::after {
-  opacity: 0.8;
+  opacity: 0.9;
   transform: scaleX(1);
 }
-[data-metric-surface]:focus-visible::before {
-  opacity: 1;
-}
-.highlight-card[data-metric-surface] {
-  scale: 1;
-}
-.ratio-metric[data-metric-surface] .ratio-progress {
-  transition:
-    stroke-width 0.36s ease,
-    filter 0.36s ease;
-}
-.ratio-metric[data-metric-surface] .ratio-visual > strong {
-  transition: color 0.32s ease;
-}
-.ratio-metric[data-metric-active] .ratio-progress {
-  stroke-width: 9;
-  filter: drop-shadow(
-    0 0 3px color-mix(in srgb, var(--ratio-color), transparent 40%)
-  );
-}
-.ratio-metric[data-metric-active] .ratio-visual > strong {
-  color: var(--ratio-color);
-}
-[data-metric-surface] :is(.highlight-label, .report-card-label) > svg {
-  transition:
-    transform 0.36s cubic-bezier(0.22, 1, 0.36, 1),
-    color 0.32s ease;
-}
-[data-metric-active] :is(.highlight-label, .report-card-label) > svg {
-  transform: translateY(-2px);
-}
-[data-metric-surface] .report-card-detail > svg {
-  transition: transform 0.36s cubic-bezier(0.22, 1, 0.36, 1);
-}
-[data-metric-active] .report-card-detail > svg {
-  transform: translate(2px, -2px);
-}
-@media (hover: hover) and (pointer: fine) {
-  [data-metric-surface]:hover {
-    translate: 0 -3px;
-    scale: 1;
-  }
-  .highlight-card[data-metric-surface]:hover {
-    scale: 1;
-  }
-  .overview-highlights:has(.highlight-card:hover) .highlight-card:not(:hover) {
-    border-color: transparent;
-  }
+[data-metric-surface]:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 4px;
 }
 button[data-metric-surface][data-metric-pressed] {
-  translate: 0 0;
   box-shadow: inset 0 2px 8px #0003;
-  transition-duration: 0.12s;
 }
 @media (prefers-reduced-motion: reduce) {
-  [data-metric-surface],
-  [data-metric-surface] *,
-  [data-metric-surface]::after {
-    transition: none !important;
-  }
-  [data-metric-surface] {
-    translate: none !important;
-  }
-  [data-metric-surface]::before {
+  .metric-spotlight {
     display: none;
+  }
+  [data-metric-surface]::after {
+    transition: none;
   }
 }

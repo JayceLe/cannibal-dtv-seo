@@ -45,7 +45,7 @@ export default function DashboardHeader({
   onSignOut,
 }: Props) {
   return (
-    <header className={`app-header header-${view}`}>
+    <header className={`app-header header-${view}`} data-motion-reveal="rows">
       <HeaderScene />
       <a className="skip-link" href="#analysis-content">
         Đến nội dung báo cáo
