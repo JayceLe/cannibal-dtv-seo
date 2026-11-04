@@ -17,7 +17,8 @@
 }
 .rank-toolbar {
   display: grid;
-  grid-template-columns: 1.25fr 1fr 1fr 1fr;
+  grid-template-columns: repeat(3,minmax(0,1fr)) auto;
+  align-items: end;
   gap: 20px;
   position: relative;
   z-index: 5;
@@ -27,11 +28,30 @@
   min-width: 0;
 }
 .rank-presets {
-  grid-column: 1/-1;
   display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--surface-up);
+  min-height: 48px;
 }
+.rank-presets button {
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 180ms ease, color 180ms ease;
+}
+.rank-presets button:hover { color:var(--text); background:var(--surface-active); }
+.rank-presets button[aria-pressed="true"] { background:var(--text); color:var(--bg); }
+
 .rank-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -269,6 +289,7 @@
   backdrop-filter: blur(5px);
 }
 @media (max-width: 1100px) {
+  .rank-presets { grid-column: 1/-1; justify-self: start; max-width: 100%; overflow-x: auto; }
   .rank-toolbar {
     grid-template-columns: 1fr 1fr;
   }
