@@ -69,3 +69,10 @@ Token chữ trong `globals.css`: page28 / section24 / panel19 / body15 / label14
 Import dùng `FocusDialog` chung với chi tiết query: tiêu đề dính, nút đóng44px, focus/Escape/scroll lock cùng vòng đời. Bốn bước chỉ hiển thị trạng thái import đã có. Hướng dẫn và file mẫu vẫn truy cập được khi màn hẹp; không ẩn nội dung. Đăng nhập vẫn chỉ dùng mật khẩu workspace.
 
 Motion bổ sung: hover thẻ có spotlight24% và viền theo vai trò; wrapper icon dịch2px/240ms, trở về180ms, nhấn120ms. Chữ và số không scale. Dòng Nguy hiểm/vừa đổi trạng thái có lớp nền nhấn480ms đúng một lần khi vào vùng nhìn; bàn phím và reduced-motion không chạy. Header Three có đoạn trôi chậm hữu hạn2400ms sau intro960ms rồi đứng yên. Mọi observer/tween/lớp tạm được dọn khi unmount hoặc đổi reduced-motion. Chi tiết audit ở `plans/README.md`.
+
+
+## Màu sắc sau khi duyệt bố cục gốc (04/11/2026)
+
+Giữ bố cục, font và chuyển động đã duyệt. Nền than đen trung tính; nút chính xanh lá đậm `#277c4c` với chữ trắng. Query dùng xanh dương `#62a1df`, impression dùng tím `#ad86d6`; tăng cannibal dùng đỏ `#e9757c`, giảm/cải thiện dùng xanh `#60b88a`, mức trung bình dùng vàng `#e3b352`. Bề mặt theo nội dung có màu đậm vừa, không dùng nền pastel sáng. Hover chỉ pha thêm 2% trắng để tránh bạc màu và giữ tương phản chữ.
+
+27 màu DMC3 tại `categories.ts` được hạ độ sáng, giữ thứ tự và màu cố định theo tên. `rankingColors` tại `design.ts` dùng chung cho chart và bảng thứ hạng. Không dùng màu DMC3 thay cho màu mức độ hay tăng/giảm. Kiểm tra cặp chữ/màu trạng thái đạt ≥4,5:1 ở bình thường và hover; dấu màu DMC3 ≥3:1 trên nền panel.

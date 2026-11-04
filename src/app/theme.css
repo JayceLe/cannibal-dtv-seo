@@ -83,12 +83,12 @@ select,
 .btn.primary {
   background: var(--accent);
   border-color: var(--accent);
-  color: #07180d;
+  color: #ffffff;
 }
 .btn.primary:hover {
-  background: #3be477;
-  border-color: #3be477;
-  color: #07180d;
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  color: #ffffff;
 }
 .btn.secondary:hover {
   background: #333;
@@ -113,24 +113,24 @@ select,
 
 /* Content-led color blocks: one fill per role, without ornamental outlines. */
 .highlight-card {
-  --tone: #91c4ff;
+  --tone: var(--query);
   --edge: transparent;
-  --card-bg: #1a2c42;
+  --card-bg: var(--query-bg);
 }
 .highlight-card.overview-high {
-  --tone: #ff9daa;
+  --tone: var(--danger);
   --edge: transparent;
-  --card-bg: #3b232b;
+  --card-bg: var(--danger-bg);
 }
 .highlight-card.overview-low {
-  --tone: #7be3b1;
+  --tone: var(--safe);
   --edge: transparent;
-  --card-bg: #183b2d;
+  --card-bg: var(--safe-bg);
 }
 .highlight-card.overview-impression {
-  --tone: #cbb0ff;
+  --tone: var(--impression);
   --edge: transparent;
-  --card-bg: #322646;
+  --card-bg: var(--impression-bg);
 }
 .highlight-label {
   color: #ededed;
@@ -142,7 +142,7 @@ select,
   color: var(--tone);
 }
 .highlight-card:first-child .highlight-footer {
-  color: #bed1e8;
+  color: var(--muted);
 }
 .highlight-label svg {
   color: var(--tone);
@@ -150,16 +150,16 @@ select,
 
 .ratio-metric {
   --ratio-color: var(--query);
-  --ratio-track: #303c4a;
-  --hover-base: #1b1e22;
+  --ratio-track: #344454;
+  --hover-base: #19232c;
   --hover-color: var(--query);
   background: var(--hover-base);
   border-color: #3a414a;
 }
 .ratio-metric.impression {
   --ratio-color: var(--impression);
-  --ratio-track: #3c354b;
-  --hover-base: #1f1c24;
+  --ratio-track: #45394f;
+  --hover-base: #24202b;
   --hover-color: var(--impression);
   background: var(--hover-base);
   border-color: #443c50;
@@ -183,7 +183,7 @@ select,
   stroke: var(--impression);
 }
 .detail-impact-ring > strong {
-  color: #d7c5ff !important;
+  color: var(--impression) !important;
 }
 
 /* Hover keeps the established timing/lift while using a natural surface change. */
@@ -202,13 +202,13 @@ select,
 }
 [data-hover-surface]:focus-within {
   border-color: var(--hover-color);
-  background: color-mix(in srgb, var(--hover-base), white 5%);
+  background: color-mix(in srgb, var(--hover-base), white 2%);
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 5%);
 }
 @media (hover: hover) and (pointer: fine) {
   [data-hover-surface]:hover {
     border-color: var(--hover-color);
-    background: color-mix(in srgb, var(--hover-base), white 5%);
+    background: color-mix(in srgb, var(--hover-base), white 2%);
     box-shadow: 0 8px 24px rgb(0 0 0 / 30%);
   }
   .highlight-card:hover {
@@ -525,17 +525,17 @@ th,
 .query-detail-dialog .leader-url .url-identity a,
 .query-detail-dialog .leader-url .url-impressions,
 .period-url-row.leader-url a {
-  color: #8ce7b5;
+  color: var(--safe);
 }
 .query-detail-dialog .runner-url .url-identity a,
 .query-detail-dialog .runner-url .url-impressions,
 .period-url-row.runner-url a {
-  color: #ffa1ac;
+  color: var(--danger);
 }
 .query-detail-dialog .other-url.eligible-url .url-identity a,
 .query-detail-dialog .other-url.eligible-url .url-impressions,
 .period-url-row.other-url.eligible-url a {
-  color: #f3d08a;
+  color: var(--medium);
 }
 .query-detail-dialog .top-1,
 .top-1 {
@@ -592,13 +592,13 @@ th,
   border-color: transparent;
 }
 .comparison-report-card.tone-danger {
-  --hover-base: #3b232b;
-  --hover-color: #ff9daa;
+  --hover-base: var(--danger-bg);
+  --hover-color: var(--danger);
   border-color: transparent;
 }
 .comparison-report-card.tone-safe {
-  --hover-base: #183b2d;
-  --hover-color: #7be3b1;
+  --hover-base: var(--safe-bg);
+  --hover-color: var(--safe);
   border-color: transparent;
 }
 .report-card-label {
@@ -667,12 +667,12 @@ th,
   border-color: transparent;
 }
 .evidence-metric[data-trend="increase"] {
-  --hover-base: #3b232b;
-  --hover-color: #ff9daa;
+  --hover-base: var(--danger-bg);
+  --hover-color: var(--danger);
 }
 .evidence-metric[data-trend="decrease"] {
-  --hover-base: #183b2d;
-  --hover-color: #7be3b1;
+  --hover-base: var(--safe-bg);
+  --hover-color: var(--safe);
 }
 .evidence-metric h4 {
   color: #ededed;
@@ -685,10 +685,10 @@ th,
   color: #c1d8cc;
 }
 .evidence-metric[data-trend="increase"] .evidence-change {
-  color: #ff9daa;
+  color: var(--danger);
 }
 .evidence-metric[data-trend="decrease"] .evidence-change {
-  color: #7be3b1;
+  color: var(--safe);
 }
 .evidence-values > strong {
   color: var(--text);
@@ -702,10 +702,10 @@ th,
 
 /* Direction remains explicit in the row and chart readouts too. */
 .comparison-impression-delta[data-trend="increase"] {
-  color: #ff9daa;
+  color: var(--danger);
 }
 .comparison-impression-delta[data-trend="decrease"] {
-  color: #7be3b1;
+  color: var(--safe);
 }
 .report-chart-values .report-delta {
   padding: 5px 9px;
@@ -713,12 +713,12 @@ th,
   background: #303030;
 }
 .report-chart-values .report-delta.text-danger {
-  background: #3b232b;
-  color: #ff9daa;
+  background: var(--danger-bg);
+  color: var(--danger);
 }
 .report-chart-values .report-delta.text-safe {
-  background: #183b2d;
-  color: #7be3b1;
+  background: var(--safe-bg);
+  color: var(--safe);
 }
 .panel {
   border-color: #2e2e2e;
@@ -752,7 +752,7 @@ th,
 }
 .error-message {
   background: var(--danger-bg);
-  color: #ffa1ac;
+  color: var(--danger);
   border-color: var(--danger-border);
   border-radius: 8px;
 }
@@ -793,12 +793,12 @@ th,
 .rules-threshold {
   padding: 22px;
   border-radius: 8px;
-  background: #1a2c42;
+  background: var(--query-bg);
 }
 .rules-threshold > span {
   display: block;
   margin-bottom: 8px;
-  color: #bed1e8;
+  color: var(--muted);
   font-size: 12px;
   font-weight: 600;
 }
@@ -833,16 +833,16 @@ th,
   border-radius: 8px;
 }
 .rule-level.safe {
-  background: #183b2d;
-  color: #7be3b1;
+  background: var(--safe-bg);
+  color: var(--safe);
 }
 .rule-level.medium {
   background: #3a2c18;
   color: #f2ce80;
 }
 .rule-level.danger {
-  background: #3b232b;
-  color: #ff9daa;
+  background: var(--danger-bg);
+  color: var(--danger);
 }
 .rule-level h4 {
   display: flex;
@@ -1061,8 +1061,8 @@ th,
   padding: 3px 7px;
   margin-top: 8px;
   border-radius: 4px;
-  background: #1a2c42;
-  color: #bed1e8;
+  background: var(--query-bg);
+  color: var(--muted);
   font-size: 11px;
 }
 
@@ -1128,7 +1128,7 @@ th,
 }
 [data-metric-surface]:is([data-metric-active], :focus-visible) {
   border-color: color-mix(in srgb, var(--hover-color), transparent 20%);
-  background: color-mix(in srgb, var(--hover-base), white 6%);
+  background: color-mix(in srgb, var(--hover-base), white 2%);
   box-shadow: 0 8px 20px -12px #000b;
 }
 [data-metric-surface]:is([data-metric-active], :focus-visible)::after {

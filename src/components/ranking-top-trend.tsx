@@ -3,6 +3,7 @@ import {useMemo,useState} from 'react';
 import dynamic from 'next/dynamic';
 import type {EChartsOption} from 'echarts';
 import {number} from '@/lib/engine';
+import {uiColors} from '@/lib/design';
 import {tableBands,dayLabel,rankingSummary,sumRankingBands} from '@/lib/rankings';
 const Chart=dynamic(()=>import('./chart'),{ssr:false});
 type DaySummary=ReturnType<typeof rankingSummary>;
@@ -15,7 +16,7 @@ export default function RankingTopTrend({dates,timeline,category,domain,total,on
   xAxis:{type:'category',data:days.map(dayLabel),axisLabel:{color:'#b3b3b3',fontSize:11,formatter:(value:string)=>value.slice(0,5)},axisTick:{show:false},axisLine:{lineStyle:{color:'#444'}}},
   yAxis:{type:'value',minInterval:1,axisLabel:{color:'#b3b3b3',formatter:(value:number)=>number(value)},splitLine:{lineStyle:{color:'#333',type:'dashed'}}},
   tooltip:{trigger:'axis',confine:true,backgroundColor:'#252525',borderColor:'#454545',textStyle:{color:'#fff'},valueFormatter:value=>number(Number(value))+' từ khóa'},
-  series:[{name:'Tổng Top đã chọn',type:'bar',barMaxWidth:64,data:stats.map(s=>sumRankingBands(s.tableCounts,selected)),label:{show:true,position:'top',color:'#ededed',fontWeight:600,formatter:p=>number(Number(p.value))},itemStyle:{color:selected.length===1?tableBands[selected[0]].color:'#65a9ff',borderRadius:[3,3,0,0]},emphasis:{focus:'self'}}],
+  series:[{name:'Tổng Top đã chọn',type:'bar',barMaxWidth:64,data:stats.map(s=>sumRankingBands(s.tableCounts,selected)),label:{show:true,position:'top',color:'#ededed',fontWeight:600,formatter:p=>number(Number(p.value))},itemStyle:{color:selected.length===1?tableBands[selected[0]].color:uiColors.query,borderRadius:[3,3,0,0]},emphasis:{focus:'self'}}],
   aria:{enabled:true}
  }),[dates,timeline,selected]);
  return <section className="panel rank-top-trend" data-motion-reveal>

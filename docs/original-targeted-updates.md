@@ -13,3 +13,11 @@ Baseline: `307bb3b017e22bcf1587e79d9c11ce90c41b655e`. Đã đối chiếu metada
 Kiểm thử: 83/83 test đạt; TypeScript và production build đạt. Kiểm tra trực quan 1440px và 390px; kiểm tra tràn ngang 768px và 320px. Không có lỗi runtime trong các luồng kiểm tra. Trình duyệt dùng fixture, reduced motion, không WebGL, đóng sau khi kiểm tra. Đã giữ nút xem tất cả từ khóa, số từ khóa, số ngày, Top 100 và N/A trong footer của chart thay thế.
 
 Bản mẫu và ảnh nằm trong thư mục `outputs` của workspace, dùng dữ liệu thử, không kết nối hoặc ghi database thật. Chưa deploy, chưa push và chưa áp dụng migration production. Khi phát hành phải cập nhật database và frontend cùng đợt để số liệu server, chi tiết và bộ lọc dùng cùng rule.
+
+
+## Tinh chỉnh màu sau khi duyệt bố cục
+
+- Giữ nguyên toàn bộ bố cục và logic; thay token màu ở CSS/`design.ts`, palette DMC3 và palette nhóm Top dùng chung.
+- Nút chính xanh đậm/chữ trắng; màu nội dung rõ hơn, bỏ nhóm màu pastel nhạt; hover bớt pha trắng. Xanh/vàng/đỏ giữ đúng nghĩa cải thiện/trung bình/tăng cannibal.
+- Kiểm tra màu: chữ trạng thái và nút chính đạt tương phản tối thiểu 4,5:1 kể cả hover; đủ 27 dấu màu DMC3 khác nhau, tương phản tối thiểu 4,05:1 trên nền panel.
+- Xem trực quan Tổng quan, So sánh và Thứ hạng ở 1440px; kiểm tra đổi DMC3 và nhiều nhóm Top. Không có lỗi runtime hoặc thay đổi chiều cao 4 KPI (168px). 83/83 test và production build đạt. Không deploy hoặc ghi database thật.

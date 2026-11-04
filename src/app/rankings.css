@@ -118,10 +118,10 @@
   margin: 0;
 }
 .rank-positive {
-  color: #65dba5 !important;
+  color: var(--safe) !important;
 }
 .rank-negative {
-  color: #ff8996 !important;
+  color: var(--danger) !important;
 }
 .rank-card-title {
   display: flex;
@@ -434,7 +434,7 @@
 }
 .rank-percent-toggle input:checked {
   background: #247c51;
-  border-color: #65dba5;
+  border-color: var(--safe);
 }
 .rank-percent-toggle input:checked:before {
   transform: translateX(14px);
@@ -613,7 +613,7 @@
 .rank-top-filters { display: flex; flex-wrap: wrap; gap: 8px; }
 .rank-top-filters button { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-up); color: var(--muted); font-size: 13px; font-weight: 600; }
 .rank-top-filters button i { width: 8px; height: 8px; border-radius: 2px; }
-.rank-top-filters button[aria-pressed="true"] { background: #263a50; border-color: #65a9ff; color: #fff; }
+.rank-top-filters button[aria-pressed="true"] { background: var(--query-bg); border-color: var(--query); color: #fff; }
 .rank-top-filters button:hover { border-color: var(--muted); color: #fff; }
 .rank-top-chart { min-width: 0; margin-block: auto; }
 .rank-top-meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; padding-top: 12px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
