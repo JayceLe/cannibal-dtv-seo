@@ -93,7 +93,6 @@ export default function Dashboard(){
   <div className="section-title" data-motion-reveal><h1>Tổng quan toàn site</h1><span><AnimatedNumber value={site.withData}/> query đã map trong kỳ</span></div>
   <OverviewSummary categories={data.categories} siteCannibal={data.siteSummary.cannibal} onSelect={openCategory}/>
   <CategoryDistributions categories={data.categories} selected={filters.category} onSelect={openCategory}/>
-  {overlap?<p className="distribution-note">Query thuộc nhiều DMC3 được tính ở từng nhóm; tỷ trọng biểu đồ tính trên tổng các nhóm.</p>:null}
  </section>
  <section id="query-analysis" className="analysis-section" aria-label="Phân tích theo DMC3"><div className="section-title" data-motion-reveal><h2>Query và URL cạnh tranh</h2></div>
  <div className="analysis-layout"><CategorySidebar categories={data.categories} selected={filters.category} total={site.cannibal} onSelect={name=>updateFilters({category:name})}/><div className="query-workspace"><QueryTable key={`${selected}:${filters.category}`} data={data} filters={filters} onFilter={updateFilters} loading={loading}/></div></div></section>

@@ -2,7 +2,7 @@ import {queryKey} from './engine';
 export type Ranking={key:string;query:string;categories:string[];domain:string;engine:string;positions:Record<string,number|null>};
 export type RankingInput=Pick<Ranking,'key'|'query'|'domain'|'engine'|'positions'>;
 export const bands=[{name:'Top 1–3',min:1,max:3,color:'#65a7ff'},{name:'Top 4–5',min:4,max:5,color:'#3986e8'},{name:'Top 6–10',min:6,max:10,color:'#2eb6e8'},{name:'Top 11–30',min:11,max:30,color:'#49c9b4'},{name:'Top 31–100',min:31,max:100,color:'#b6a0ef'},{name:'Ngoài Top 100',min:101,max:Infinity,color:'#81858c'}];
-export const tableBands=[{name:'1–3',min:1,max:3,color:'#3978d5'},{name:'4–5',min:4,max:5,color:'#258cce'},{name:'6–10',min:6,max:10,color:'#20a3dd'},{name:'11–20',min:11,max:20,color:'#41b8e7'},{name:'21–50',min:21,max:50,color:'#71cbef'},{name:'51–100',min:51,max:100,color:'#a2def5'}];
+export const tableBands=[{name:'1–3',min:1,max:3,color:'#65a9ff'},{name:'4–5',min:4,max:5,color:'#54d5a0'},{name:'6–10',min:6,max:10,color:'#f1c46f'},{name:'11–20',min:11,max:20,color:'#f18c86'},{name:'21–50',min:21,max:50,color:'#bd9af2'},{name:'51–100',min:51,max:100,color:'#a8b6c7'}];
 export function parseSpyserp(rows:unknown[][]){
  const h=rows.findIndex(r=>r.some(v=>queryKey(v)==='keywords')&&r.some(v=>queryKey(v)==='search engines'));
  if(h<0)throw new Error('Không tìm thấy tiêu đề Keywords / Search engines trong file SpySERP.');

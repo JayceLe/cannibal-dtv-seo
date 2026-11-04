@@ -7,7 +7,7 @@ import {SVGRenderer} from 'echarts/renderers';
 import type {EChartsOption} from 'echarts';
 import {highlightDonut} from '@/lib/chart-interactions';
 echarts.use([LineChart,PieChart,BarChart,SankeyChart,GridComponent,TooltipComponent,LegendComponent,AriaComponent,SVGRenderer]);
-export default function Chart({option,label,height=250,onPick,onHover,highlightedName}:{option:EChartsOption;label:string;height?:number;onPick?:(name:string)=>void;onHover?:(name:string|null)=>void;highlightedName?:string|null}){
+export default function Chart({option,label,height=250,onPick,onHover,highlightedName}:{option:EChartsOption;label:string;height?:number|string;onPick?:(name:string)=>void;onHover?:(name:string|null)=>void;highlightedName?:string|null}){
  const el=useRef<HTMLDivElement>(null),instance=useRef<echarts.EChartsType|null>(null),callback=useRef({onPick,onHover});callback.current={onPick,onHover};
  useEffect(()=>{
   const chart=echarts.init(el.current!,undefined,{renderer:'svg'});instance.current=chart;
