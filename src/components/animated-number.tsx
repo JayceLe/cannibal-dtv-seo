@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { Fragment, useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { motionTiming } from "@/lib/motion-tokens";
 
@@ -8,11 +8,13 @@ export default function AnimatedNumber({
   digits = 0,
   suffix = "",
   instant = false,
+  wrap = false,
 }: {
   value: number | null;
   digits?: number;
   suffix?: string;
   instant?: boolean;
+  wrap?: boolean;
 }) {
   const formatter = new Intl.NumberFormat("vi-VN", {
     maximumFractionDigits: digits,
@@ -30,9 +32,21 @@ export default function AnimatedNumber({
     let tween: gsap.core.Tween | undefined,
       observer: IntersectionObserver | undefined,
       alive = true;
+    const display = (text: string) => {
+      if (!wrap) {
+        el.textContent = text;
+        return;
+      }
+      const fragment = document.createDocumentFragment();
+      text.split(/(?=\.\d)/).forEach((part, index) => {
+        if (index) fragment.append(document.createElement("wbr"));
+        fragment.append(part);
+      });
+      el.replaceChildren(fragment);
+    };
     const finish = () => {
       tween?.kill();
-      el.textContent = label;
+      display(label);
       current.current = value;
     };
     const play = () => {
@@ -52,10 +66,11 @@ export default function AnimatedNumber({
         ease: "power2.out",
         onUpdate: () => {
           current.current = state.value;
-          el.textContent =
+          display(
             formatter.format(
               digits === 0 ? Math.round(state.value) : state.value,
-            ) + suffix;
+            ) + suffix,
+          );
         },
         onComplete: finish,
       });
@@ -90,14 +105,27 @@ export default function AnimatedNumber({
       mq.removeEventListener("change", preference);
     };
     // The formatter is derived only from digits; do not restart for parent-only rerenders.
-  }, [value, digits, suffix, instant, label]);
+  }, [value, digits, suffix, instant, label, wrap]);
+  const content = wrap
+    ? label.split(/(?=\.\d)/).map((part, index) => (
+        <Fragment key={index}>
+          {index ? <wbr /> : null}
+          {part}
+        </Fragment>
+      ))
+    : label;
   return (
-    <span className="animated-number" data-animated-number aria-label={label}>
+    <span
+      className="animated-number"
+      data-animated-number
+      data-wrap={wrap || undefined}
+      aria-label={label}
+    >
       <span className="number-reserve" aria-hidden="true">
-        {label}
+        {content}
       </span>
       <span className="number-display" aria-hidden="true" ref={node}>
-        {label}
+        {content}
       </span>
     </span>
   );

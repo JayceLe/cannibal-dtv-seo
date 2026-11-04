@@ -52,3 +52,12 @@ test('import retains source types, date, locale, format limits and all four visi
  assert.match(html,/aria-current="step"/);
  assert.match(html,/aria-pressed="true"/);
 });
+
+test('long KPI numbers retain exact formatting and break only between digit groups',async()=>{
+ const {default:AnimatedNumber}=await import('../src/components/animated-number');
+ const html=render(React.createElement(AnimatedNumber,{value:1234567890123,wrap:true}));
+ assert.match(html,/aria-label="1.234.567.890.123"/);
+ assert.match(html,/1<wbr\/>.234<wbr\/>.567<wbr\/>.890<wbr\/>.123/);
+ const compact=render(React.createElement(AnimatedNumber,{value:1234567}));
+ assert.doesNotMatch(compact,/<wbr/);
+});

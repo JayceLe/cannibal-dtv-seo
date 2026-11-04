@@ -326,6 +326,7 @@ export default function Importer({
             Định dạng số trong file
             <select
               disabled={!!phase}
+              name="number-locale"
               value={locale}
               onChange={(e) => {
                 setLocale(e.target.value);
@@ -340,6 +341,8 @@ export default function Importer({
         <input
           ref={input}
           type="file"
+          name="import-file"
+          aria-label="File dữ liệu import"
           hidden
           accept=".xlsx,.csv,.tsv"
           onChange={(e) => {
@@ -372,6 +375,7 @@ export default function Importer({
             Chọn đúng tab dữ liệu
             <select
               value=""
+              name="import-sheet"
               onChange={(e) => analyze(file!, Number(e.target.value))}
             >
               <option value="" disabled>

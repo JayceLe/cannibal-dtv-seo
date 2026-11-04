@@ -1007,7 +1007,7 @@ th,
   .app-header .header-date-menu {
     grid-column: 1;
     grid-row: 3;
-    width: 152px;
+    width: 176px;
   }
   .app-header .header-date-menu .select-menu-trigger {
     padding: 10px;
@@ -1067,6 +1067,14 @@ th,
 }
 
 @media (max-width: 380px) {
+  .header-overview .header-date-menu {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+  .header-overview .header-actions {
+    grid-column: 1 / -1;
+    grid-row: 4;
+  }
   .app-header .main-navigation button {
     padding-inline: 8px;
   }

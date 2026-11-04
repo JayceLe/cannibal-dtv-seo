@@ -85,7 +85,7 @@ export default function OverviewSummary({
                 <i style={{ background: categoryColor(c.name) }} />
               ) : null}
               <span title={isTotal ? String(c.value ?? "—") : c.group}>
-                {isTotal ? <AnimatedNumber value={c.value} /> : c.group}
+                {isTotal ? <AnimatedNumber value={c.value} wrap /> : c.group}
               </span>
             </strong>
             <span className="highlight-footer" data-motion-update>
@@ -99,6 +99,7 @@ export default function OverviewSummary({
                 <>
                   <AnimatedNumber
                     value={c.value}
+                    wrap
                     digits={c.tone === "overview-impression" ? 0 : 2}
                     suffix={c.tone === "overview-impression" ? "" : "%"}
                   />

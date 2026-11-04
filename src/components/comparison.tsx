@@ -118,6 +118,8 @@ export default function Comparison({
               <Search size={16} />
               <input
                 aria-label="Tìm DMC3 so sánh"
+                name="comparison-category-search"
+                autoComplete="off"
                 placeholder="Tìm DMC3…"
                 value={groupSearch}
                 onChange={(e) => setGroupSearch(e.target.value)}

@@ -42,6 +42,8 @@ export default function CategorySidebar({
           <Search size={17} />
           <input
             aria-label="Tìm nhóm DMC3"
+            name="category-search"
+            autoComplete="off"
             placeholder="Tìm nhóm DMC3…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}

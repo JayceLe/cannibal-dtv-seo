@@ -589,7 +589,7 @@ main {
   display: flex;
   align-items: center;
   gap: 12px;
-  min-height: 42px;
+  min-height: 44px;
   padding: 8px 10px;
   border: 1px solid transparent;
   border-radius: 6px;
@@ -693,6 +693,11 @@ main {
 }
 .query-list-section .section-title h2 {
   font-size: var(--type-section);
+}
+.query-panel .table-scroll:focus-visible,
+.comparison-query-panel .table-scroll:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
 }
 .query-panel .table-scroll,
 .comparison-query-panel .table-scroll {
@@ -1305,6 +1310,7 @@ tbody tr:last-child td {
   width: 22%;
 }
 .query-table th > button {
+  min-height: 44px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -2810,6 +2816,14 @@ progress {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
+.animated-number[data-wrap="true"] {
+  max-width: 100%;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+  white-space: normal;
+  overflow-wrap: normal;
+  word-break: normal;
+}
 .animated-number > .number-reserve,
 .animated-number > .number-display {
   grid-area: 1 / 1;
@@ -3984,7 +3998,7 @@ progress {
   background: var(--surface);
 }
 .report-metric-toggle button {
-  min-height: 34px;
+  min-height: 44px;
   padding: 6px 12px;
   border: 0;
   border-radius: 5px;
@@ -4082,7 +4096,8 @@ progress {
 }
 .report-data-details summary {
   cursor: pointer;
-  padding: 4px 0;
+  min-height: 44px;
+  padding: 12px 0;
 }
 .report-data-details summary:focus-visible {
   outline: 2px solid var(--accent);
