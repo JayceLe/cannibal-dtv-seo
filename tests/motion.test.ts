@@ -294,3 +294,29 @@ test('select menu portals outside panels, keeps trigger focus and supports choos
  await act(async()=>trigger.dispatchEvent(new win.MouseEvent('click',{bubbles:true})));
  await act(async()=>root.unmount());assert.equal(win.document.querySelector('[role="listbox"]'),null);host.remove();gsap.ticker.sleep();
 });
+
+test('dashboard header preserves actions, keyboard tab order and scoped controls across all three reports',async()=>{
+ const React=await import('react'),{act}=React,{createRoot}=await import('react-dom/client');
+ const {default:DashboardHeader}=await import('../src/components/dashboard-header');
+ await preference(true);
+ const host=win.document.createElement('div');win.document.body.append(host);
+ const root=createRoot(host as unknown as HTMLElement);
+ let view:'overview'|'compare'|'rankings'='overview',exports=0,rules=0,imports=0,signouts=0;
+ const render=()=>React.createElement(DashboardHeader,{view,onView:next=>{view=next;root.render(render());},periods:[{id:'19',week_start:'2026-10-19',file_name:'weekly.xlsx',status:'ready',created_at:'2026-10-19T00:00:00Z'}],selected:'19',onDate:()=>{},onRules:()=>rules++,onExport:()=>exports++,onImport:()=>imports++,onSignOut:()=>signouts++});
+ await act(async()=>root.render(render()));
+ assert.ok(host.querySelector('a[href="#analysis-content"]'),'Keyboard users can skip the header');
+ assert.equal(host.querySelectorAll('[role="tab"][tabindex="0"]').length,1);
+ assert.ok(host.querySelector('.header-date-menu'));
+ await act(async()=>host.querySelector('[aria-label="Xuất CSV"]')!.dispatchEvent(new win.MouseEvent('click',{bubbles:true})));
+ await act(async()=>host.querySelector('[aria-label="Import dữ liệu"]')!.dispatchEvent(new win.MouseEvent('click',{bubbles:true})));
+ await act(async()=>host.querySelector('[aria-label="Quy tắc tính cannibal"]')!.dispatchEvent(new win.MouseEvent('click',{bubbles:true})));
+ assert.deepEqual([exports,imports,rules],[1,1,1]);
+ await act(async()=>host.querySelector('#overview-tab')!.dispatchEvent(new win.KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true})));
+ assert.equal(view,'compare');assert.equal(host.querySelector('#compare-tab')!.getAttribute('aria-selected'),'true');
+ assert.equal(host.querySelector('.header-date-menu'),null,'Comparison uses its own two-date selector');
+ await act(async()=>host.querySelector('#compare-tab')!.dispatchEvent(new win.KeyboardEvent('keydown',{key:'End',bubbles:true})));
+ assert.equal(view,'rankings');assert.equal(host.querySelector('[aria-label="Xuất CSV"]'),null);
+ assert.equal(host.querySelector('[aria-label="Import dữ liệu"]'),null,'Rankings keeps its dedicated import flow');
+ await act(async()=>host.querySelector('[aria-label="Đăng xuất workspace"]')!.dispatchEvent(new win.MouseEvent('click',{bubbles:true})));assert.equal(signouts,1);
+ await act(async()=>root.unmount());host.remove();await preference(false);gsap.ticker.sleep();
+});
