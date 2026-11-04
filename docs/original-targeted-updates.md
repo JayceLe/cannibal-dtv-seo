@@ -21,3 +21,8 @@ Bản mẫu và ảnh nằm trong thư mục `outputs` của workspace, dùng d�
 - Nút chính xanh đậm/chữ trắng; màu nội dung rõ hơn, bỏ nhóm màu pastel nhạt; hover bớt pha trắng. Xanh/vàng/đỏ giữ đúng nghĩa cải thiện/trung bình/tăng cannibal.
 - Kiểm tra màu: chữ trạng thái và nút chính đạt tương phản tối thiểu 4,5:1 kể cả hover; đủ 27 dấu màu DMC3 khác nhau, tương phản tối thiểu 4,05:1 trên nền panel.
 - Xem trực quan Tổng quan, So sánh và Thứ hạng ở 1440px; kiểm tra đổi DMC3 và nhiều nhóm Top. Không có lỗi runtime hoặc thay đổi chiều cao 4 KPI (168px). 83/83 test và production build đạt. Không deploy hoặc ghi database thật.
+
+
+## Tinh gọn so sánh và sửa chọn DMC3
+
+Căn chấm DMC3 giữa dòng chữ. Menu không tự cuộn theo hover; chuột chọn ở lần nhấn đầu, giữ thao tác Enter và cảm ứng. Gom sáu thẻ biến động thành một khối gồm bốn số đếm và hai nhóm tăng/giảm mạnh nhất. Bốn thẻ nhận định bỏ dòng chú thích; thẻ impression hiển thị số impression của nhóm đang chọn, hoặc chênh lệch của nhóm biến động lớn nhất khi xem toàn site. Giữ thao tác bấm vào nhóm và chuyển sang bảng query. Chỉ chạy kiểm tra hồi quy nhỏ cho lần chọn DMC3 và TypeScript; không chạy bộ QC/chụp màn hình đầy đủ theo yêu cầu tiết kiệm thời gian.

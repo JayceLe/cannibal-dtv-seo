@@ -2,12 +2,9 @@
 import { useMemo, useState, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import {
-  ArrowDownRight,
   ArrowUpRight,
   ArrowRight,
   CheckCheck,
-  Layers,
-  Minus,
   Target,
 } from "lucide-react";
 import AnimatedNumber from "./animated-number";
@@ -19,7 +16,6 @@ import {
   rate,
   signed,
   snapshotValues,
-  pointChange,
   type ComparisonMetric,
 } from "@/lib/comparison-report";
 import {
@@ -40,14 +36,14 @@ const Chart = dynamic(() => import("./chart"), {
 function ReportCard({
   label,
   value,
-  detail,
+  title,
   tone = "neutral",
   onClick,
   icon,
 }: {
   label: string;
   value: ReactNode;
-  detail: ReactNode;
+  title?: string;
   tone?: string;
   onClick?: () => void;
   icon: ReactNode;
@@ -70,14 +66,7 @@ function ReportCard({
       >
         {value}
       </strong>
-      <span className="report-card-detail">
-        {detail}
-        {onClick ? (
-          <span className="metric-action-icon" aria-hidden="true">
-            <ArrowUpRight size={14} />
-          </span>
-        ) : null}
-      </span>
+
     </>
   );
   return onClick ? (
@@ -87,6 +76,7 @@ function ReportCard({
       data-metric-surface
       data-motion-reveal
       onClick={onClick}
+      title={title}
     >
       {content}
     </button>
@@ -201,61 +191,30 @@ export default function ComparisonOverview({
         <h2>Biến động DMC3</h2>
         <span>{groups.total} nhóm được đối chiếu</span>
       </div>
-      <div className="comparison-group-cards">
-        <ReportCard
-          label="Nhóm cải thiện"
-          value={<AnimatedNumber value={groups.improved} />}
-          detail="Giảm query cannibal"
-          tone="safe"
-          icon={<ArrowDownRight size={17} />}
-        />
-        <ReportCard
-          label="Nhóm tăng cannibal"
-          value={<AnimatedNumber value={groups.worsened} />}
-          detail="Tăng query cannibal"
-          tone="danger"
-          icon={<ArrowUpRight size={17} />}
-        />
-        <ReportCard
-          label="Nhóm không đổi"
-          value={<AnimatedNumber value={groups.unchanged} />}
-          detail="Query cannibal giữ nguyên"
-          icon={<Minus size={17} />}
-        />
-        <ReportCard
-          label="Giảm nhiều nhất"
-          value={groups.drop?.name.replaceAll("_", " ") || "Không có"}
-          detail={
-            groups.drop
-              ? `${signed(groups.drop.delta, number)} query${groups.dropTies > 1 ? ` · ${groups.dropTies} nhóm` : ""}`
-              : "Không có nhóm giảm"
-          }
-          tone="safe"
-          onClick={
-            groups.drop ? () => onCategory(groups.drop!.name) : undefined
-          }
-          icon={<ArrowDownRight size={17} />}
-        />
-        <ReportCard
-          label="Tăng nhiều nhất"
-          value={groups.rise?.name.replaceAll("_", " ") || "Không có"}
-          detail={
-            groups.rise
-              ? `${signed(groups.rise.delta, number)} query${groups.riseTies > 1 ? ` · ${groups.riseTies} nhóm` : ""}`
-              : "Không có nhóm tăng"
-          }
-          tone="danger"
-          onClick={
-            groups.rise ? () => onCategory(groups.rise!.name) : undefined
-          }
-          icon={<ArrowUpRight size={17} />}
-        />
-        <ReportCard
-          label="Nhóm còn cannibal"
-          value={<AnimatedNumber value={groups.remaining} />}
-          detail={`Trên ${groups.total} nhóm`}
-          icon={<Layers size={17} />}
-        />
+      <div className="panel comparison-group-cards" aria-label="Tóm tắt biến động DMC3">
+        <div className="group-movement-counts">
+          {[
+            {label:"Nhóm cải thiện",value:groups.improved,tone:"safe"},
+            {label:"Nhóm tăng cannibal",value:groups.worsened,tone:"danger"},
+            {label:"Nhóm không đổi",value:groups.unchanged,tone:"neutral"},
+            {label:"Nhóm còn cannibal",value:groups.remaining,tone:"neutral"},
+          ].map(item=><div className={`group-movement-stat ${item.tone}`} key={item.label}>
+            <span>{item.label}</span><strong><AnimatedNumber value={item.value}/></strong>
+          </div>)}
+        </div>
+        <div className="group-movement-extremes">
+          {[
+            {label:"Giảm nhiều nhất",group:groups.drop,ties:groups.dropTies,tone:"safe"},
+            {label:"Tăng nhiều nhất",group:groups.rise,ties:groups.riseTies,tone:"danger"},
+          ].map(item=><button type="button" className={`group-movement-extreme ${item.tone}`} key={item.label}
+            disabled={!item.group} onClick={()=>item.group&&onCategory(item.group.name)}
+            title={item.ties>1?`${item.ties} nhóm đồng hạng`:undefined}>
+            <span>{item.label}</span>
+            <strong>{item.group?.name.replaceAll("_"," ")||"Không có"}</strong>
+            <span className="movement-delta">{item.group?`${signed(item.group.delta,number)} query`:"—"}</span>
+            <ArrowUpRight size={16} aria-hidden="true"/>
+          </button>)}
+        </div>
       </div>
       <div
         className="report-section-heading report-scope-heading"
@@ -281,11 +240,6 @@ export default function ComparisonOverview({
               <small>query</small>
             </>
           }
-          detail={
-            data.report.coverage
-              ? `${number(data.report.coverage.new_common)} chuyển trạng thái + ${number(data.report.coverage.new_only)} mới có dữ liệu`
-              : "Gồm query chuyển trạng thái và mới có dữ liệu"
-          }
           tone={data.report.transitions.new ? "danger" : "neutral"}
           onClick={() => transition("new")}
           icon={<ArrowUpRight size={17} />}
@@ -300,23 +254,14 @@ export default function ComparisonOverview({
               <small>query</small>
             </>
           }
-          detail={
-            data.report.coverage?.old_only
-              ? `${number(data.report.coverage.resolved_common)} hết cannibal · ${number(data.report.coverage.old_only)} không có dữ liệu ngày sau`
-              : "Không còn đạt ngưỡng"
-          }
           tone={data.report.transitions.resolved ? "safe" : "neutral"}
           onClick={() => transition("resolved")}
           icon={<CheckCheck size={17} />}
         />
         <ReportCard
           label={category ? "Impression của nhóm" : "Impression đổi nhiều nhất"}
-          value={impressionGroup?.name.replaceAll("_", " ") || "Không đổi"}
-          detail={
-            impressionGroup
-              ? `${signed(impressionGroup.affected_delta, number)} impression`
-              : "0 impression"
-          }
+          title={impressionGroup?.name.replaceAll("_", " ")}
+          value={<>{category ? number(impressionGroup?.new_affected ?? 0) : signed(impressionGroup?.affected_delta ?? 0, number)}<small>impression</small></>}
           tone={
             impressionGroup?.affected_delta
               ? impressionGroup.affected_delta > 0
@@ -339,7 +284,6 @@ export default function ComparisonOverview({
               {decimal(newImpact, 2)}%
             </span>
           }
-          detail={pointChange(impactDelta)}
           tone={
             impactDelta > 0 ? "danger" : impactDelta < 0 ? "safe" : "neutral"
           }

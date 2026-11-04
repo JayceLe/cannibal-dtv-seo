@@ -48,6 +48,8 @@ export default function SearchPicker({
     }
   }, [open]);
   useEffect(() => {
+    // Pointer hover must never scroll the row out from under the click.
+    if (presence.pointer.current) return;
     const row = list.current?.children[active] as HTMLElement | undefined;
     if (row && list.current) {
       const box = list.current;
@@ -60,6 +62,7 @@ export default function SearchPicker({
     }
   }, [active]);
   function choose(name: string) {
+    if (!open) return;
     onChange(name);
     setOpen(false);
     trigger.current?.focus();
@@ -187,7 +190,14 @@ export default function SearchPicker({
                 key={c.value}
                 id={`${id}-option-${index}`}
                 className={active === index ? "is-active" : ""}
-                onPointerMove={() => setActive(index)}
+                onPointerMove={() => { presence.pointer.current = true; setActive(index); }}
+                onPointerDown={(e) => {
+                  presence.pointer.current = true;
+                  if (e.pointerType === "mouse" && e.button === 0) {
+                    e.preventDefault();
+                    choose(c.value);
+                  }
+                }}
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => choose(c.value)}
               >
