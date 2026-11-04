@@ -422,7 +422,7 @@ main {
   --edge: var(--border);
   --card-bg: var(--surface-up);
   display: grid;
-  grid-template-rows: auto minmax(72px, 1fr) minmax(48px, auto);
+  grid-template-rows: auto minmax(38px, auto) auto;
   align-content: start;
   gap: 12px;
   min-width: 0;
@@ -4734,7 +4734,7 @@ progress {
 .url-share-track::after {
   content: "";
   position: absolute;
-  left: 20%;
+  left: var(--threshold-position, 20%);
   top: -2px;
   bottom: -2px;
   width: 1px;

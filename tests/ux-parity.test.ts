@@ -15,7 +15,10 @@ test('overview keeps taxonomy, ratios, distributions and query controls in the n
  const data=overviewFromRecords(uxNewRecords,initialFilters,knownCategories);
  const html=render(React.createElement(OverviewWorkspace,{data,filters:initialFilters,loading:false,onFilter:noop,onSelect:noop,periodId:'ux-new'}));
  assert.ok(html.indexOf('id="overview-title"') < html.indexOf('id="dmc3-analysis"'));
- assert.ok(html.indexOf('Lọc theo DMC3') < html.indexOf('Tỷ lệ cannibal'));
+ assert.ok(html.indexOf('Tỷ lệ cannibal') < html.indexOf('Lọc theo DMC3'));
+ assert.ok(html.indexOf('Tỷ trọng impression cannibal theo DMC3') < html.indexOf('Lọc theo DMC3'));
+ assert.ok(html.indexOf('Query và URL cạnh tranh') < html.indexOf('Lọc theo DMC3'));
+ assert.ok(html.indexOf('Lọc theo DMC3') < html.indexOf('aria-label="Bảng query'));
  for(const label of ['Số DMC3 bị cannibal','Nhóm cannibal cao nhất','Nhóm cannibal thấp nhất','Impression cannibal lớn nhất','Query đã map','Có cannibal','Không cannibal','Khớp chính xác','An toàn','Trung bình','Nguy hiểm','Sắp xếp query','Gap rank','Trang sau','Tỷ trọng query cannibal theo DMC3','Tỷ trọng impression cannibal theo DMC3','nhóm đồng hạng']) assert.ok(html.includes(label),label);
  for(const name of knownCategories) assert.ok(html.includes(name.replaceAll('_',' ')),name);
  assert.match(html,/aria-label="Bảng query, cuộn để xem đầy đủ"/);

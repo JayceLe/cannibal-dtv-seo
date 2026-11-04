@@ -39,3 +39,14 @@ test('summary preserves every rank boundary, missing date and N/A',()=>{
  assert.equal(s.coverage,14/18*100);
  assert.deepEqual(rankingSummary([],'b'),{total:0,missing:0,ranked:0,coverage:0,average:null,counts:[0,0,0,0,0,0],tableCounts:[0,0,0,0,0,0]});
 });
+
+test('selected Top bands sum once per date and preserve DMC3 scope',async()=>{
+ const {sumRankingBands,rankingSummary}=await import('../src/lib/rankings');
+ assert.equal(sumRankingBands([10,4,6,3,2,1],[0,1]),14);
+ assert.equal(sumRankingBands([10,4,6,3,2,1],[0,0,1]),14);
+ assert.equal(sumRankingBands([10,4,6,3,2,1],[]),0);
+ const dates=['2026-10-06','2026-10-13','2026-10-20','2026-10-25','2026-11-01'];
+ const rows=[{key:'a',query:'A',domain:'example.test',engine:'Google',categories:['PIN'],positions:Object.fromEntries(dates.map((d,i)=>[d,i+1]))},{key:'b',query:'B',domain:'example.test',engine:'Google',categories:['CAMERA'],positions:Object.fromEntries(dates.map(d=>[d,2]))}];
+ assert.deepEqual(dates.map(d=>sumRankingBands(rankingSummary(rows,d).tableCounts,[0,1])),[2,2,2,2,2]);
+ assert.deepEqual(dates.map(d=>sumRankingBands(rankingSummary(rows.filter(r=>r.categories.includes('PIN')),d).tableCounts,[0])),[1,1,1,0,0]);
+});

@@ -43,12 +43,30 @@ export default function OverviewWorkspace({
           onSelect={onSelect}
         />
       </section>
+      <div className="overview-metrics query-workspace">
+        <CannibalRatios
+          scoped={data.summary}
+          site={data.siteSummary}
+          category={filters.category}
+          categories={data.categories}
+          loading={loading}
+          onSelect={(category) => onFilter({ category })}
+        />
+        <CategoryDistributions
+          categories={data.categories}
+          selected={filters.category}
+          onSelect={onSelect}
+        />
+      </div>
       <section
         id="query-analysis"
         className="analysis-section"
         aria-label="Phân tích theo DMC3"
       >
-        <div className="analysis-layout overview-analysis">
+        <div className="section-title" data-motion-reveal>
+          <h2>Query và URL cạnh tranh</h2>
+        </div>
+        <div className="analysis-layout overview-query-layout">
           <CategorySidebar
             categories={data.categories}
             selected={filters.category}
@@ -56,23 +74,7 @@ export default function OverviewWorkspace({
             onSelect={(category) => onFilter({ category })}
           />
           <div className="query-workspace">
-            <CannibalRatios
-              scoped={data.summary}
-              site={data.siteSummary}
-              category={filters.category}
-              categories={data.categories}
-              loading={loading}
-              onSelect={(category) => onFilter({ category })}
-            />
-            <CategoryDistributions
-              categories={data.categories}
-              selected={filters.category}
-              onSelect={onSelect}
-            />
             <div className="query-list-section">
-              <div className="section-title" data-motion-reveal>
-                <h2>Query và URL cạnh tranh</h2>
-              </div>
               <QueryTable
                 key={`${periodId}:${filters.category}`}
                 data={data}

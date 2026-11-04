@@ -605,3 +605,17 @@
     height: 340px;
   }
 }
+
+.rank-top-trend { display: flex; flex-direction: column; gap: 16px; }
+.rank-top-trend .rank-card-title { margin: 0; align-items: baseline; flex-wrap: wrap; gap: 8px 16px; }
+.rank-top-trend .rank-card-title h2 { margin: 0; }
+.rank-top-trend .rank-card-title > span { color: var(--muted); font-size: 13px; }
+.rank-top-filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.rank-top-filters button { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-up); color: var(--muted); font-size: 13px; font-weight: 600; }
+.rank-top-filters button i { width: 8px; height: 8px; border-radius: 2px; }
+.rank-top-filters button[aria-pressed="true"] { background: #263a50; border-color: #65a9ff; color: #fff; }
+.rank-top-filters button:hover { border-color: var(--muted); color: #fff; }
+.rank-top-chart { min-width: 0; margin-block: auto; }
+.rank-top-meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; padding-top: 12px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+.rank-top-meta > span:first-child { flex-basis: 100%; color: var(--text); font-weight: 600; }
+.rank-top-hint { color: var(--muted); font-size: 13px; }

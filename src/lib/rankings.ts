@@ -61,3 +61,8 @@ export function rankingDelta(a:number|null|undefined,b:number|null|undefined){
 
 const percentFormat=new Intl.NumberFormat('vi-VN',{minimumFractionDigits:1,maximumFractionDigits:1});
 export const rankingPercent=(value:number)=>`${percentFormat.format(value)}%`;
+
+/** Rank bands do not overlap; sum each selected band once. */
+export function sumRankingBands(counts:number[],selected:number[]){
+ return [...new Set(selected)].reduce((sum,index)=>sum+(counts[index]??0),0);
+}

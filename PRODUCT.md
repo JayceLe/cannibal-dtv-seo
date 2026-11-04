@@ -11,7 +11,7 @@ Dashboard SEO nội bộ của Điện Thoại Vui, phục vụ đọc báo cáo
 
 ## Quy tắc dữ liệu đã chốt
 
-Bộ keyword gốc cung cấp quan hệ DMC3 cho mọi lần import. Query–URL loại dòng chứa `#` rồi map với bộ gốc. Một ngày giữ dữ liệu import mới nhất. Top 1 / Top 2 được xếp theo impression. Impression cannibal chỉ cộng URL phụ đạt ngưỡng 20% Top 1. Làm tròn rank một chữ số trước khi tính gap và phân loại. So sánh gồm cả query chỉ có một ngày; thiếu dữ liệu không giả thành số 0.
+Bộ keyword gốc cung cấp quan hệ DMC3 cho mọi lần import. Query–URL loại dòng chứa `#` rồi map với bộ gốc. Một ngày giữ dữ liệu import mới nhất. Top 1 / Top 2 được xếp theo impression. Query có tổng impression dưới 20 chỉ bị cannibal khi URL thứ hai trên 60% impression Top 1; từ 20 impression trở lên giữ ngưỡng ≥ 20%. Impression cannibal chỉ cộng URL phụ đạt ngưỡng tương ứng, không cộng Top 1. Làm tròn rank một chữ số trước khi tính gap và phân loại. So sánh gồm cả query chỉ có một ngày; thiếu dữ liệu không giả thành số 0.
 
 SpySERP không dùng cột Main để phân nhóm. Giữ 20 keyword chưa map trong nhóm tương ứng để tổng khớp nguồn; `-2` là N/A. Các phần trăm và rank trong tab Thứ hạng trình bày một chữ số thập phân.
 
