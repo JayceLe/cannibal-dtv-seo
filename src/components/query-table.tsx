@@ -149,7 +149,7 @@ export function QueryDetails({
                       ? "URL chính · Không tính cannibal"
                       : u.reachesThreshold
                         ? `Tính cannibal · Đạt ngưỡng ${threshold}`
-                        : `Không tính · Chưa đạt ngưỡng ${threshold}`}
+                        : threshold === "Tổng impression dưới 5" ? "Không tính · Tổng impression dưới 5" : `Không tính · Chưa đạt ngưỡng ${threshold}`}
                   </span>
                 </div>
               </div>

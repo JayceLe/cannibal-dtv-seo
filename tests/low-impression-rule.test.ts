@@ -34,3 +34,10 @@ test('comparison reuses the new rule, including crossing the 20-impression bound
  const reverse=comparisonEvidence(next,old);
  assert.match(reverse.metrics[1].note,/> 80%/);assert.equal(reverse.next.affected,0);
 });
+
+test('queries below 5 impressions never cannibalize, boundary 5 still applies',()=>{
+ assert.equal(make([2,2]).cannibal,false);
+ assert.equal(cannibalImpressions(make([2,2])),0);
+ assert.equal(make([2,2,1]).cannibal,true);
+ assert.equal(cannibalThresholdLabel(make([2,2])),'Tổng impression dưới 5');
+});
