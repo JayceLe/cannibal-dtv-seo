@@ -123,3 +123,10 @@ Tuân theo hệ thống cấu trúc Airtable với phân cấp hình khối ch�
 - **Biểu đồ ECharts**: Nền tooltip trắng viền xám hairline có bóng đổ dịu nhẹ (`box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1)`), chữ đen dễ đọc. Khi hover vào lát bánh donut, đường viền stroke chuyển sang trắng `#ffffff` nổi bật trên nền lát màu, các lát còn lại giảm opacity nhẹ.
 - **Bảng dữ liệu (Data Tables)**: Dòng xen kẽ trắng `#ffffff` và xám cực nhẹ `#fafbfd`, hover dòng chuyển `#f1f5f9`. Bảng có thanh cuộn ngang độc lập, không làm tràn trang.
 - **Hộp thoại chi tiết (Focus Dialogs)**: Backdrop mờ dịu `rgba(15, 23, 42, 0.45)` với `backdrop-filter: blur(4px)`. Không gian đọc URL rộng rãi, hiển thị rõ ràng URL chính (Leader), URL cạnh tranh (Runner) và các URL phụ đạt ngưỡng.
+
+### Bảng thứ hạng theo DMC3
+
+- “Thứ hạng theo ngày” hiển thị bảng DMC3 × tối đa 5 ngày gần nhất trong khoảng ngày đã chọn. Đủ danh mục gốc, kể cả nhóm 0 key; giữ thêm các nhóm từ dữ liệu import.
+- Các nút Top chọn nhiều cộng số key trong các khoảng đã chọn. “Tất cả” chọn/hủy toàn bộ. Mỗi ô dùng số key đậm và phần trăm nhỏ hơn, một chữ số thập phân; mẫu số là tổng key của DMC3 tương ứng. Dòng toàn site tính theo key duy nhất của dữ liệu, không cộng lại các nhóm có key chung.
+- Desktop: bảng ở trái; cả ba phần “Phân bố thứ hạng”, “Độ hiển thị từ khóa” và “Số lượng Top” xếp dọc trong cùng cột phải, kể cả khi chọn một DMC3. Màn hình nhỏ xếp dọc, bảng cuộn ngang có nhãn và giữ cột DMC3.
+- Tái sử dụng màu DMC3, màu Top và chuyển động hiện có. Hover hàng tô nhẹ; focus rõ; tôn trọng giảm chuyển động.
