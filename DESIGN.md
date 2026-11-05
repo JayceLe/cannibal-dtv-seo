@@ -127,7 +127,7 @@ Tuân theo hệ thống cấu trúc Airtable với phân cấp hình khối ch�
 ### Bảng thứ hạng theo DMC3
 
 - “Thứ hạng theo ngày” hiển thị bảng DMC3 × toàn bộ ngày trong khoảng đã chọn; khung hiển thị 4 ngày, cuộn ngang để xem lịch sử, mặc định mở 4 ngày mới nhất. Đủ danh mục gốc, kể cả nhóm 0 key; không hiển thị dòng Chưa map DMC3 trong bảng (số liệu toàn site vẫn giữ).
-- Các nút Top chọn nhiều cộng số key trong các khoảng đã chọn. “Tất cả” chọn/hủy toàn bộ. Mỗi ô dùng số key đậm và phần trăm nhỏ hơn, một chữ số thập phân; mẫu số là tổng key của DMC3 tương ứng. Dòng toàn site tính theo key duy nhất của dữ liệu, không cộng lại các nhóm có key chung.
+- Các nút Top chọn nhiều cộng số key trong các khoảng đã chọn; tách riêng Top 1 và Top 2–3 trong bộ lọc bảng DMC3. “Tất cả” chọn/hủy toàn bộ. Mỗi ô dùng số key đậm và phần trăm nhỏ hơn, một chữ số thập phân; mẫu số là tổng key của DMC3 tương ứng. Dòng toàn site tính theo key duy nhất của dữ liệu, không cộng lại các nhóm có key chung.
 - Desktop: bảng DMC3 ở phải; “Phân bố thứ hạng” và “Độ hiển thị từ khóa” ở cột trái. Bên dưới là hai biểu đồ “Vị trí trung bình” và “Từ khóa trong SERP”; tiếp theo là bảng “Số lượng Top” chiếm toàn bộ chiều ngang. Màn hình nhỏ xếp dọc, bảng cuộn ngang có nhãn và giữ cột DMC3.
 - Tái sử dụng màu DMC3, màu Top và chuyển động hiện có. Hover hàng tô nhẹ; focus rõ; tôn trọng giảm chuyển động.
 

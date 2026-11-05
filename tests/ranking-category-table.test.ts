@@ -7,7 +7,7 @@ import RankingTopTrend from '../src/components/ranking-top-trend';
 import {rankingCategoryTimeline,rankingSummary,type Ranking} from '../src/lib/rankings';
 const dates=['2026-10-01','2026-10-06','2026-10-13','2026-10-20','2026-10-25','2026-11-01'];
 const make=(key:string,categories:string[],rank:number|null):Ranking=>({key,query:key,categories,domain:'example.test',engine:'Google',positions:Object.fromEntries(dates.map(d=>[d,rank]))});
-const rows=[make('a',['PIN'],1),make('b',['PIN'],4),make('c',['PIN'],null),make('d',['CAMERA'],2),make('e',['PIN','CAMERA','CAMERA'],51)];
+const rows=[make('a',['PIN'],1),make('b',['PIN'],4),make('c',['PIN'],null),make('d',['CAMERA'],2),make('e',['PIN','CAMERA','CAMERA'],51),make('f',['PIN'],2),make('g',['PIN'],3)];
 
 test('DMC3 matrix agrees with rank summaries, preserves zero groups and counts shared keys once per group',()=>{
  const matrix=rankingCategoryTimeline(rows,dates,['PIN','CAMERA','EMPTY']);
@@ -35,19 +35,25 @@ test('ranking table retains all dates for scrolling and smaller percentages; Top
   assert.equal(host.querySelectorAll('thead th').length,dates.length+1);
   assert.equal(host.querySelectorAll('tbody tr').length,4);
   assert.equal(host.querySelector('time')?.getAttribute('datetime'),dates[0]);
-  assert.equal(pinCell().querySelector('strong')?.textContent,'3');
-  assert.equal(pinCell().querySelector('small')?.textContent,'75,0%');
+  assert.equal(pinCell().querySelector('strong')?.textContent,'5');
+  assert.equal(pinCell().querySelector('small')?.textContent,'83,3%');
   const buttons=host.querySelectorAll('button');
+  assert.equal(buttons[1].textContent,'Top 1');
+  assert.equal(buttons[2].textContent,'Top 2–3');
   await act(async()=>buttons[0].click());
   assert.equal(pinCell().querySelector('strong')?.textContent,'0');
   await act(async()=>buttons[1].click());
   assert.equal(pinCell().querySelector('strong')?.textContent,'1');
   await act(async()=>buttons[2].click());
-  assert.equal(pinCell().querySelector('strong')?.textContent,'2');
+  assert.equal(pinCell().querySelector('strong')?.textContent,'3');
   assert.equal(pinCell().querySelector('small')?.textContent,'50,0%');
   assert.equal(host.querySelectorAll('button[aria-pressed="true"]').length,2);
+  assert.equal(host.querySelector('.rank-dmc3-total td strong')?.textContent,'4');
+  await act(async()=>buttons[1].click());
+  assert.equal(pinCell().querySelector('strong')?.textContent,'2');
+  await act(async()=>buttons[1].click());
   await act(async()=>root.render(React.createElement(RankingTopTrend,{...props,rows:rows.filter(r=>r.categories.includes('PIN')),category:'PIN'})));
   assert.equal(host.querySelectorAll('tbody tr').length,1);
-  assert.equal(pinCell().querySelector('strong')?.textContent,'2');
+  assert.equal(pinCell().querySelector('strong')?.textContent,'3');
  }finally{await act(async()=>root.unmount());await win.happyDOM.abort();}
 });

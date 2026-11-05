@@ -70,7 +70,7 @@ export function sumRankingBands(counts:number[],selected:number[]){
 
 /** Build all DMC3 rows once; changing Top filters only sums the cached band counts. */
 export function rankingCategoryTimeline(rows:Ranking[],dates:string[],categories:string[]){
- const groups=new Map(categories.map(category=>[category,{category,total:0,counts:dates.map(()=>tableBands.map(()=>0))}]));
+ const groups=new Map(categories.map(category=>[category,{category,total:0,counts:dates.map(()=>tableBands.map(()=>0)),topOne:dates.map(()=>0)}]));
  for(const row of rows){
   const targets=[...new Set(row.categories)].flatMap(category=>{const group=groups.get(category);return group?[group]:[];});
   for(const group of targets)group.total++;
@@ -78,7 +78,7 @@ export function rankingCategoryTimeline(rows:Ranking[],dates:string[],categories
    const value=row.positions[date];
    if(typeof value!=='number'||value<1||value>100)return;
    const band=tableBands.findIndex(b=>value>=b.min&&value<=b.max);
-   if(band>=0)for(const group of targets)group.counts[i][band]++;
+   if(band>=0)for(const group of targets){group.counts[i][band]++;if(value===1)group.topOne[i]++;}
   });
  }
  return [...groups.values()];
