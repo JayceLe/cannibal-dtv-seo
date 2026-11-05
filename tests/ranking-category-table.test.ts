@@ -21,26 +21,25 @@ test('DMC3 matrix agrees with rank summaries, preserves zero groups and counts s
  assert.deepEqual(rankingCategoryTimeline(edgeRows,dates,['PIN'])[0].counts[0],[0,0,0,0,0,0]);
 });
 
-test('ranking table displays five dates and smaller percentages; Top filters sum and select-all toggles off',async()=>{
+test('ranking table retains all dates for scrolling and smaller percentages; Top filters sum and select-all toggles off',async()=>{
  const win=new Window({url:'https://dashboard.test'});
  for(const key of ['document','HTMLElement','Element','Node'] as const)Object.defineProperty(globalThis,key,{configurable:true,value:win[key]});
  Object.defineProperty(globalThis,'window',{configurable:true,value:win});
  Object.defineProperty(globalThis,'IS_REACT_ACT_ENVIRONMENT',{configurable:true,value:true});
  const host=win.document.createElement('div');win.document.body.append(host);
  const root=createRoot(host as unknown as Element);
- const props={rows,dates,timeline:dates.map(d=>rankingSummary(rows,d)),categories:['PIN','CAMERA','EMPTY'],category:''};
+ const props={rows,dates,timeline:dates.map(d=>rankingSummary(rows,d)),categories:['PIN','CAMERA','EMPTY','Chưa map DMC3'],category:''};
  const pinCell=()=>[...host.querySelectorAll('tbody tr')].find(r=>r.querySelector('th')?.textContent==='PIN')!.querySelector('td')!;
  try{
   await act(async()=>root.render(React.createElement(RankingTopTrend,props)));
-  assert.equal(host.querySelectorAll('thead th').length,6);
+  assert.equal(host.querySelectorAll('thead th').length,dates.length+1);
   assert.equal(host.querySelectorAll('tbody tr').length,4);
-  assert.equal(host.querySelector('time')?.getAttribute('datetime'),dates[1]);
+  assert.equal(host.querySelector('time')?.getAttribute('datetime'),dates[0]);
   assert.equal(pinCell().querySelector('strong')?.textContent,'3');
   assert.equal(pinCell().querySelector('small')?.textContent,'75,0%');
   const buttons=host.querySelectorAll('button');
   await act(async()=>buttons[0].click());
   assert.equal(pinCell().querySelector('strong')?.textContent,'0');
-  assert.ok(host.querySelector('[role="status"]'));
   await act(async()=>buttons[1].click());
   assert.equal(pinCell().querySelector('strong')?.textContent,'1');
   await act(async()=>buttons[2].click());

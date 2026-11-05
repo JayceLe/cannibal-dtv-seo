@@ -370,7 +370,7 @@
 .rank-distribution-pair {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto minmax(380px, 1fr) auto;
+  grid-template-rows: auto minmax(380px, 1fr);
   gap: 24px;
   align-items: stretch;
 }
@@ -621,7 +621,6 @@
 .rank-top-filters button i { width: 8px; height: 8px; border-radius: var(--radius-xs); }
 .rank-top-filters button[aria-pressed="true"] { background: var(--query); border-color: var(--query); color: #ffffff; }
 .rank-top-filters button:hover { border-color: var(--border-strong); color: var(--text); }
-.rank-top-hint { color: var(--muted); font-size: 13px; }
 
 /* A long DMC3 table shares its height with the two report panels on desktop. */
 .rank-dmc3-scroll {
@@ -632,7 +631,7 @@
   scrollbar-color: var(--border-strong) var(--surface-up);
 }
 .rank-dmc3-scroll:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
-.ranking-report .rank-dmc3-table { table-layout: fixed; min-width: 760px; }
+.ranking-report .rank-dmc3-table { table-layout: fixed; }
 .ranking-report .rank-dmc3-table th,
 .ranking-report .rank-dmc3-table td {
   padding: 8px 10px;
@@ -660,11 +659,7 @@
 .rank-dmc3-name i { flex: 0 0 8px; height: 8px; border-radius: 2px; }
 .rank-dmc3-table td strong { font-size: 14px; font-weight: 650; }
 .ranking-report .rank-dmc3-table td small { display: inline-block; margin: 0 0 0 6px; color: var(--muted); font-size: 12px; font-weight: 500; min-width: 6ch; }
-.rank-overview-layout .rank-history-scroll { flex: 1; }
-.rank-overview-layout .rank-history { height: 100%; }
-.rank-overview-layout .rank-history th,
-.rank-overview-layout .rank-history td { padding: 13px 8px; font-size: 14px; }
-.rank-overview-layout .rank-history td small { margin-left: 5px; font-size: 12px; }
+.rank-grid > .rank-history-card { grid-column: 1/-1; }
 .rank-top-filters button:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
 .rank-top-filters button[aria-pressed="true"]:hover { background: var(--query); color: #fff; }
 @media (prefers-reduced-motion: reduce) {
@@ -675,3 +670,10 @@
 .rank-distribution-pair .rank-band > div { gap: 8px; flex-wrap: wrap; }
 .rank-distribution-pair .rank-band strong { font-size: 24px; }
 .rank-distribution-pair .rank-band p { margin-bottom: 0; }
+
+/* Subtle cell dividers keep dates easy to follow in both ranking tables. */
+.ranking-report .rank-dmc3-table,
+.ranking-report .rank-history { border: 1px solid var(--line); }
+.ranking-report .rank-dmc3-table tr > :not(:first-child),
+.ranking-report .rank-history tr > :not(:first-child) { border-left: 1px solid var(--line); }
+.rank-dmc3-scroll { padding-bottom: 8px; }
