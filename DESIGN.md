@@ -25,12 +25,15 @@ Giao diện áp dụng chuẩn **Airtable Editorial System** nhẹ nhàng, tĩnh
 - **Border Strong**: `--border-strong: #94a3b8` (viền nhấn cho trạng thái hover/focus).
 - **Line / Dividers**: `--line: #e2e8f0` (đường kẻ phân cách rõ ràng giữa các hàng và khối).
 
-### 2.2 Độ tương phản thẻ con trên nền Panel (Card Surface Contrast)
-Để tránh hiện tượng thẻ con chìm vào nền panel trắng:
-- **Thẻ tỷ lệ (`.ratio-metric`)**: Đặt trên nền xám dịu `#f8fafc`, viền 1px `#e2e8f0` và dải nhấn màu 4px ở mép trái (`border-left: 4px solid var(--ratio-color)`).
-- **Thẻ KPI tổng quan (`.highlight-card`)**: Nền màu pastel dịu nhẹ theo chỉ số kết hợp dải nhấn 4px mép trái (`border-left: 4px solid var(--tone)`) và bóng đổ mềm.
-- **Thẻ báo cáo so sánh & minh chứng (`.comparison-report-card`, `.evidence-metric`)**: Thẻ trung tính dùng nền `#f8fafc`; thẻ biến động nguy hiểm/an toàn sử dụng nền pastel tương ứng kèm dải viền trái 4px đặc trưng.
-- **Danh mục Sidebar (`.category-list button`)**: Các nút danh mục mang nền `#f8fafc` có viền nhẹ phân cách trên sidebar trắng; khi active chuyển sang nền `#ffffff` với vạch màu 4px (`inset 4px 0 var(--category-color)`).
+### 2.2 Độ tương phản thẻ con trên nền Panel & Bố cục ô trực quan (Card Surface & Contrast)
+Theo phản hồi trực quan từ người dùng, toàn bộ phong cách viền dày bên trái (`border-left: 4px solid` hoặc `box-shadow: inset 4px/3px 0`) đã được **loại bỏ hoàn toàn trên toàn site**:
+- **Thẻ KPI tổng quan (`.highlight-card`)**: Nền màu pastel dịu sáng theo từng chỉ số (`--query-bg`, `--danger-bg`, `--safe-bg`, `--impression-bg`), viền 1px bao quanh đồng điệu (`border: 1px solid var(--edge)`), đổ bóng nhẹ 1px giúp từng ô nổi bật rõ ràng so với nền canvas.
+- **Thẻ tỷ lệ (`.ratio-metric`)**: Nền trắng sáng tinh khiết `#ffffff`, viền 1px `#e2e8f0` bao quanh trọn vẹn, không vạch kẻ trái thô.
+- **Thẻ báo cáo so sánh & minh chứng (`.comparison-report-card`, `.evidence-metric`, `.rank-band`)**: Viền 1px sạch sẽ, nền sáng tinh giản, tương phản rõ rệt mà không gây cảm giác ngột ngạt.
+- **Nút danh mục DMC3 khi được chọn (`.category-list button.active`)**: Chuyển màu nền theo đúng màu sắc nhận diện của DMC3 đó (`var(--category-color)`). Toàn bộ chữ và chấm chuyển sang màu trắng sắc nét (`#ffffff`), badge đếm hiển thị dạng viên thuốc trắng trong mờ (`rgba(255, 255, 255, 0.25)`), đảm bảo tương phản tuyệt đối và không bị mất chữ.
+- **Bảng đối chiếu URL giữa 2 ngày (`.comparison-url-table`)**: Thiết kế thoáng đãng, padding rộng rãi (16px 20px), phân tách rõ ràng giữa 2 ngày bằng đường kẻ dọc 2px xuyên suốt, hiệu ứng hover đồng bộ theo từng cặp URL, badge TOP 1 / TOP 2 / URL 3+ gọn gàng không vạch viền dày.
+- **Dialog chi tiết Query (`FocusDialog`)**: 4 chỉ số KPI được chia thành 4 ô thẻ độc lập có viền bao rõ ràng; danh sách URL được định dạng bảng có khung viền ngoài, dòng tiêu đề riêng và phân cách dòng sắc nét.
+- **Bộ lọc mức độ (`.level-chip.active`)**: Số lượng `<b>` luôn giữ màu tương phản cao (chữ trắng trên nền đen hoặc cùng tone màu trạng thái), không bao giờ bị biến mất khi ấn chọn.
 
 ### 2.2 Typography & Văn bản (Ink Hierarchy)
 - **Display & Headings (Near-Black Ink)**: `--text: #181d26` (áp dụng cho H1, H2, giá trị KPI và nút CTA chính).

@@ -1199,7 +1199,7 @@ main {
 }
 .level-chip > b {
   padding-left: 4px;
-  color: var(--text);
+  color: inherit;
   font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
@@ -2532,7 +2532,6 @@ progress {
   }
   .url-metric-row:hover {
     background: var(--surface-up);
-    box-shadow: inset 3px 0 var(--border-strong);
   }
   .url-metric-row:hover .url-identity a {
     color: var(--query);
@@ -2571,7 +2570,6 @@ progress {
 .distribution-legend button:is(:hover, :focus-visible, .is-highlighted) {
   border-color: var(--category-color);
   background: color-mix(in srgb, var(--surface-up), var(--category-color) 20%);
-  box-shadow: inset 3px 0 var(--category-color);
 }
 .distribution-legend
   button:is(:hover, :focus-visible, .is-highlighted)
@@ -3188,15 +3186,12 @@ progress {
 }
 .query-detail-dialog .leader-url {
   background: var(--surface);
-  box-shadow: inset 3px 0 var(--border-strong);
 }
 .query-detail-dialog .runner-url {
   background: var(--surface-up);
-  box-shadow: inset 3px 0 var(--border-strong);
 }
 .query-detail-dialog .other-url.eligible-url {
   background: var(--surface);
-  box-shadow: inset 3px 0 var(--border-strong);
 }
 .query-detail-dialog .leader-url .url-identity a,
 .query-detail-dialog .leader-url .url-impressions {
@@ -3612,15 +3607,12 @@ progress {
 }
 .period-url-row.leader-url {
   background: var(--surface);
-  box-shadow: inset 3px 0 var(--border-strong);
 }
 .period-url-row.runner-url {
   background: var(--surface-up);
-  box-shadow: inset 3px 0 var(--border-strong);
 }
 .period-url-row.other-url.eligible-url {
   background: var(--surface);
-  box-shadow: inset 3px 0 var(--border-strong);
 }
 .period-url-row.leader-url a {
   color: var(--muted);
