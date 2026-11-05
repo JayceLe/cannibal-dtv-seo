@@ -333,7 +333,6 @@ export default function QueryTable({
           <strong>{number(data.count)} query đã map</strong> ·{" "}
           {filters.category || "Tất cả DMC3"}
         </span>
-        <span>Mở query để xem URL chính và URL cạnh tranh</span>
       </div>
       <div
         className="table-scroll"
