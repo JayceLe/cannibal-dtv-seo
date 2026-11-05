@@ -13,7 +13,9 @@ from unittest.mock import patch
 from email.message import Message
 import numpy as np
 import pandas as pd
-from aio_engine import runtime, security, evidence
+from aio_engine import runtime, security, evidence, embeddings
+from types import SimpleNamespace
+from unittest.mock import Mock
 from aio_engine.storage import Store
 from api.aio import handler, dispatch
 
@@ -112,15 +114,9 @@ class NotebookParity(unittest.TestCase):
         self.assertIn(chunks[203], chosen)
         self.assertLessEqual(len(chosen), 24)
 
-    def test_fanout_reuses_daily_result_without_extra_model_call(self):
-        store = MemoryStore()
-        calls = []
-        ns = {'generate_fanout': lambda *_: calls.append(1) or ['Giá thay pin?', ' Giá thay pin? ', 'Bảo hành pin?']}
-        first = runtime.cached_fanout(ns, store, CONFIG)
-        second = runtime.cached_fanout(ns, store, CONFIG)
-        self.assertEqual(first, ['Giá thay pin?', 'Bảo hành pin?'])
-        self.assertEqual(second, first)
-        self.assertEqual(len(calls), 1)
+    def test_fanout_normalizes_without_persistent_cache(self):
+        self.assertEqual(runtime.distinct_queries(['Giá thay pin?', ' Giá thay pin? ', 'Bảo hành pin?']),
+                         ['Giá thay pin?', 'Bảo hành pin?'])
 
     def test_comparison_requires_query_evidence_even_when_vector_is_close(self):
         q = 'Giá thay pin iPhone?'
@@ -227,6 +223,7 @@ class StagedWorkflow(unittest.TestCase):
             self.assertEqual(state['stage'], 'done')
         with patch('sys.stdout', new=io.StringIO()): expected = fixture_result()
         self.assertEqual(store.artifact(state['id'], 'result')['rows'], expected['rows'])
+        self.assertEqual(store.cached, {})
         persisted = json.dumps([store.states, list(store.artifacts.values()), store.cached])
         for key in keys.values(): self.assertNotIn(key, persisted)
 
@@ -310,35 +307,45 @@ class StagedWorkflow(unittest.TestCase):
         state['page_index'] = 1
         self.assertEqual(runtime.page_chunks(ns, MemoryStore(), state), [])
 
-    def test_cache_only_reuses_successful_batches(self):
-        store = MemoryStore(); ns = runtime.engine(CONFIG); count = []
-        ns['embed_batch'] = lambda texts: count.append(texts) or [np.array([1, 2], dtype='float32') for _ in texts]
-        a = runtime.cached_embeddings(ns, store, ['some text'])
-        b = runtime.cached_embeddings(ns, store, ['some text'])
-        self.assertEqual(len(count), 1); np.testing.assert_array_equal(a[0], b[0])
-        ns['embed_batch'] = lambda _: [np.array([])]
-        runtime.cached_embeddings(ns, store, ['failed text'])
-        self.assertEqual(len(store.cached), 1)
+    def test_embedding_deduplicates_only_current_request(self):
+        call = Mock(return_value=SimpleNamespace(embeddings=[SimpleNamespace(values=[1., 2.])]))
+        client = SimpleNamespace(models=SimpleNamespace(embed_content=call))
+        first = embeddings.embed(['same', 'same'], client, 'model', Mock(), Mock())
+        embeddings.embed(['same'], client, 'model', Mock(), Mock())
+        self.assertEqual(call.call_count, 2)
+        self.assertEqual(call.call_args_list[0].kwargs['contents'], ['same'])
+        np.testing.assert_array_equal(first[0], first[1])
 
-    def test_deadline_keeps_partial_embeddings_for_resume(self):
-        store = MemoryStore(); ns = runtime.engine(CONFIG)
-        first = np.array([1, 2], dtype='float32')
-        def stopped(_):
-            ns['_EMB_CACHE']['md5-original'] = first
-            raise runtime.StepDeadline('paused')
-        ns['embed_batch'] = stopped
-        with self.assertRaises(runtime.StepDeadline): runtime.cached_embeddings(ns, store, ['page'])
-        resumed = runtime.engine(CONFIG)
-        def finish(_):
-            np.testing.assert_array_equal(resumed['_EMB_CACHE']['md5-original'], first)
-            return [first]
-        resumed['embed_batch'] = finish
-        np.testing.assert_array_equal(runtime.cached_embeddings(resumed, store, ['page'])[0], first)
-        budget = runtime.RequestBudget()
-        with patch.object(runtime.time, 'sleep') as sleep:
-            with self.assertRaises(runtime.StepDeadline): budget.sleep(181)
-            sleep.assert_not_called()
-        self.assertTrue(budget.exhausted)
+    def test_embedding_errors_keep_provider_cause_and_do_not_retry_bad_key(self):
+        error = RuntimeError('API key is invalid')
+        error.code = 403
+        call = Mock(side_effect=error)
+        client = SimpleNamespace(models=SimpleNamespace(embed_content=call))
+        with self.assertRaisesRegex(RuntimeError, '403.*API key is invalid'):
+            embeddings.embed(['a'], client, 'model', Mock(), Mock())
+        self.assertEqual(call.call_count, 1)
+
+    def test_embedding_retries_transient_error_and_rejects_incomplete_output(self):
+        error = RuntimeError('unavailable')
+        error.code = 503
+        call = Mock(side_effect=[error, SimpleNamespace(embeddings=[SimpleNamespace(values=[1., 2.])])])
+        client = SimpleNamespace(models=SimpleNamespace(embed_content=call))
+        sleep = Mock()
+        embeddings.embed(['a'], client, 'model', sleep, Mock())
+        sleep.assert_called_once_with(2)
+        call.side_effect = None
+        call.return_value = SimpleNamespace(embeddings=[])
+        with self.assertRaisesRegex(RuntimeError, 'không hợp lệ'):
+            embeddings.embed(['a'], client, 'model', sleep, Mock())
+
+    def test_embedding_daily_quota_has_no_retry_loop(self):
+        error = RuntimeError('RESOURCE_EXHAUSTED RequestsPerDay limit: 0')
+        error.code = 429
+        client = SimpleNamespace(models=SimpleNamespace(embed_content=Mock(side_effect=error)))
+        sleep = Mock()
+        with self.assertRaisesRegex(RuntimeError, 'RequestsPerDay'):
+            embeddings.embed(['a'], client, 'model', sleep, Mock())
+        sleep.assert_not_called()
 
     def test_daily_quota_stops_instead_of_retrying_every_minute(self):
         budget = runtime.RequestBudget()

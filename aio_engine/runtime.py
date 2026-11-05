@@ -1,6 +1,5 @@
 """Staged web orchestration. The notebook's audit and scoring functions are replayed unchanged."""
 import base64
-import hashlib
 import io
 import json
 import re
@@ -9,7 +8,6 @@ import types
 import uuid
 import zipfile
 from concurrent.futures import ThreadPoolExecutor
-from datetime import date
 from pathlib import Path
 from urllib.parse import quote
 import numpy as np
@@ -17,7 +15,7 @@ import pandas as pd
 import requests
 from google import genai
 from .security import public_get
-from . import evidence
+from . import evidence, embeddings
 
 _SOURCE = compile(Path(__file__).with_name('notebook.py').read_text(), 'aio_notebook', 'exec')
 DEFAULTS = {'n_queries': 15, 'top_competitors': 10, 'threshold': .85, 'provider': 'serper',
@@ -103,6 +101,7 @@ def engine(config, credentials=None):
         ns['requests'] = types.SimpleNamespace(get=budget.call(public_get), post=budget.call(requests.post))
     else:
         ns['requests'] = types.SimpleNamespace(get=public_get, post=requests.post)
+    ns['embed_batch'] = lambda texts: embeddings.embed(texts, ns['client'], ns['EMBED_MODEL'], ns['time'].sleep, ns.get('print', print))
     return ns
 
 
@@ -146,18 +145,6 @@ def distinct_queries(queries):
     return result
 
 
-def cached_fanout(ns, store, config):
-    key = hashlib.sha256(json.dumps(['fanout-v2', date.today().isoformat(), config['llm_model'],
-        config['keyword'].casefold(), config['n_queries'], config['country'], config['generation_language']],
-        ensure_ascii=False).encode()).hexdigest()
-    try:
-        return store.cache(key)['queries']
-    except FileNotFoundError:
-        queries = distinct_queries(ns['generate_fanout'](config['keyword'], config['n_queries']))
-        store.cache(key, {'queries': queries})
-        return queries
-
-
 def start(store, config, credentials):
     config = validate_config(config)
     require_keys(config, credentials)
@@ -165,32 +152,6 @@ def start(store, config, credentials):
     state = {'id': job, 'stage': 'fanout', 'config': config, 'page_index': 0, 'logs': [], 'error': '', 'progress': 0}
     store.create(job, state)
     return state
-
-
-def cached_embeddings(ns, store, texts):
-    # Keep notebook MD5 cache on quota errors; empty vectors never become cache hits.
-    key = hashlib.sha256(json.dumps([ns['EMBED_MODEL'], texts], ensure_ascii=False).encode()).hexdigest()
-    try:
-        data = store.cache(key)
-        if isinstance(data, list):
-            ns.get('print', print)(f'Cache: {len(data)} embedding đã lưu')
-            return [np.asarray(v, dtype='float32') for v in data]
-        ns['_EMB_CACHE'].update({k: np.asarray(v, dtype='float32') for k, v in data['partial'].items()})
-    except FileNotFoundError:
-        pass
-    try:
-        vectors = ns['embed_batch'](texts)
-        if ns.get('_budget', None) and ns['_budget'].exhausted:
-            ns['_budget'].check(float('inf'))
-    except Exception:
-        store.cache(key, {'partial': {k: v.tolist() for k, v in ns['_EMB_CACHE'].items() if v.size}})
-        if ns.get('_budget', None) and ns['_budget'].exhausted:
-            raise StepDeadline('Đã lưu embedding hoàn tất. Chọn Tiếp tục audit để chạy phần còn lại.') from None
-        raise
-    data = [v.tolist() for v in vectors]
-    if all(v.size for v in vectors):
-        store.cache(key, data)
-    return vectors
 
 
 def replay(ns, state, seed, pages):
@@ -289,16 +250,15 @@ def step(store, job, credentials):
         config = state['config']
         require_keys(config, credentials)
         ns = engine(config, credentials)
-        ns['_embed_log'] = state.get('embed_log', [])
         # A per-request print binding avoids redirecting other concurrent users' stdout.
         ns['print'] = lambda *args, **kwargs: print(*args, **{**kwargs, 'file': log})
         if state['stage'] == 'fanout':
             try:
                 queries = store.artifact(job, 'fanout')['queries']
             except FileNotFoundError:
-                queries = cached_fanout(ns, store, config)
+                queries = distinct_queries(ns['generate_fanout'](config['keyword'], config['n_queries']))
                 store.artifact(job, 'fanout', {'queries': queries})
-            vectors = cached_embeddings(ns, store, queries)
+            vectors = ns['embed_batch'](queries)
             valid = [(q, v) for q, v in zip(queries, vectors) if v.size]
             if not valid:
                 raise RuntimeError('Không có query embedding hợp lệ để gom door.')
@@ -311,13 +271,6 @@ def step(store, job, credentials):
             index = state['page_index']
             chunks = page_chunks(ns, store, state)
             if len(chunks) > 24:
-                old_key = hashlib.sha256(json.dumps([ns['EMBED_MODEL'], chunks], ensure_ascii=False).encode()).hexdigest()
-                try:
-                    old_cache = store.cache(old_key)
-                    if isinstance(old_cache, dict):
-                        ns['_EMB_CACHE'].update({k: np.asarray(v, dtype='float32') for k, v in old_cache['partial'].items()})
-                except FileNotFoundError:
-                    pass
                 seed = store.artifact(job, 'seed')
                 query_vectors = [np.asarray(v, dtype='float32') for v in seed['vectors']]
                 valid = [(q, v) for q, v in zip(seed['queries'], query_vectors, strict=True) if v.size]
@@ -326,7 +279,7 @@ def step(store, job, credentials):
                 chosen = evidence.select_passages(chunks, queries)
                 ns['print'](f'Đoạn liên quan query: {len(chosen)}/{len(chunks)}')
                 chunks = chosen
-            vectors = cached_embeddings(ns, store, chunks) if chunks else []
+            vectors = ns['embed_batch'](chunks) if chunks else []
             store.artifact(job, f'page-{index}', {'chunks': chunks, 'vectors': [v.tolist() for v in vectors]})
             state.update(page_index=index+1, progress=15+int(70*(index+1)/len(state['urls'])))
             if state['page_index'] == len(state['urls']):
@@ -341,15 +294,12 @@ def step(store, job, credentials):
             raise ValueError('Bước audit không hợp lệ.')
         state['error'] = ''
     except StepDeadline:
-        timestamps = ns.get('_embed_log', []) if ns else []
-        remaining = 61 - (time.time() - min(timestamps)) if timestamps else 1
-        state.update(error='', retry_after=max(1, min(60, int(remaining))))
+        state.update(error='', retry_after=1)
     except Exception as exc:
         state['error'] = str(exc)
         raise
     finally:
         if ns:
-            state['embed_log'] = ns['_embed_log']
             close_engine(ns)
         state['logs'] = (state.get('logs', []) + log.getvalue().splitlines())[-120:]
         # Provider messages can echo credentials; scrub before any checkpoint write.

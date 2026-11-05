@@ -2,10 +2,11 @@
 
 ## Tối ưu xử lý 06/11/2026
 
-- Vẫn dùng một lần Gemini để sinh fan-out và embedding cho query/đoạn cần so sánh; SERP chỉ gọi cho từ khóa gốc. Fan-out hợp lệ được lưu theo từ khóa, model, thị trường và ngày để audit cùng chủ đề không gọi lại Gemini trong ngày.
+- Vẫn dùng một lần Gemini để sinh fan-out và embedding cho query/đoạn cần so sánh; SERP chỉ gọi cho từ khóa gốc. Mỗi audit sinh fan-out riêng, không đọc/ghi cache dùng lại giữa các audit.
 - Bỏ query trùng bằng code trước khi embedding. Prompt buộc các nhánh giữ đúng chủ đề và không tự bịa giá, sản phẩm hay đối thủ.
 - Tách nội dung thành đoạn tối đa khoảng 420 ký tự; dùng bộ lọc từ khóa, ý định và chủ đề để chọn tối đa 24 đoạn mỗi trang trước khi gọi embedding. Kết quả so sánh thiếu đoạn có bằng chứng được ghi là thiếu dữ liệu thay vì hiển thị gap sai.
-- Giữ toàn bộ trang đã tải và vector thành công trong checkpoint; tiếp tục audit không tải/chấm lại các phần đã hoàn tất.
+- Giữ trang đã tải và bước đã hoàn tất trong checkpoint của chính audit để tiếp tục. Không có cache embedding. Chỉ gom input trùng trong một request rồi khôi phục đúng thứ tự đầu vào.
+- Embedding kiểm tra đủ vector, kích thước và giá trị hợp lệ. Báo nguyên nhân Gemini (key/model/quota); tối đa hai lượt thử lại lỗi tạm thời theo thời gian Google yêu cầu. Lỗi key, model hoặc quota ngày không thử lại vòng lặp. Không chờ cố định theo giới hạn 90 vector/phút tự đặt.
 
 Tab **AIO** đưa `aio_dtv.ipynb` vào Cannibal Query bằng giao diện React. Bỏ Gradio, Colab secrets, các ô cài package và lệnh `launch`; không viết lại công thức sang JavaScript. Phần tính toán vẫn là Python/NumPy.
 
@@ -42,7 +43,7 @@ Không có Python, NumPy hoặc embedding vector trong bundle trình duyệt. Ta
 - Citation thủ công + AIO + organic theo thứ tự gốc, deduplicate và giới hạn số đối thủ. Trang không đọc được giữ hành vi skip; trang mục tiêu không đọc được thì dừng.
 - Dùng mean vector chung để centering; chấm điểm so với **đối thủ dẫn đầu**, không so trung bình field.
 - Field size <3: LOW CONFIDENCE. Spread <0,03: PARITY. Gap/spread ≤−0,15: AHEAD; <0,15: PARITY; <0,50: BEHIND close; còn lại: BEHIND clear. Gap/score/spread giữ 4 số thập phân, z giữ 2 trong hàm gốc.
-- Giới hạn 90 embedding/phút, batch 20, cache MD5 theo model + text, retry 503 và tối đa 5 lần cho 429. Khi vượt thời gian request, lưu các embedding đã hoàn tất để tiếp tục.
+- Batch tối đa 20 input, không có cache dùng lại. Lỗi embedding không được biến thành vector rỗng rồi chấm điểm tiếp.
 - Mã rank dùng chuẩn NFC, casefold và khoảng trắng, kiểm tra đầy đủ door + metadata + chữ ký audit. URL giữ nguyên phân biệt chữ hoa trong path/query; bỏ scheme, www, fragment, slash cuối khi đối chiếu như notebook.
 - Giữ đủ 6 nhóm hành động và hai nhánh “URL unknown”. P(k) = 1 − 0,91^(k+1); giá trị thêm một door là P(k+1) − P(k), không phải xác suất đo từ Google.
 - Giữ cả các chi tiết đã có trong notebook: mọi rank nguyên dương được chấp nhận, kể cả >100; k đếm các rank khác rỗng. Giao diện ghi “Door có rank” để không gọi sai thành Top 100. Cách lọc embedding rỗng và ánh xạ chỉ số đoạn cũng giữ nguyên, không tự thay thuật toán.
@@ -62,7 +63,7 @@ POST `/api/aio`, header `Authorization: Bearer <workspace JWT>`, cùng origin.
 | template / export_ranks | id, rows nếu export | XLSX có metadata audit ẩn |
 | import_ranks | id, name, file base64 | Kiểm tra XLSX và phân tích rank |
 
-`fanout → pages → score → done`. Query fan-out được lưu trước khi lấy SERP. Các trang được tải trước với tối đa 5 kết nối song song và lưu checkpoint trước khi embedding. Mỗi request embedding một trang theo thứ tự gốc, với giới hạn 90 embedding/phút. Khi chấm, mỗi đoạn luôn đi cùng vector của nó. AIO chọn đoạn theo query đại diện bằng cosine sau centering, mức trùng từ và các dấu hiệu ý định như chi phí, bảo hành hoặc thời gian. Gap bằng điểm đoạn đối thủ tốt nhất trừ điểm đoạn trang mục tiêu. Nếu một phía thiếu đoạn phù hợp thì không có gap. Các kết quả đã lưu giữ nguyên phiên bản cũ. Nội dung đã tải được tái sử dụng khi tiếp tục sau lỗi quota hoặc hết thời gian. Lock RPC có lease 330 giây để tránh hai thao tác step đồng thời. Hết ngân sách xử lý sẽ báo tiếp tục, giữ stage hiện tại và vector đã hoàn tất. Một request đang chạy không bị hủy giữa lúc lưu checkpoint khi bấm Tạm dừng.
+`fanout → pages → score → done`. Query fan-out được lưu trước khi lấy SERP. Các trang được tải trước với tối đa 5 kết nối song song và lưu checkpoint trước khi embedding. Mỗi request embedding một trang theo thứ tự gốc, với batch tối đa 20 input và retry có giới hạn. Khi chấm, mỗi đoạn luôn đi cùng vector của nó. AIO chọn đoạn theo query đại diện bằng cosine sau centering, mức trùng từ và các dấu hiệu ý định như chi phí, bảo hành hoặc thời gian. Gap bằng điểm đoạn đối thủ tốt nhất trừ điểm đoạn trang mục tiêu. Nếu một phía thiếu đoạn phù hợp thì không có gap. Các kết quả đã lưu giữ nguyên phiên bản cũ. Nội dung đã tải được tái sử dụng khi tiếp tục sau lỗi quota hoặc hết thời gian. Lock RPC có lease 330 giây để tránh hai thao tác step đồng thời. Hết ngân sách xử lý sẽ báo tiếp tục, giữ stage hiện tại và vector đã hoàn tất. Một request đang chạy không bị hủy giữa lúc lưu checkpoint khi bấm Tạm dừng.
 
 Không hứa exactly-once cho API tính phí: nếu response đã tới nhưng lưu checkpoint thất bại hoặc function bị kill đột ngột, bước đang dở có thể gọi lại provider. Các bước trước đã lưu vẫn được dùng lại. Không chạy nền độc lập khi tab đã đóng; cần mở lại phiên và tiếp tục.
 
@@ -73,7 +74,7 @@ Không hứa exactly-once cho API tính phí: nếu response đã tới nhưng l
 - URL phải HTTP(S), không kèm tài khoản, không localhost/private/link-local. Kiểm tra toàn bộ IP DNS, ghim IP cho kết nối và kiểm tra từng redirect, cả URL nhúng trong Jina fallback. Không chuyển API key sang website được crawl.
 - HTTP body tối đa 3 MB; XLSX upload 2 MB, sau giải nén tối đa 32 MB và 128 entries; nội dung một trang tối đa 12 MB.
 - API key được che trong log/checkpoint và phản hồi lỗi; không ghi request body trong access log của function. Không render HTML lấy từ website.
-- Artifact/cache được giữ để tiếp tục và đối chiếu. Chưa tự xóa audit cũ; cần định thời hạn lưu nếu khối lượng tăng. Không xóa dữ liệu SEO đang có.
+- Artifact của audit được giữ để tiếp tục và đối chiếu. Chưa tự xóa audit cũ; cần định thời hạn lưu nếu khối lượng tăng. Không xóa dữ liệu SEO đang có.
 
 ## Thiết lập khi triển khai
 

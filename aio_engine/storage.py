@@ -61,6 +61,3 @@ class Store:
         data = gzip.compress(json.dumps(value, ensure_ascii=False, allow_nan=False).encode())
         self.request('POST', path, headers={'Content-Type': 'application/gzip', 'x-upsert': 'true'}, data=data)
 
-    def cache(self, key, value=None):
-        # Cache paths are private to this owner, and never contain API keys.
-        return self.artifact('cache', key, value)
