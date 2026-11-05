@@ -15,7 +15,7 @@ import pandas as pd
 import requests
 from google import genai
 from .security import public_get
-from . import evidence, embeddings
+from . import evidence, embeddings, review
 
 _SOURCE = compile(Path(__file__).with_name('notebook.py').read_text(), 'aio_notebook', 'exec')
 DEFAULTS = {'n_queries': 15, 'top_competitors': 10, 'threshold': .85, 'provider': 'serper',
@@ -334,10 +334,15 @@ def step(store, job, credentials):
             if state['page_index'] == len(state['urls']):
                 state['stage'] = 'score'
         elif state['stage'] == 'score':
-            seed = store.artifact(job, 'seed')
-            pages = {url: store.artifact(job, f'page-{i}') for i, url in enumerate(state['urls'])}
-            result = replay(ns, state, seed, pages)
-            store.artifact(job, 'result', result)
+            try:
+                store.artifact(job, 'result')
+            except FileNotFoundError:
+                seed = store.artifact(job, 'seed')
+                pages = {url: store.artifact(job, f'page-{i}') for i, url in enumerate(state['urls'])}
+                result = review.apply(ns, replay(ns, state, seed, pages))
+                if ns.get('_budget') and ns['_budget'].exhausted:
+                    raise StepDeadline('Đã lưu bước đối chiếu; audit sẽ tiếp tục trong lượt xử lý sau.')
+                store.artifact(job, 'result', result)
             state.update(stage='done', progress=100)
         else:
             raise ValueError('Bước audit không hợp lệ.')

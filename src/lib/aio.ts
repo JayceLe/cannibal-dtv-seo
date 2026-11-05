@@ -55,6 +55,7 @@ export type AioRow = {
   your_rank: string;
   spread: number | null;
   verdict: string;
+  reason?: string;
   best_rival: string;
   your_best_passage: string;
 };

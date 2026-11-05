@@ -84,7 +84,7 @@ export default function AioResults({ result }: { result: AioResult }) {
                   Đối thủ tốt nhất
                 </th>
                 <th scope="col" className="aio-numeric">
-                  Gap
+                  Gap đã đối chiếu
                 </th>
                 <th scope="col" className="aio-numeric">
                   Xếp trong nhóm
@@ -142,7 +142,7 @@ export default function AioResults({ result }: { result: AioResult }) {
                         <ChevronDown size={14} aria-hidden="true" /> Xem
                       </summary>
                       <div className="aio-row-detail">
-                        <p>{row.verdict}</p>
+                        <p>{row.reason || row.verdict}</p>
                         <p>
                           <strong>Đối thủ: </strong>
                           {row.best_rival || "—"}
@@ -177,9 +177,9 @@ export default function AioResults({ result }: { result: AioResult }) {
         <div className="aio-panel-head">
           <div>
             <span className="aio-eyebrow">Đối chiếu nội dung</span>
-            <h2 id="aio-passages-title">Đoạn nào cần viết lại?</h2>
+            <h2 id="aio-passages-title">Bằng chứng theo từng door</h2>
           </div>
-          <span className="aio-count">So sánh với đối thủ có điểm cao hơn</span>
+          <span className="aio-count">Đối chiếu đoạn trả lời theo query</span>
         </div>
         <div className="aio-passage-controls">
           <SearchPicker
@@ -209,6 +209,7 @@ export default function AioResults({ result }: { result: AioResult }) {
                 {aioVerdict(selected.verdict)}
               </span>
             </div>
+            {selected.reason && <p className="aio-count">{selected.reason}</p>}
             {grouped && grouped.members.length > 1 ? (
               <details className="aio-disclosure">
                 <summary>
@@ -237,7 +238,7 @@ export default function AioResults({ result }: { result: AioResult }) {
                       <span>Đối thủ {index + 1}</span>
                       <strong>
                         {aioScore(rival.score)}{" "}
-                        {rival.gap != null && <small>gap +{aioScore(rival.gap)}</small>}
+                        {rival.gap != null && <small>chênh điểm +{aioScore(rival.gap)}</small>}
                       </strong>
                     </div>
                     <AioUrl url={rival.url} />
@@ -246,7 +247,7 @@ export default function AioResults({ result }: { result: AioResult }) {
                 ))}
                 {!passage.rivals.length ? (
                   <div className="aio-empty">
-                    <strong>{selected.gap == null ? "Chưa đủ đoạn phù hợp để tính gap." : "Trang của bạn đang dẫn đầu door này."}</strong>
+                    <strong>{selected.gap == null ? "Chưa đủ bằng chứng để kết luận gap." : "Trang của bạn đang dẫn đầu door này."}</strong>
                     {selected.gap != null && <p>Không có đối thủ nào có điểm cao hơn để đối chiếu.</p>}
                   </div>
                 ) : null}

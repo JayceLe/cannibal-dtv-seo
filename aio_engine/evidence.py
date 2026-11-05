@@ -129,7 +129,13 @@ def select_passages(texts, queries, limit=None, keyword=''):
             overlap = sum(weights[word] for word in query_words & tokens)
             if overlap and (query_words - set(normalized(' '.join(_INTENT)).split())) & tokens:
                 ranked.append((overlap, i))
-        ranked_by_query.append([i for _, i in sorted(ranked, key=lambda row: (-row[0], row[1]))[:2]])
+        ranked.sort(key=lambda row: (-row[0], row[1]))
+        # Keep a fallback when local evidence cannot clearly distinguish the top two.
+        complex_query = bool(re.search(r'\b(so sanh|khac nhau|tung|uu nhuoc|va|hay)\b', normalized(query)))
+        candidates = [ranked[0][1]] if ranked else []
+        if len(ranked) > 1 and (complex_query or ranked[1][0] >= .85 * ranked[0][0]):
+            candidates.append(ranked[1][1])
+        ranked_by_query.append(candidates)
     for rank in range(2):
         for candidates in ranked_by_query:
             if limit is not None and len(selected) >= limit:

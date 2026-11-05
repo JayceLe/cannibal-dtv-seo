@@ -269,7 +269,7 @@ export default function AioRankTracker({ result }: { result: AioResult }) {
                   </th>
                   <th scope="col">URL / đối chiếu</th>
                   <th scope="col" className="aio-numeric">
-                    Gap
+                    Gap đã đối chiếu
                   </th>
                   <th scope="col">Kết luận audit</th>
                 </tr>
