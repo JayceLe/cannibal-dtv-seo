@@ -251,7 +251,7 @@ class StagedWorkflow(unittest.TestCase):
             ns = factory(config)
             ns.update(generate_fanout=lambda *_: QUERIES, fetch_serp=lambda *_: SERP,
                       fetch_page_text=lambda url: url, chunk_text=lambda url, *_: PAGES[url]['chunks'])
-            ns['embed_batch'] = lambda texts: [np.asarray(v, dtype='float32') for v in (VECTORS if texts == QUERIES else next(p['vectors'] for p in PAGES.values() if p['chunks'] == texts))]
+            ns['embed_batch'] = lambda texts, **_: [np.asarray(v, dtype='float32') for v in (VECTORS if texts == QUERIES else next(p['vectors'] for p in PAGES.values() if p['chunks'] == texts))]
             return ns
         with patch.object(runtime, 'engine', side_effect=fake_engine):
             state = runtime.step(store, state['id'], keys)
@@ -275,7 +275,7 @@ class StagedWorkflow(unittest.TestCase):
         state = runtime.start(store, CONFIG, keys)
         ns = runtime.engine(CONFIG)
         ns['generate_fanout'] = lambda *_: QUERIES
-        def pause(*_):
+        def pause(*_, **__):
             raise runtime.StepDeadline('saved')
         ns['embed_batch'] = pause
         with patch.object(runtime, 'engine', return_value=ns):
@@ -284,7 +284,7 @@ class StagedWorkflow(unittest.TestCase):
         self.assertEqual(response['error'], '')
         self.assertGreaterEqual(response['retry_after'], 1)
         self.assertNotIn(state['id'], store.leased)
-        ns['embed_batch'] = lambda _: [np.array(v, dtype='float32') for v in VECTORS]
+        ns['embed_batch'] = lambda _, **kwargs: [np.array(v, dtype='float32') for v in VECTORS]
         ns['fetch_serp'] = lambda _: SERP
         with patch.object(runtime, 'engine', return_value=ns):
             response = runtime.step(store, state['id'], keys)
@@ -357,6 +357,43 @@ class StagedWorkflow(unittest.TestCase):
         self.assertEqual(call.call_count, 2)
         self.assertEqual(call.call_args_list[0].kwargs['contents'], ['same'])
         np.testing.assert_array_equal(first[0], first[1])
+
+    def test_completed_embedding_batches_are_not_charged_again_after_failure(self):
+        error = RuntimeError('RequestsPerDay limit: 0')
+        error.code = 429
+        first = SimpleNamespace(embeddings=[SimpleNamespace(values=[1., 0.]), SimpleNamespace(values=[0., 1.])])
+        call = Mock(side_effect=[first, error, SimpleNamespace(embeddings=[SimpleNamespace(values=[.5, .5])])])
+        client = SimpleNamespace(models=SimpleNamespace(embed_content=call))
+        checkpoint = {}
+        with self.assertRaisesRegex(RuntimeError, 'RequestsPerDay'):
+            embeddings.embed(['one', 'two', 'three'], client, 'model', Mock(), Mock(), batch=2,
+                             on_batch=lambda values: checkpoint.update(values))
+        self.assertEqual(set(checkpoint), {'one', 'two'})
+        resumed = embeddings.embed(['one', 'two', 'three'], client, 'model', Mock(), Mock(), batch=2, known=checkpoint)
+        self.assertEqual(call.call_count, 3)
+        self.assertEqual(call.call_args.kwargs['contents'], ['three'])
+        np.testing.assert_array_equal(resumed[0], checkpoint['one'])
+
+    def test_next_page_reuses_only_exact_text_from_same_audit(self):
+        text = 'Giá thay pin iPhone là 800.000 đồng và bảo hành trong 12 tháng.'
+        job = 'a' * 32
+        urls = [CONFIG['my_url'], SERP['organic'][0]]
+        store = MemoryStore()
+        store.create(job, {'id': job, 'config': CONFIG, 'stage': 'pages', 'page_index': 1,
+                           'urls': urls, 'logs': [], 'error': '', 'progress': 40})
+        store.artifact(job, 'seed', {'queries': ['Giá thay pin iPhone?'], 'vectors': [[.1, .9]], 'serp': SERP})
+        store.artifact(job, 'page-0', {'chunks': [text], 'vectors': [[.8, .2]], 'readable': True})
+        ns = runtime.engine(CONFIG)
+        calls = []
+        ns.update(fetch_page_text=lambda _: text, chunk_text=lambda *_: [text])
+        def embed(texts, **kwargs):
+            calls.append((texts, kwargs['known']))
+            return [np.asarray(kwargs['known'][value], dtype='float32') for value in texts]
+        ns['embed_batch'] = embed
+        with patch.object(runtime, 'engine', return_value=ns):
+            runtime.step(store, job, {'gemini': 'key', 'serp': 'key'})
+        self.assertEqual(calls[0][1][text], [.8, .2])
+        np.testing.assert_allclose(store.artifact(job, 'page-1')['vectors'], [[.8, .2]])
 
     def test_embedding_errors_keep_provider_cause_and_do_not_retry_bad_key(self):
         error = RuntimeError('API key is invalid')

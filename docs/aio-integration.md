@@ -6,7 +6,7 @@
 - Bỏ query trùng bằng code trước khi embedding. Prompt buộc các nhánh giữ đúng chủ đề và không tự bịa giá, sản phẩm hay đối thủ.
 - Giữ Gemini sinh fan-out và tạo embedding ngữ nghĩa. Code xử lý tải/đọc trang, chuẩn hóa dấu và từ tương đương, kiểm tra model sản phẩm, gom door có cùng ý định, lọc bằng chứng và tính centering/gap theo notebook.
 - Tách nội dung thành đoạn khoảng 420 ký tự và quét toàn bộ trang. Mỗi door giữ tối đa hai ứng viên phù hợp; chỉ các đoạn này được gửi embedding, không nhúng các đoạn lấy mẫu ngẫu nhiên. Query giá cần có giá hoặc miễn phí; query thời gian cần có mốc thời gian cụ thể. Thiếu đoạn trả lời thì không suy ra điểm/gap.
-- Giữ trang đã tải và bước đã hoàn tất trong checkpoint của chính audit để tiếp tục. Không có cache embedding. Chỉ gom input trùng trong một request rồi khôi phục đúng thứ tự đầu vào.
+- Giữ trang đã tải và bước đã hoàn tất trong checkpoint của chính audit để tiếp tục. Không có cache dùng chung giữa các audit. Đoạn trùng nguyên văn trong cùng audit dùng lại đúng vector đã có; từng batch embedding thành công được lưu ngay vào checkpoint để lỗi quota ở batch sau không gọi lại batch trước.
 - Embedding kiểm tra đủ vector, kích thước và giá trị hợp lệ. Báo nguyên nhân Gemini (key/model/quota); tối đa hai lượt thử lại lỗi tạm thời theo thời gian Google yêu cầu. Lỗi key, model hoặc quota ngày không thử lại vòng lặp. Không chờ cố định theo giới hạn 90 vector/phút tự đặt.
 
 Tab **AIO** đưa `aio_dtv.ipynb` vào Cannibal Query bằng giao diện React. Bỏ Gradio, Colab secrets, các ô cài package và lệnh `launch`; không viết lại công thức sang JavaScript. Phần tính toán vẫn là Python/NumPy.
@@ -44,7 +44,7 @@ Không có Python, NumPy hoặc embedding vector trong bundle trình duyệt. Ta
 - Citation thủ công + AIO + organic theo thứ tự gốc, deduplicate và giới hạn số đối thủ. Trang không đọc được giữ hành vi skip; trang mục tiêu không đọc được thì dừng.
 - Dùng mean vector chung để centering; chấm điểm so với **đối thủ dẫn đầu**, không so trung bình field.
 - Field size <3: LOW CONFIDENCE. Spread <0,03: PARITY. Gap/spread ≤−0,15: AHEAD; <0,15: PARITY; <0,50: BEHIND close; còn lại: BEHIND clear. Gap/score/spread giữ 4 số thập phân, z giữ 2 trong hàm gốc.
-- Batch tối đa 20 input, không có cache dùng lại. Lỗi embedding không được biến thành vector rỗng rồi chấm điểm tiếp.
+- Batch tối đa 20 input, chỉ dùng lại vector của cùng model và đoạn trùng nguyên văn trong chính audit. Lỗi embedding không được biến thành vector rỗng rồi chấm điểm tiếp.
 - Mã rank dùng chuẩn NFC, casefold và khoảng trắng, kiểm tra đầy đủ door + metadata + chữ ký audit. URL giữ nguyên phân biệt chữ hoa trong path/query; bỏ scheme, www, fragment, slash cuối khi đối chiếu như notebook.
 - Giữ đủ 6 nhóm hành động và hai nhánh “URL unknown”. P(k) = 1 − 0,91^(k+1); giá trị thêm một door là P(k+1) − P(k), không phải xác suất đo từ Google.
 - Giữ cả các chi tiết đã có trong notebook: mọi rank nguyên dương được chấp nhận, kể cả >100; k đếm các rank khác rỗng. Giao diện ghi “Door có rank” để không gọi sai thành Top 100. Cách lọc embedding rỗng và ánh xạ chỉ số đoạn cũng giữ nguyên, không tự thay thuật toán.

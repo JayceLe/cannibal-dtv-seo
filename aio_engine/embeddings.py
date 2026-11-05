@@ -4,12 +4,15 @@ import numpy as np
 from google.genai import types
 
 
-def embed(texts, client, model, sleep, log, batch=20):
-    # Remove duplicate inputs inside this request, then restore their original order.
+def embed(texts, client, model, sleep, log, batch=20, known=None, on_batch=None):
+    # Reuse only exact texts from this audit; never substitute an approximate vector.
     unique = list(dict.fromkeys(texts))
-    vectors = {}
-    for offset in range(0, len(unique), batch):
-        part = unique[offset:offset + batch]
+    vectors = {text: np.asarray(known[text], dtype='float32') for text in unique if known and text in known}
+    if any(v.ndim != 1 or not v.size or not np.isfinite(v).all() or not np.linalg.norm(v) for v in vectors.values()) or len({v.size for v in vectors.values()}) > 1:
+        raise RuntimeError('Vector đã lưu không hợp lệ; dừng để tránh chấm sai.')
+    missing = [text for text in unique if text not in vectors]
+    for offset in range(0, len(missing), batch):
+        part = missing[offset:offset + batch]
         for attempt in range(3):
             try:
                 contents = [types.Content(parts=[types.Part(text=text)]) for text in part] if model.split('/')[-1] == 'gemini-embedding-2' else part
@@ -20,6 +23,8 @@ def embed(texts, client, model, sleep, log, batch=20):
                 if len({v.size for v in list(vectors.values()) + values}) != 1:
                     raise RuntimeError('Gemini trả vector khác kích thước; dừng để tránh chấm sai.')
                 vectors.update(zip(part, values, strict=True))
+                if on_batch:
+                    on_batch({text: vectors[text] for text in part})
                 break
             except Exception as exc:
                 code = getattr(exc, 'code', None)

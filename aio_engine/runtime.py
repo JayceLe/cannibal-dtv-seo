@@ -103,7 +103,7 @@ def engine(config, credentials=None):
         ns['requests'] = types.SimpleNamespace(get=budget.call(public_get), post=budget.call(requests.post))
     else:
         ns['requests'] = types.SimpleNamespace(get=public_get, post=requests.post)
-    ns['embed_batch'] = lambda texts: embeddings.embed(texts, ns['client'], ns['EMBED_MODEL'], ns['time'].sleep, ns.get('print', print))
+    ns['embed_batch'] = lambda texts, **kwargs: embeddings.embed(texts, ns['client'], ns['EMBED_MODEL'], ns['time'].sleep, ns.get('print', print), **kwargs)
     def retry_unavailable(fn, delay=2):
         for attempt in range(3):
             try:
@@ -278,11 +278,16 @@ def step(store, job, credentials):
         if state['stage'] == 'fanout':
             ns['print'](f"Model sinh query: {config['llm_model']} · Model embedding: {config['embed_model']}")
             try:
-                queries = store.artifact(job, 'fanout')['queries']
+                fanout = store.artifact(job, 'fanout')
+                queries = fanout['queries']
             except FileNotFoundError:
                 queries = distinct_queries(ns['generate_fanout'](config['keyword'], config['n_queries']))
-                store.artifact(job, 'fanout', {'queries': queries})
-            vectors = ns['embed_batch'](queries)
+                fanout = {'queries': queries}
+                store.artifact(job, 'fanout', fanout)
+            def save_queries(batch):
+                fanout.setdefault('vectors', {}).update({text: vector.tolist() for text, vector in batch.items()})
+                store.artifact(job, 'fanout', fanout)
+            vectors = ns['embed_batch'](queries, known=fanout.get('vectors'), on_batch=save_queries)
             valid = [(q, v) for q, v in zip(queries, vectors) if v.size]
             if not valid:
                 raise RuntimeError('Không có query embedding hợp lệ để gom door.')
@@ -304,7 +309,26 @@ def step(store, job, credentials):
                 chosen = evidence.select_passages(chunks, queries, keyword=config['keyword'])
                 ns['print'](f'Đoạn liên quan query: {len(chosen)}/{len(chunks)}')
                 chunks = chosen
-            vectors = ns['embed_batch'](chunks) if chunks else []
+            known = {}
+            if chunks:
+                for text, vector in zip(seed['queries'], seed['vectors'], strict=True):
+                    if text in chunks and vector:
+                        known[text] = vector
+                for previous in range(index + 1):
+                    try:
+                        saved = store.artifact(job, f'page-{previous}')
+                    except FileNotFoundError:
+                        continue
+                    if previous == index and saved['chunks'] != chunks:
+                        raise RuntimeError('Nội dung trang đã đổi trong lúc tiếp tục audit; dừng để tránh chấm sai.')
+                    for text, vector in zip(saved['chunks'], saved['vectors'], strict=True):
+                        if text in chunks and vector:
+                            known[text] = vector
+            def save_page_batch(batch):
+                known.update({text: vector.tolist() for text, vector in batch.items()})
+                store.artifact(job, f'page-{index}', {'chunks': chunks,
+                    'vectors': [known.get(text, []) for text in chunks], 'readable': readable})
+            vectors = ns['embed_batch'](chunks, known=known, on_batch=save_page_batch) if chunks else []
             store.artifact(job, f'page-{index}', {'chunks': chunks, 'vectors': [v.tolist() for v in vectors], 'readable': readable})
             state.update(page_index=index+1, progress=15+int(70*(index+1)/len(state['urls'])))
             if state['page_index'] == len(state['urls']):
