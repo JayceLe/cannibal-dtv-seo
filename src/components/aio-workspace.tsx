@@ -122,51 +122,17 @@ export default function AioWorkspace({ userId }: { userId: string }) {
   const [run, setRun] = useState<AioRun | null>(null);
   const [result, setResult] = useState<AioResult | null>(null);
   const [busy, setBusy] = useState(false);
-  const [restoring, setRestoring] = useState(true);
+  const restoring = false;
   const [error, setError] = useState("");
   const [paused, setPaused] = useState(false);
   const working = useRef(false),
     stop = useRef(false),
     alive = useRef(true);
   const storageKey = `aio-last-run:${userId}`;
-  function remember(id: string) {
-    try {
-      sessionStorage.setItem(storageKey, id);
-    } catch {
-      /* Storage may be disabled. */
-    }
-  }
   useEffect(() => {
     alive.current = true;
-    let current = true;
-    async function restore() {
-      try {
-        const id = sessionStorage.getItem(storageKey);
-        if (!id) return;
-        const saved = await aioRequest<AioRun>({ action: "status", id });
-        if (!current) return;
-        setRun(saved);
-        setConfig(saved.config);
-        setPaused(saved.stage !== "done");
-        if (saved.stage === "done") {
-          const data = await aioRequest<AioResult>({ action: "result", id });
-          if (current) setResult(data);
-        }
-      } catch (e) {
-        if (current)
-          setError(
-            e instanceof Error ? e.message : "Không tải được audit đã lưu.",
-          );
-      } finally {
-        if (current) setRestoring(false);
-      }
-    }
-    void restore();
-    return () => {
-      current = false;
-      alive.current = false;
-      stop.current = true;
-    };
+    try { sessionStorage.removeItem(storageKey); } catch { /* Storage may be disabled. */ }
+    return () => { alive.current = false; stop.current = true; };
   }, [storageKey]);
   function update<K extends keyof AioConfig>(key: K, value: AioConfig[K]) {
     setConfig((before) => ({ ...before, [key]: value }));
@@ -201,7 +167,6 @@ export default function AioWorkspace({ userId }: { userId: string }) {
         });
         if (!alive.current) return;
         setResult(null);
-        remember(current.id);
         setRun(current);
       }
       if (!current) return;
