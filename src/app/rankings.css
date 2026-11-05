@@ -34,7 +34,7 @@
   padding: 4px;
   border: 1px solid var(--border);
   border-radius: var(--radius-control);
-  background: var(--surface-up);
+  background: #f1f5f9;
   min-height: 48px;
 }
 .rank-presets button {
@@ -47,10 +47,10 @@
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
-  transition: background 180ms ease, color 180ms ease;
+  transition: background 180ms ease, color 180ms ease, box-shadow 180ms ease;
 }
-.rank-presets button:hover { color:var(--text); background:var(--surface-active); }
-.rank-presets button[aria-pressed="true"] { background:var(--text); color:var(--bg); }
+.rank-presets button:hover { color: var(--text); background: #ffffff; }
+.rank-presets button[aria-pressed="true"] { background: #ffffff; color: #181d26; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08); font-weight: 700; }
 
 .rank-grid {
   display: grid;
@@ -64,19 +64,22 @@
   gap: 14px;
 }
 .rank-band {
-  background: var(--surface-up);
+  background: #f8fafc;
   border: 1px solid var(--border);
-  border-left: 3px solid;
+  border-left: 4px solid;
   padding: 16px;
   border-radius: var(--radius-card);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   transition:
     background 0.24s,
     border-color 0.24s,
+    box-shadow 0.24s,
     transform 0.24s;
 }
 .rank-band:hover {
-  background: var(--surface-active);
+  background: #ffffff;
   border-color: var(--border-strong);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
   transform: translateY(-2px);
 }
 .rank-band > span {

@@ -7,7 +7,7 @@
   --input: #ffffff;
   --border: #e2e8f0;
   --border-strong: #94a3b8;
-  --line: #edf2f7;
+  --line: #e2e8f0;
   --text: #181d26;
   --muted: #475569;
   --soft: #64748b;
@@ -349,6 +349,7 @@ main {
   border: 1px solid var(--border);
   border-radius: var(--radius-panel);
   background: var(--surface);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 /* Shared filter state, used by both cannibal reports. */
 .filter-summary {

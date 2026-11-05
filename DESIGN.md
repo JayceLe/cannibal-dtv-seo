@@ -23,7 +23,14 @@ Giao diện áp dụng chuẩn **Airtable Editorial System** nhẹ nhàng, tĩnh
 - **Input Background**: `--input: #ffffff`.
 - **Hairline Border**: `--border: #e2e8f0` (viền mỏng 1px tinh tế).
 - **Border Strong**: `--border-strong: #94a3b8` (viền nhấn cho trạng thái hover/focus).
-- **Line / Dividers**: `--line: #edf2f7`.
+- **Line / Dividers**: `--line: #e2e8f0` (đường kẻ phân cách rõ ràng giữa các hàng và khối).
+
+### 2.2 Độ tương phản thẻ con trên nền Panel (Card Surface Contrast)
+Để tránh hiện tượng thẻ con chìm vào nền panel trắng:
+- **Thẻ tỷ lệ (`.ratio-metric`)**: Đặt trên nền xám dịu `#f8fafc`, viền 1px `#e2e8f0` và dải nhấn màu 4px ở mép trái (`border-left: 4px solid var(--ratio-color)`).
+- **Thẻ KPI tổng quan (`.highlight-card`)**: Nền màu pastel dịu nhẹ theo chỉ số kết hợp dải nhấn 4px mép trái (`border-left: 4px solid var(--tone)`) và bóng đổ mềm.
+- **Thẻ báo cáo so sánh & minh chứng (`.comparison-report-card`, `.evidence-metric`)**: Thẻ trung tính dùng nền `#f8fafc`; thẻ biến động nguy hiểm/an toàn sử dụng nền pastel tương ứng kèm dải viền trái 4px đặc trưng.
+- **Danh mục Sidebar (`.category-list button`)**: Các nút danh mục mang nền `#f8fafc` có viền nhẹ phân cách trên sidebar trắng; khi active chuyển sang nền `#ffffff` với vạch màu 4px (`inset 4px 0 var(--category-color)`).
 
 ### 2.2 Typography & Văn bản (Ink Hierarchy)
 - **Display & Headings (Near-Black Ink)**: `--text: #181d26` (áp dụng cho H1, H2, giá trị KPI và nút CTA chính).

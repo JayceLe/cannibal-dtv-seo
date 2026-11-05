@@ -143,7 +143,10 @@ select,
   --tone: var(--query);
   --edge: var(--query-border);
   --card-bg: var(--query-bg);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  background: var(--card-bg);
+  border: 1px solid var(--edge);
+  border-left: 4px solid var(--tone);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 }
 .highlight-card.overview-high {
   --tone: var(--danger);
@@ -179,19 +182,21 @@ select,
 .ratio-metric {
   --ratio-color: var(--query);
   --ratio-track: #e2e8f0;
-  --hover-base: var(--surface);
+  --hover-base: #f8fafc;
   --hover-color: var(--query);
-  background: var(--surface);
-  border-color: var(--border);
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--ratio-color);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 .ratio-metric.impression {
   --ratio-color: var(--impression);
   --ratio-track: #e2e8f0;
-  --hover-base: var(--surface);
+  --hover-base: #f8fafc;
   --hover-color: var(--impression);
-  background: var(--surface);
-  border-color: var(--border);
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--ratio-color);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 .ratio-label {
@@ -270,26 +275,32 @@ select,
 
 /* The DMC3 palette stays stable across both charts, lists and detail selections. */
 .category-list button {
-  background: var(--surface);
-  color: var(--text);
+  background: #f8fafc;
+  color: #333840;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
 }
 .category-list b {
-  background: var(--surface-up);
-  color: var(--muted);
+  background: #e2e8f0;
+  color: #181d26;
   border-radius: var(--radius-pill);
 }
-.category-list button.active {
-  background: var(--surface-active);
+.category-list button:hover {
+  background: #ffffff;
   border-color: var(--border-strong);
-  box-shadow: inset 3px 0 var(--category-color);
-  color: var(--text);
-  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+.category-list button.active {
+  background: #ffffff;
+  border-color: var(--category-color);
+  box-shadow: inset 4px 0 var(--category-color), 0 2px 4px rgba(0, 0, 0, 0.06);
+  color: #181d26;
+  font-weight: 700;
 }
 .category-list button.active b {
-  background: #cbd5e1;
-  color: var(--text);
+  background: #e2e8f0;
+  color: #181d26;
 }
 .distribution-legend button {
   border-radius: var(--radius-sm);
@@ -307,12 +318,15 @@ select,
   color: var(--soft);
 }
 .distribution-detail {
-  background: var(--surface-up);
+  background: #f8fafc;
   border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
 }
 .distribution-detail.is-active {
   border-color: color-mix(in srgb, var(--category-color), transparent 25%);
-  background: color-mix(in srgb, var(--surface), var(--category-color) 8%);
+  background: color-mix(in srgb, #ffffff, var(--category-color) 8%);
+  border-left: 4px solid var(--category-color);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 .distribution-detail > div,
 .distribution-detail .distribution-value {
@@ -339,14 +353,20 @@ select,
 }
 .level-chip {
   border-radius: var(--radius-pill);
-  border-color: var(--border);
-  background: var(--surface);
+  border: 1px solid var(--border);
+  background: #f8fafc;
   color: var(--muted);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.level-chip:hover {
+  background: #ffffff;
+  border-color: var(--border-strong);
+  color: var(--text);
 }
 .level-chip.active {
-  border-color: var(--border-strong);
-  background: var(--surface-active);
-  color: var(--text);
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #ffffff;
   font-weight: 600;
 }
 .level-chip.safe.active {
@@ -550,7 +570,8 @@ th,
 }
 .url-metric-row,
 .period-url-row {
-  background: var(--surface-up);
+  background: #f8fafc;
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
 }
 .url-identity a,
@@ -580,17 +601,20 @@ th,
 .query-detail-dialog .leader-url,
 .period-url-row.leader-url {
   background: var(--safe-bg);
-  box-shadow: inset 3px 0 var(--safe);
+  border-color: var(--safe-border);
+  box-shadow: inset 4px 0 var(--safe);
 }
 .query-detail-dialog .runner-url,
 .period-url-row.runner-url {
   background: var(--danger-bg);
-  box-shadow: inset 3px 0 var(--danger);
+  border-color: var(--danger-border);
+  box-shadow: inset 4px 0 var(--danger);
 }
 .query-detail-dialog .other-url.eligible-url,
 .period-url-row.other-url.eligible-url {
   background: var(--medium-bg);
-  box-shadow: inset 3px 0 var(--medium);
+  border-color: var(--medium-border);
+  box-shadow: inset 4px 0 var(--medium);
 }
 .query-detail-dialog .leader-url .url-identity a,
 .query-detail-dialog .leader-url .url-impressions,
@@ -670,21 +694,24 @@ th,
   border-radius: var(--radius-pill);
 }
 .comparison-report-card {
-  --hover-base: var(--surface);
+  --hover-base: #f8fafc;
   --hover-color: var(--text);
   background: var(--hover-base);
   border: 1px solid var(--border);
   border-radius: var(--radius-card);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 .comparison-report-card.tone-danger {
   --hover-base: var(--danger-bg);
   --hover-color: var(--danger);
   border-color: var(--danger-border);
+  border-left: 4px solid var(--danger);
 }
 .comparison-report-card.tone-safe {
   --hover-base: var(--safe-bg);
   --hover-color: var(--safe);
   border-color: var(--safe-border);
+  border-left: 4px solid var(--safe);
 }
 .report-card-label {
   color: var(--muted);
@@ -747,21 +774,24 @@ th,
   border-color: var(--danger-border);
 }
 .evidence-metric {
-  --hover-base: var(--surface);
+  --hover-base: #f8fafc;
   --hover-color: var(--muted);
   background: var(--hover-base);
   border: 1px solid var(--border);
   border-radius: var(--radius-card);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 .evidence-metric[data-trend="increase"] {
   --hover-base: var(--danger-bg);
   --hover-color: var(--danger);
   border-color: var(--danger-border);
+  border-left: 4px solid var(--danger);
 }
 .evidence-metric[data-trend="decrease"] {
   --hover-base: var(--safe-bg);
   --hover-color: var(--safe);
   border-color: var(--safe-border);
+  border-left: 4px solid var(--safe);
 }
 .evidence-metric h4 {
   color: var(--text);
