@@ -1,3 +1,9 @@
+## AIO Content Audit
+
+Tab **AIO** tích hợp `aio_dtv.ipynb` thành giao diện web: nhập Gemini + SERP API, audit từng door, đối chiếu đoạn nội dung, nhập/xuất rank XLSX và hàng đợi hành động. Giữ 27 hàm Python tính toán gốc; không chạy Gradio/Colab, không đổi quy tắc cannibal. API key chỉ dùng trong phiên mở và không lưu cùng kết quả.
+
+Hướng dẫn, kiến trúc, giới hạn và cách triển khai: [docs/aio-integration.md](docs/aio-integration.md). Backend Python 3.12 cần `requirements.txt`; chỉ migration AIO mới được chuẩn bị, **chưa áp dụng lên Supabase thật, chưa deploy**. Những ghi chú triển khai lịch sử bên dưới không bao gồm migration AIO này.
+
 ## UX rebuild hiện hành
 
 Nhánh local `ux-rebuild`. Baseline `5d3bf0b`. Checklist chức năng và kiểm chứng: [docs/ux-parity-checklist.md](docs/ux-parity-checklist.md). Mô tả sản phẩm và quy tắc hiện hành: [PRODUCT.md](PRODUCT.md); hệ thống giao diện và chuyển động: [DESIGN.md](DESIGN.md). Các ghi chú triển khai cũ bên dưới là lịch sử.

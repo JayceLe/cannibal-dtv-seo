@@ -13,3 +13,6 @@ supabase/.temp/
 .ux-baseline/
 
 public/__ux-fixture/
+
+__pycache__/
+*.pyc

@@ -287,10 +287,15 @@ select,
   transition: all 0.18s ease;
 }
 .category-list button:hover:not(.active) {
-  background: color-mix(in srgb, var(--category-color, #181d26) 12%, #ffffff) !important;
+  background: color-mix(
+    in srgb,
+    var(--category-color, #181d26) 12%,
+    #ffffff
+  ) !important;
   border-color: var(--category-color, #181d26) !important;
   color: #0f172a !important;
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--category-color, #181d26) 22%, transparent) !important;
+  box-shadow: 0 2px 8px
+    color-mix(in srgb, var(--category-color, #181d26) 22%, transparent) !important;
   transform: translateX(4px);
 }
 .category-list button:hover:not(.active) span {
@@ -298,12 +303,17 @@ select,
   font-weight: 700;
 }
 .category-list button:hover:not(.active) b {
-  background: color-mix(in srgb, var(--category-color, #181d26) 22%, #ffffff) !important;
+  background: color-mix(
+    in srgb,
+    var(--category-color, #181d26) 22%,
+    #ffffff
+  ) !important;
   color: #0f172a !important;
   font-weight: 700;
 }
 .category-list button:hover:not(.active) i {
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--category-color, #181d26) 40%, transparent);
+  box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--category-color, #181d26) 40%, transparent);
   transform: scale(1.25);
 }
 .category-list button.active {
@@ -522,7 +532,9 @@ th,
   border-radius: var(--radius-menu);
   background: #ffffff;
   border: 1px solid var(--border);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.1),
+    0 8px 10px -6px rgba(0, 0, 0, 0.05);
 }
 .picker-search {
   background: var(--surface-up);
@@ -1228,7 +1240,9 @@ th,
 .toast {
   background: #ffffff;
   border-color: var(--border);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.1),
+    0 8px 10px -6px rgba(0, 0, 0, 0.05);
   border-radius: var(--radius-card);
 }
 .toast svg {
@@ -1385,6 +1399,24 @@ th,
   }
 }
 /* A single responsive header grid keeps visual and keyboard order aligned. */
+.app-header .main-navigation {
+  min-width: 0;
+  max-width: 100%;
+}
+@media (max-width: 760px) {
+  .app-header .main-navigation {
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+}
+@media (max-width: 480px) {
+  .app-header .main-navigation button {
+    padding-inline: 6px;
+  }
+  .app-header .main-navigation button svg {
+    display: none;
+  }
+}
 .app-header {
   gap: 16px;
 }
@@ -1642,35 +1674,104 @@ button[data-metric-surface][data-metric-pressed] {
 }
 
 /* Keep the production palette; fit the overview to its content. */
-.overview-workspace { gap: 24px; }
-.overview-highlights .highlight-card { padding: 18px 20px; gap: 12px; }
-.overview-highlights .highlight-main { font-size: 26px; line-height: 1.3; }
-.overview-highlights .highlight-footer { font-size: 15px; }
-.overview-metrics { container-type: inline-size; gap: 20px; }
-.overview-metrics .cannibal-ratios { padding: 20px; }
-.overview-metrics .ratio-section-heading { margin-bottom: 16px; }
-.overview-metrics .ratio-groups { gap: 20px; }
-.overview-metrics .ratio-metric { grid-template-columns: 152px minmax(0, 1fr); padding: 18px; gap: 24px; }
-.overview-metrics .ratio-visual { width: 152px; height: 152px; }
-.overview-metrics .ratio-visual circle { stroke-width: 12; }
-.overview-metrics .ratio-visual > strong { font-size: 23px; }
-.overview-metrics .ratio-fraction { margin: 6px 0 4px; }
-.overview-metrics .ratio-fraction > strong { font-size: 28px; }
-.overview-metrics .ratio-denominator { font-size: 20px; }
-.overview-metrics .distribution-card { padding: 20px; }
-.overview-metrics .distribution-body { grid-template-columns: minmax(150px, 190px) minmax(0, 1fr); gap: 16px; }
-.overview-metrics .distribution-legend { max-height: 192px; }
-.overview-metrics .distribution-detail { margin-top: 16px; padding: 12px 14px; }
-.overview-metrics .distribution-value { flex-wrap: wrap; justify-content: flex-end; }
+.overview-workspace {
+  gap: 24px;
+}
+.overview-highlights .highlight-card {
+  padding: 18px 20px;
+  gap: 12px;
+}
+.overview-highlights .highlight-main {
+  font-size: 26px;
+  line-height: 1.3;
+}
+.overview-highlights .highlight-footer {
+  font-size: 15px;
+}
+.overview-metrics {
+  container-type: inline-size;
+  gap: 20px;
+}
+.overview-metrics .cannibal-ratios {
+  padding: 20px;
+}
+.overview-metrics .ratio-section-heading {
+  margin-bottom: 16px;
+}
+.overview-metrics .ratio-groups {
+  gap: 20px;
+}
+.overview-metrics .ratio-metric {
+  grid-template-columns: 152px minmax(0, 1fr);
+  padding: 18px;
+  gap: 24px;
+}
+.overview-metrics .ratio-visual {
+  width: 152px;
+  height: 152px;
+}
+.overview-metrics .ratio-visual circle {
+  stroke-width: 12;
+}
+.overview-metrics .ratio-visual > strong {
+  font-size: 23px;
+}
+.overview-metrics .ratio-fraction {
+  margin: 6px 0 4px;
+}
+.overview-metrics .ratio-fraction > strong {
+  font-size: 28px;
+}
+.overview-metrics .ratio-denominator {
+  font-size: 20px;
+}
+.overview-metrics .distribution-card {
+  padding: 20px;
+}
+.overview-metrics .distribution-body {
+  grid-template-columns: minmax(150px, 190px) minmax(0, 1fr);
+  gap: 16px;
+}
+.overview-metrics .distribution-legend {
+  max-height: 192px;
+}
+.overview-metrics .distribution-detail {
+  margin-top: 16px;
+  padding: 12px 14px;
+}
+.overview-metrics .distribution-value {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
 @media (max-width: 1100px) {
- .overview-metrics .distribution-grid { grid-template-columns: 1fr; }
+  .overview-metrics .distribution-grid {
+    grid-template-columns: 1fr;
+  }
 }
 @media (max-width: 640px) {
- .overview-metrics .ratio-metric { grid-template-columns: 120px minmax(0, 1fr); padding: 14px; gap: 12px; }
- .overview-metrics .ratio-visual { width: 120px; height: 120px; }
- .overview-metrics .ratio-visual > strong { font-size: 21px; }
- .overview-metrics .ratio-fraction > strong { font-size: 24px; }
- .overview-metrics .ratio-denominator { font-size: 18px; }
- .overview-metrics .distribution-body { grid-template-columns: 1fr; }
- .overview-metrics .distribution-ring { width: 190px; justify-self: center; }
+  .overview-metrics .ratio-metric {
+    grid-template-columns: 120px minmax(0, 1fr);
+    padding: 14px;
+    gap: 12px;
+  }
+  .overview-metrics .ratio-visual {
+    width: 120px;
+    height: 120px;
+  }
+  .overview-metrics .ratio-visual > strong {
+    font-size: 21px;
+  }
+  .overview-metrics .ratio-fraction > strong {
+    font-size: 24px;
+  }
+  .overview-metrics .ratio-denominator {
+    font-size: 18px;
+  }
+  .overview-metrics .distribution-body {
+    grid-template-columns: 1fr;
+  }
+  .overview-metrics .distribution-ring {
+    width: 190px;
+    justify-self: center;
+  }
 }

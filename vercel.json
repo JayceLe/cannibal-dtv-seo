@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/aio.py": {
+      "maxDuration": 300,
+      "includeFiles": "aio_engine/**",
+      "excludeFiles": "{data/**,public/**,docs/**,tests/**,.ux-baseline/**,node_modules/**,.next/**,plans/**,spotify/**}"
+    }
+  }
+}

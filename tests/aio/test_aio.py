@@ -1,0 +1,424 @@
+"""Offline parity and trust-boundary checks; no production DB or paid API calls."""
+import ast
+import copy
+import gzip
+import io
+import json
+import os
+import socket
+import threading
+import unittest
+from pathlib import Path
+from unittest.mock import patch
+from email.message import Message
+import numpy as np
+import pandas as pd
+from aio_engine import runtime, security, evidence
+from aio_engine.storage import Store
+from api.aio import handler, dispatch
+
+CONFIG = runtime.validate_config({'keyword': 'thay pin iPhone', 'my_url': 'https://example.com/target'})
+QUERIES = ['Chi phí thay pin?', 'Giá thay pin?', 'Khi nào cần thay?', 'Pin nào phù hợp?', 'Thay ở đâu?']
+VECTORS = [[1, .2, .1], [.99, .21, .11], [.1, 1, .2], [.2, .1, 1], [.6, .5, .7]]
+SERP = {'organic': ['https://one.example/a', 'https://two.example/b', 'https://blocked.example/c'], 'aio_citations': []}
+PAGES = {
+    CONFIG['my_url']: {'chunks': ['Chi phí, khi nào cần thay pin, loại pin phù hợp và thay ở đâu. ' * 12, 'Chi phí, khi nào cần thay pin, loại pin phù hợp và thay ở đâu? ' * 12], 'vectors': [[.5, .2, .4], [.2, .9, .1]]},
+    SERP['organic'][0]: {'chunks': ['Chi phí, khi nào cần thay pin, loại pin phù hợp và thay ở đâu! ' * 12], 'vectors': [[1, .1, .1]]},
+    SERP['organic'][1]: {'chunks': ['Chi phí, khi nào cần thay pin, loại pin phù hợp và thay ở đâu… ' * 12], 'vectors': [[.15, .2, .95]]},
+    SERP['organic'][2]: {'chunks': [], 'vectors': []},
+}
+SEED = {'queries': QUERIES, 'vectors': VECTORS, 'serp': SERP}
+
+
+class MemoryStore:
+    def __init__(self):
+        self.states, self.artifacts, self.cached = {}, {}, {}
+        self.leased = set()
+    def create(self, job, state): self.states[job] = copy.deepcopy(state)
+    def read(self, job): return copy.deepcopy(self.states[job])
+    def claim(self, job):
+        if job in self.leased: raise BlockingIOError('busy')
+        self.leased.add(job)
+        return self.read(job)
+    def save(self, job, state):
+        self.states[job] = copy.deepcopy(state)
+        self.leased.discard(job)
+    def artifact(self, job, name, value=None):
+        if value is None:
+            if (job, name) not in self.artifacts: raise FileNotFoundError()
+            return copy.deepcopy(self.artifacts[(job, name)])
+        self.artifacts[(job, name)] = copy.deepcopy(value)
+    def cache(self, key, value=None):
+        if value is None:
+            if key not in self.cached: raise FileNotFoundError()
+            return copy.deepcopy(self.cached[key])
+        self.cached[key] = copy.deepcopy(value)
+
+
+def fixture_result():
+    return runtime.replay(runtime.engine(CONFIG), {'id': 'a' * 32, 'config': CONFIG}, copy.deepcopy(SEED), copy.deepcopy(PAGES))
+
+
+class NotebookParity(unittest.TestCase):
+    def test_calculation_matches_original_functions(self):
+        # The exact audit() executes once with mocked I/O, once with staged replay.
+        ns = runtime.engine(CONFIG)
+        ns['generate_fanout'] = lambda *_: QUERIES
+        ns['fetch_serp'] = lambda *_: SERP
+        ns['fetch_page_text'] = lambda url: url
+        ns['chunk_text'] = lambda url, *_: PAGES[url]['chunks']
+        def embed(texts):
+            values = VECTORS if texts is QUERIES else next(p['vectors'] for p in PAGES.values() if texts is p['chunks'])
+            return [np.array(v, dtype='float32') for v in values]
+        ns['embed_batch'] = embed
+        with patch('sys.stdout', new=io.StringIO()):
+            original, doors, competitors = ns['audit'](CONFIG['keyword'], CONFIG['my_url'], 15, False)
+            replayed = fixture_result()
+        self.assertEqual(runtime.json_rows(original), replayed['rows'])
+        self.assertEqual(doors, replayed['doors'])
+        self.assertEqual(competitors, replayed['competitors'])
+        self.assertEqual(replayed['read_competitors'], 2)
+        self.assertEqual(replayed['query_count'], 5)
+        for row in replayed['rows']:
+            self.assertIn(row['door'], replayed['passages'])
+            for rival in replayed['passages'][row['door']]['rivals']:
+                self.assertGreater(rival['score'], replayed['passages'][row['door']]['score'])
+
+    def test_price_evidence_excludes_off_topic_and_handles_missing_vector(self):
+        q = 'Chi phí thay pin iPhone là bao nhiêu?'
+        seed = {'queries': [q], 'vectors': [[1., 0.]], 'serp': SERP}
+        pages = {
+            CONFIG['my_url']: {'chunks': ['Chi phí thay kính lưng.', 'Giá thay pin iPhone là 800.000 đồng.'], 'vectors': [[], [.8, .2]]},
+            SERP['organic'][0]: {'chunks': ['Ceramic Shield bảo vệ mặt kính của iPhone.', 'Thay pin iPhone có chi phí 900.000 đồng.'], 'vectors': [[1., 0.], [.99, .01]]},
+        }
+        def run():
+            return runtime.replay(runtime.engine(CONFIG), {'id': 'a'*32, 'config': CONFIG}, seed, pages)
+        output = run()
+        self.assertEqual(output['passages'][q]['passage'], pages[CONFIG['my_url']]['chunks'][1])
+        rival = output['passages'][q]['rivals'][0]
+        self.assertIn('900.000', rival['passage'])
+        self.assertAlmostEqual(output['rows'][0]['gap'], rival['gap'], places=4)
+        pages[SERP['organic'][0]]['chunks'][1] = 'Điều khoản sử dụng Ceramic Shield.'
+        output = run()
+        self.assertIsNone(output['rows'][0]['gap'])
+        self.assertTrue(output['rows'][0]['verdict'].startswith('INSUFFICIENT'))
+
+    def test_long_page_keeps_query_passages_and_reduces_embeddings(self):
+        chunks = [f'Thông tin chung về điện thoại mục {i}.' for i in range(246)]
+        chunks[91] = 'Giá thay pin iPhone là 800.000 đồng.'
+        chunks[203] = 'Bảo hành pin iPhone trong 12 tháng.'
+        chosen = evidence.select_passages(chunks, ['Giá thay pin iPhone?', 'Bảo hành pin iPhone bao lâu?'])
+        self.assertIn(chunks[91], chosen)
+        self.assertIn(chunks[203], chosen)
+        self.assertLessEqual(len(chosen), 24)
+
+    def test_fanout_reuses_daily_result_without_extra_model_call(self):
+        store = MemoryStore()
+        calls = []
+        ns = {'generate_fanout': lambda *_: calls.append(1) or ['Giá thay pin?', ' Giá thay pin? ', 'Bảo hành pin?']}
+        first = runtime.cached_fanout(ns, store, CONFIG)
+        second = runtime.cached_fanout(ns, store, CONFIG)
+        self.assertEqual(first, ['Giá thay pin?', 'Bảo hành pin?'])
+        self.assertEqual(second, first)
+        self.assertEqual(len(calls), 1)
+
+    def test_comparison_requires_query_evidence_even_when_vector_is_close(self):
+        q = 'Giá thay pin iPhone?'
+        pages = {
+            CONFIG['my_url']: {'chunks': ['Giá thay pin iPhone là 800.000 đồng.'], 'vectors': [[.8, .2]]},
+            SERP['organic'][0]: {'chunks': ['Điều khoản Ceramic Shield và sửa màn hình.'], 'vectors': [[1., 0.]]},
+        }
+        seed = {'queries': [q], 'vectors': [[1., 0.]], 'serp': SERP}
+        result = runtime.replay(runtime.engine(CONFIG), {'id': 'a'*32, 'config': CONFIG}, seed, pages)
+        self.assertIsNone(result['rows'][0]['gap'])
+        self.assertEqual(result['passages'][q]['rivals'], [])
+
+    def test_passages_survive_without_navigation_and_keep_words_whole(self):
+        ns = runtime.engine(CONFIG)
+        text = ns['_extract']('<nav>Danh mục sản phẩm</nav><main><h2>Giá thay pin</h2><p>' + 'Thông tin bảo hành. '*80 + '</p></main>')
+        chunks = ns['chunk_text'](text)
+        self.assertNotIn('Danh mục', text)
+        self.assertTrue(chunks[0].startswith('Giá thay pin'))
+        self.assertEqual(' '.join(chunks), ' '.join(text.split()))
+        self.assertTrue(all(len(c) <= 700 for c in chunks))
+
+    def test_notebook_source_bodies_are_verbatim_when_available(self):
+        source = Path(os.environ.get('AIO_SOURCE_NOTEBOOK', '.ux-baseline/aio/source.ipynb'))
+        if not source.exists(): self.skipTest('Optional original notebook not on this machine')
+        original = {}
+        for cell in json.loads(source.read_text())['cells']:
+            if cell['cell_type'] != 'code': continue
+            try: tree = ast.parse(''.join(cell['source']))
+            except SyntaxError: continue
+            for node in tree.body:
+                if isinstance(node, ast.FunctionDef): original[node.name] = node
+        selected = ast.parse(Path('aio_engine/notebook.py').read_text())
+        for node in selected.body:
+            if isinstance(node, ast.FunctionDef):
+                self.assertEqual(ast.dump(node), ast.dump(original[node.name]), node.name)
+
+    def test_core_edge_rules(self):
+        ns = runtime.engine(CONFIG)
+        self.assertEqual(ns['chunk_text'](''), [])
+        self.assertEqual(ns['cosine']([], [1, 2]), 0)
+        self.assertEqual(ns['best_match']([1, 2], []), (0, -1))
+        for size, spread, gap, prefix in [(2, 1, 1, 'LOW'), (3, .02, .01, 'PARITY'), (3, 1, -.15, 'AHEAD'), (3, 1, .149, 'PARITY'), (3, 1, .15, 'BEHIND - close'), (3, 1, .5, 'BEHIND - clear')]:
+            self.assertTrue(ns['verdict']({'field_size': size, 'spread': spread, 'gap': gap}).startswith(prefix))
+
+    def test_rank_export_roundtrip_and_formula_safety(self):
+        with patch('sys.stdout', new=io.StringIO()): result = fixture_result()
+        rows = [{'door': door['representative'], 'rank': 1 if i == 0 else '', 'ranking_url': CONFIG['my_url'] if i == 0 else ''} for i, door in enumerate(result['doors'])]
+        calculated = runtime.rank_analysis(result, rows)
+        self.assertEqual(calculated['k'], 1)
+        self.assertAlmostEqual(calculated['probability'], 1-.91**2)
+        data = runtime.rank_file(result, rows)
+        self.assertEqual(runtime.import_ranks(result, data), calculated)
+        import openpyxl
+        workbook = openpyxl.load_workbook(io.BytesIO(data))
+        self.assertEqual(workbook['Ranks'].freeze_panes, 'A2')
+        self.assertTrue(workbook['Ranks'].column_dimensions['D'].hidden)
+        literal = copy.deepcopy(result)
+        old_door = literal['doors'][0]['representative']
+        literal['doors'][0]['representative'] = '=1+1'
+        next(row for row in literal['rows'] if row['door'] == old_door)['door'] = '=1+1'
+        template = runtime.rank_file(literal)
+        self.assertEqual(openpyxl.load_workbook(io.BytesIO(template))['Ranks']['A2'].data_type, 's')
+
+    def test_rank_validation_context_and_url_rules(self):
+        with patch('sys.stdout', new=io.StringIO()): result = fixture_result()
+        rows = [{'door': door['representative'], 'rank': '', 'ranking_url': ''} for door in result['doors']]
+        for invalid in [rows[:-1], rows + [rows[0]], [{**row, 'keyword': 'khác'} for row in rows], [{**rows[0], 'rank': 2.5}] + rows[1:], [{**rows[0], 'rank': True}] + rows[1:], [{**rows[0], 'ranking_url': CONFIG['my_url']}] + rows[1:], [{**rows[0], 'rank': 1, 'ranking_url': 'https://foreign.example/a'}] + rows[1:]]:
+            with self.assertRaises(ValueError): runtime.rank_analysis(result, invalid)
+        valid = [{**rows[0], 'rank': 101, 'ranking_url': 'http://www.example.com/target/#section'}] + rows[1:]
+        # Original notebook accepts all positive integer ranks, including 101.
+        analysis = runtime.rank_analysis(result, valid)
+        self.assertEqual(analysis['k'], 1)
+        self.assertEqual(next(r for r in analysis['rows'] if r['door'] == rows[0]['door'])['url_match'], 'CORRECT TARGET')
+
+    def test_every_action_category_is_preserved(self):
+        result = {'id': 'a'*32, 'config': CONFIG, 'doors': [{'representative': f'd{i}'} for i in range(6)],
+                  'rows': [{'door': f'd{i}', 'verdict': 'BEHIND' if i in (1, 3, 5) else 'PARITY', 'gap': i/10} for i in range(6)]}
+        rows = [{'door': f'd{i}', 'rank': 4 if i < 4 else None, 'ranking_url': CONFIG['my_url'] if i < 2 else 'https://example.com/other' if i < 4 else ''} for i in range(6)]
+        output = runtime.rank_analysis(result, rows)
+        self.assertEqual([r['action'][0] for r in output['rows']], list('123456'))
+
+
+class StagedWorkflow(unittest.TestCase):
+    def test_pause_resume_matches_replay_and_never_saves_keys(self):
+        store = MemoryStore()
+        keys = {'gemini': 'not-a-real-gemini-key', 'serp': 'not-a-real-serp-key'}
+        state = runtime.start(store, CONFIG, keys)
+        factory = runtime.engine
+        def fake_engine(config, credentials):
+            ns = factory(config)
+            ns.update(generate_fanout=lambda *_: QUERIES, fetch_serp=lambda *_: SERP,
+                      fetch_page_text=lambda url: url, chunk_text=lambda url, *_: PAGES[url]['chunks'])
+            ns['embed_batch'] = lambda texts: [np.asarray(v, dtype='float32') for v in (VECTORS if texts == QUERIES else next(p['vectors'] for p in PAGES.values() if p['chunks'] == texts))]
+            return ns
+        with patch.object(runtime, 'engine', side_effect=fake_engine):
+            state = runtime.step(store, state['id'], keys)
+            self.assertEqual(state['stage'], 'pages')
+            self.assertEqual(state['page_index'], 0)
+            for i in range(len(state['urls'])):
+                state = runtime.step(store, state['id'], keys)
+                self.assertEqual(state['page_index'], i+1)
+            self.assertEqual(state['stage'], 'score')
+            state = runtime.step(store, state['id'], keys)
+            self.assertEqual(state['stage'], 'done')
+        with patch('sys.stdout', new=io.StringIO()): expected = fixture_result()
+        self.assertEqual(store.artifact(state['id'], 'result')['rows'], expected['rows'])
+        persisted = json.dumps([store.states, list(store.artifacts.values()), store.cached])
+        for key in keys.values(): self.assertNotIn(key, persisted)
+
+    def test_request_deadline_returns_retryable_checkpoint_and_resumes(self):
+        store = MemoryStore()
+        keys = {'gemini': 'test-key', 'serp': 'test-serp'}
+        state = runtime.start(store, CONFIG, keys)
+        ns = runtime.engine(CONFIG)
+        ns['generate_fanout'] = lambda *_: QUERIES
+        def pause(*_):
+            raise runtime.StepDeadline('saved')
+        ns['embed_batch'] = pause
+        with patch.object(runtime, 'engine', return_value=ns):
+            response, filename = dispatch(store, {'action': 'step', 'id': state['id'], 'credentials': keys})
+        self.assertEqual(response['stage'], 'fanout')
+        self.assertEqual(response['error'], '')
+        self.assertGreaterEqual(response['retry_after'], 1)
+        self.assertNotIn(state['id'], store.leased)
+        ns['embed_batch'] = lambda _: [np.array(v, dtype='float32') for v in VECTORS]
+        ns['fetch_serp'] = lambda _: SERP
+        with patch.object(runtime, 'engine', return_value=ns):
+            response = runtime.step(store, state['id'], keys)
+        self.assertEqual(response['stage'], 'pages')
+        self.assertNotIn('retry_after', response)
+
+    def test_failed_step_is_retryable_and_scrubs_credentials(self):
+        store = MemoryStore(); keys = {'gemini': 'private-test-key', 'serp': 'test-serp'}
+        state = runtime.start(store, CONFIG, keys)
+        fake = runtime.engine(CONFIG)
+        exec("def generate_fanout(*args):\n print('upstream private-test-key')\n raise RuntimeError('Failure private-test-key')", fake)
+        with patch.object(runtime, 'engine', return_value=fake), self.assertRaises(RuntimeError): runtime.step(store, state['id'], keys)
+        stored = store.read(state['id'])
+        self.assertEqual(stored['stage'], 'fanout')
+        self.assertNotIn(keys['gemini'], json.dumps(stored))
+        self.assertIn('[ẩn]', stored['error'])
+        self.assertIn('upstream [ẩn]', stored['logs'])
+        self.assertNotIn(state['id'], store.leased)
+
+    def test_page_prefetch_is_parallel_ordered_and_reused_on_resume(self):
+        store = MemoryStore()
+        urls = list(PAGES)[:3]
+        state = {'id': 'a'*32, 'page_index': 0, 'urls': urls}
+        ns = runtime.engine(CONFIG)
+        barrier = threading.Barrier(3)
+        calls = []
+        def fetch(url):
+            calls.append(url)
+            barrier.wait(timeout=5)
+            return url
+        ns.update(fetch_page_text=fetch, chunk_text=lambda url, *_: PAGES[url]['chunks'])
+        self.assertEqual(runtime.page_chunks(ns, store, state), PAGES[urls[0]]['chunks'])
+        self.assertCountEqual(calls, urls)
+        # A paused embedding step must reuse the same content, even if the site changes.
+        ns['fetch_page_text'] = lambda _: self.fail('A saved page was downloaded twice')
+        self.assertEqual(runtime.page_chunks(ns, store, state), PAGES[urls[0]]['chunks'])
+        state['page_index'] = 1
+        self.assertEqual(runtime.page_chunks(ns, store, state), PAGES[urls[1]]['chunks'])
+
+    def test_page_prefetch_covers_later_pages_before_embedding(self):
+        store = MemoryStore()
+        urls = [f'https://example.com/page-{i}' for i in range(8)]
+        state = {'id': 'a'*32, 'page_index': 0, 'urls': urls}
+        ns = runtime.engine(CONFIG)
+        seen = []
+        ns.update(fetch_page_text=lambda url: seen.append(url) or url,
+                  chunk_text=lambda url, *_: [url])
+        self.assertEqual(runtime.page_chunks(ns, store, state), [urls[0]])
+        self.assertCountEqual(seen, urls)
+        state['page_index'] = 7
+        ns['fetch_page_text'] = lambda _: self.fail('A prefetched page was downloaded twice')
+        self.assertEqual(runtime.page_chunks(ns, store, state), [urls[7]])
+
+    def test_failed_target_is_fatal_and_failed_rival_is_skipped(self):
+        ns = runtime.engine(CONFIG)
+        ns['print'] = lambda *_: None
+        def fail(_): raise RuntimeError('unreadable')
+        ns['fetch_page_text'] = fail
+        state = {'id': 'a'*32, 'page_index': 0, 'urls': list(PAGES)[:2]}
+        with self.assertRaisesRegex(RuntimeError, 'trang mục tiêu'):
+            runtime.page_chunks(ns, MemoryStore(), state)
+        state['page_index'] = 1
+        self.assertEqual(runtime.page_chunks(ns, MemoryStore(), state), [])
+
+    def test_cache_only_reuses_successful_batches(self):
+        store = MemoryStore(); ns = runtime.engine(CONFIG); count = []
+        ns['embed_batch'] = lambda texts: count.append(texts) or [np.array([1, 2], dtype='float32') for _ in texts]
+        a = runtime.cached_embeddings(ns, store, ['some text'])
+        b = runtime.cached_embeddings(ns, store, ['some text'])
+        self.assertEqual(len(count), 1); np.testing.assert_array_equal(a[0], b[0])
+        ns['embed_batch'] = lambda _: [np.array([])]
+        runtime.cached_embeddings(ns, store, ['failed text'])
+        self.assertEqual(len(store.cached), 1)
+
+    def test_deadline_keeps_partial_embeddings_for_resume(self):
+        store = MemoryStore(); ns = runtime.engine(CONFIG)
+        first = np.array([1, 2], dtype='float32')
+        def stopped(_):
+            ns['_EMB_CACHE']['md5-original'] = first
+            raise runtime.StepDeadline('paused')
+        ns['embed_batch'] = stopped
+        with self.assertRaises(runtime.StepDeadline): runtime.cached_embeddings(ns, store, ['page'])
+        resumed = runtime.engine(CONFIG)
+        def finish(_):
+            np.testing.assert_array_equal(resumed['_EMB_CACHE']['md5-original'], first)
+            return [first]
+        resumed['embed_batch'] = finish
+        np.testing.assert_array_equal(runtime.cached_embeddings(resumed, store, ['page'])[0], first)
+        budget = runtime.RequestBudget()
+        with patch.object(runtime.time, 'sleep') as sleep:
+            with self.assertRaises(runtime.StepDeadline): budget.sleep(181)
+            sleep.assert_not_called()
+        self.assertTrue(budget.exhausted)
+
+    def test_daily_quota_stops_instead_of_retrying_every_minute(self):
+        budget = runtime.RequestBudget()
+        with patch.object(runtime.time, 'sleep') as sleep:
+            with self.assertRaisesRegex(RuntimeError, 'hết quota'):
+                budget.sleep(54562)
+            sleep.assert_not_called()
+
+
+class SecurityAndAPI(unittest.TestCase):
+    def test_public_urls_only_and_dns_rebinding_guard(self):
+        for url in ['file:///etc/passwd', 'http://localhost', 'http://a.local', 'https://user:pass@example.com']:
+            with self.assertRaises(ValueError): security.public_address(url)
+        for ips in [['127.0.0.1'], ['10.0.0.1'], ['169.254.169.254'], ['::1'], ['93.184.216.34', '192.168.1.2']]:
+            answers = [(socket.AF_INET, socket.SOCK_STREAM, 6, '', (ip, 443)) for ip in ips]
+            with patch.object(socket, 'getaddrinfo', return_value=answers), self.assertRaises(ValueError): security.public_address('https://example.com')
+        with patch.object(socket, 'getaddrinfo', return_value=[(2, 1, 6, '', ('93.184.216.34', 443))]):
+            self.assertEqual(security.public_address('https://example.com/a')[1], '93.184.216.34')
+        def dns(host, *_args, **_kwargs): return [(2, 1, 6, '', ('127.0.0.1' if host == '127.0.0.1' else '93.184.216.34', 443))]
+        with patch.object(socket, 'getaddrinfo', side_effect=dns), self.assertRaises(ValueError): security.public_address('https://r.jina.ai/http://127.0.0.1/admin')
+
+    def test_http_endpoint_requires_auth_and_same_origin(self):
+        def request(body, headers):
+            h = object.__new__(handler); h.headers = Message(); h.rfile = io.BytesIO(body); output = []
+            for key, value in {'Host': 'workspace.test', 'Content-Length': str(len(body)), **headers}.items(): h.headers[key] = value
+            h.send = lambda status, data, filename=None: output.append((status, data, filename))
+            h.do_POST(); return output[0]
+        with patch('api.aio.Store') as store:
+            self.assertEqual(request(b'{}', {})[0], 401); store.assert_not_called()
+            self.assertEqual(request(b'{}', {'Authorization': 'Bearer test', 'Origin': 'https://evil.test'})[0], 401); store.assert_not_called()
+            self.assertEqual(request(b'[]', {'Authorization': 'Bearer test'})[0], 400); store.assert_not_called()
+            store.return_value = MemoryStore()
+            payload = {'action': 'start', 'config': CONFIG, 'credentials': {'gemini': 'test', 'serp': 'test'}}
+            response = request(json.dumps(payload).encode(), {'Authorization': 'Bearer test', 'Origin': 'https://workspace.test'})
+            self.assertEqual(response[0], 200)
+            self.assertEqual(response[1]['stage'], 'fanout')
+
+    def test_owner_scoped_storage_and_no_service_role(self):
+        store = object.__new__(Store); store.owner = 'user-one'; calls = []
+        def send(method, path, **kwargs):
+            calls.append((method, path, kwargs))
+            return type('Response', (), {'content': gzip.compress(json.dumps({'ok': True}).encode())})()
+        store.request = send
+        store.artifact('job', 'result', {'ok': True})
+        self.assertIn('/seo-aio/user-one/job/result.json.gz', calls[0][1])
+        self.assertEqual(store.artifact('job', 'result'), {'ok': True})
+        sql = Path('supabase/migrations/20261105000002_aio_workspace.sql').read_text()
+        self.assertIn('enable row level security', sql)
+        self.assertIn('security invoker', sql)
+        self.assertIn('auth.uid()', sql)
+        self.assertNotIn('service_role', Path('aio_engine/storage.py').read_text())
+        import base64
+        secret = 'login:private-test'
+        self.assertEqual(runtime.redact(base64.b64encode(secret.encode()).decode(), {'serp': secret}), '[ẩn]')
+        first, second = runtime.engine(CONFIG), runtime.engine(CONFIG)
+        first['_EMB_CACHE']['test'] = np.array([1])
+        self.assertNotIn('test', second['_EMB_CACHE'])
+
+    def test_invalid_config_and_job_are_rejected(self):
+        for config in [None, [], {**CONFIG, 'n_queries': True}, {**CONFIG, 'n_queries': 31}, {**CONFIG, 'threshold': .1}, {**CONFIG, 'provider': 'injected'}, {**CONFIG, 'my_url': 'file:///root'}, {**CONFIG, 'llm_model': 'bad?apikey=private'}]:
+            with self.assertRaises(ValueError): runtime.validate_config(config)
+        for payload in [{'action': 'status', 'id': '../user/result'}, {'action': 'step', 'id': 'a'*32, 'credentials': {'gemini': []}}]:
+            with self.assertRaises(ValueError): dispatch(MemoryStore(), payload)
+
+
+if __name__ == '__main__': unittest.main()
+
+class StorageMissingObject(unittest.TestCase):
+    def test_storage_400_not_found_is_cache_miss_only(self):
+        store = object.__new__(Store)
+        store.base = 'https://example.supabase.co'
+        store.headers = {}
+        from unittest.mock import Mock
+        response = Mock(status_code=400)
+        response.json.return_value = {'statusCode': '404', 'error': 'not_found', 'message': 'Object not found'}
+        with patch('aio_engine.storage.requests.request', return_value=response):
+            with self.assertRaises(FileNotFoundError):
+                store.request('GET', '/storage/v1/object/seo-aio/owner/job/fanout.json.gz')
+            with self.assertRaises(RuntimeError):
+                store.request('POST', '/storage/v1/object/seo-aio/owner/job/fanout.json.gz')
+            response.json.return_value = {'error': 'InvalidRequest', 'message': 'bad payload'}
+            with self.assertRaises(RuntimeError):
+                store.request('GET', '/storage/v1/object/seo-aio/owner/job/fanout.json.gz')

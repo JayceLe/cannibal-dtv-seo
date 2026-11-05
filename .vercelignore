@@ -5,3 +5,6 @@ private
 .vercel
 *.tsbuildinfo
 supabase/.temp
+
+.ux-baseline
+**/__pycache__

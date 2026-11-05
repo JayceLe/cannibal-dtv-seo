@@ -117,6 +117,12 @@ Tuân theo hệ thống cấu trúc Airtable với phân cấp hình khối ch�
 
 ---
 
+## Tab AIO
+
+Tái dùng Be Vietnam Pro, token bề mặt/viền và màu ngữ nghĩa hiện hành. Khu thiết lập ở trái, tiến trình ở phải; kết quả audit, đối chiếu đoạn và Rank Tracker nằm toàn chiều ngang bên dưới. Tối đa 30 query nên giữ bảng trực tiếp, không thêm thư viện bảng hoặc biểu đồ. Điểm căn phải, dùng chữ số đều; verdict có nhãn chữ và màu. Hai API key ẩn mặc định, nhập từ file hoặc dán trực tiếp. Model và cấu hình nâng cao nằm trong một disclosure.
+
+Tab chỉ nạp khi mở; chuyển qua báo cáo khác giữ tiến trình AIO trong phiên. Trạng thái stage/progress thay thế hiệu ứng số chạy. Chuyển động ngắn khi kết quả xuất hiện và progress dùng transform; tắt khi reduced-motion. Bảng cuộn trong vùng riêng, nội dung website không render thành HTML. Dưới 1100px hai cột thiết lập xếp dọc; điều hướng bốn tab không làm tràn trang ở 320px.
+
 ## 6. Bố cục, Biểu đồ & Tương tác
 
 - **Header tinh gọn**: Nền trắng sáng `#ffffff`, viền chân `#e2e8f0`, brand mark mực đen `#181d26` với chữ trắng, các nút chuyển màn hình Tổng quan / So sánh / Thứ hạng hiển thị rõ ràng.

@@ -36,6 +36,13 @@ const OverviewWorkspace = dynamic(() => import("./overview-workspace"));
 const Comparison = dynamic(() => import("./comparison"));
 const CannibalRules = dynamic(() => import("./cannibal-rules"));
 const RankingsReport = dynamic(() => import("./rankings-report"));
+const AioWorkspace = dynamic(() => import("./aio-workspace"), {
+  loading: () => (
+    <p className="muted" role="status">
+      Đang mở AIO…
+    </p>
+  ),
+});
 const Importer = dynamic(() => import("./importer"), {
   loading: () => <p className="muted">Đang nạp trình import…</p>,
 });
@@ -47,6 +54,7 @@ function csvCell(value: unknown) {
 }
 export default function Dashboard() {
   const [showRules, setShowRules] = useState(false);
+  const [aioOpened, setAioOpened] = useState(false);
   const [comparisonRefresh, setComparisonRefresh] = useState(0);
   const motionRoot = useRef<HTMLDivElement>(null);
   const [view, setView] = useState<DashboardView>("overview"),
@@ -509,6 +517,7 @@ export default function Dashboard() {
         view={view}
         onView={(next) => {
           setView(next);
+          if (next === "aio") setAioOpened(true);
           if (next === "compare") setComparisonRefresh((n) => n + 1);
         }}
         periods={weeks}
@@ -529,7 +538,7 @@ export default function Dashboard() {
         tabIndex={-1}
         aria-labelledby={view + "-tab"}
       >
-        {error ? (
+        {error && view !== "aio" ? (
           <div role="alert" className="error-message">
             {error}
             <button
@@ -551,7 +560,7 @@ export default function Dashboard() {
           />
         ) : view === "rankings" ? (
           <RankingsReport />
-        ) : (
+        ) : view === "compare" ? (
           <Comparison
             weeks={weeks}
             older={older}
@@ -573,7 +582,12 @@ export default function Dashboard() {
             loading={compareBusy}
             onImport={() => setShowImport(true)}
           />
-        )}
+        ) : null}
+        {aioOpened ? (
+          <div hidden={view !== "aio"}>
+            <AioWorkspace key={user.id} userId={user.id} />
+          </div>
+        ) : null}
       </main>
 
       {showRules ? <CannibalRules onClose={() => setShowRules(false)} /> : null}

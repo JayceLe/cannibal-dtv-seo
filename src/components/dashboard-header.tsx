@@ -8,17 +8,19 @@ import {
   LayoutDashboard,
   LogOut,
   Upload,
+  ScanSearch,
 } from "lucide-react";
 import type { Week } from "@/lib/comparison";
 import HeaderDateSelect from "./header-date-select";
 import HeaderScene from "./header-scene";
 
-export type DashboardView = "overview" | "compare" | "rankings";
+export type DashboardView = "overview" | "compare" | "rankings" | "aio";
 
 const tabs = [
   { value: "overview", label: "Tổng quan", icon: LayoutDashboard },
   { value: "compare", label: "So sánh", icon: GitCompareArrows },
   { value: "rankings", label: "Thứ hạng", icon: ChartNoAxesCombined },
+  { value: "aio", label: "AIO", icon: ScanSearch },
 ] as const;
 
 type Props = {
@@ -95,16 +97,18 @@ export default function DashboardHeader({
           </button>
         ))}
       </nav>
-      <button
-        className="btn secondary header-rules-button"
-        aria-label="Quy tắc tính cannibal"
-        title="Quy tắc tính cannibal"
-        aria-haspopup="dialog"
-        onClick={onRules}
-      >
-        <BookOpen size={17} aria-hidden="true" />
-        <span>Quy tắc</span>
-      </button>
+      {view !== "aio" ? (
+        <button
+          className="btn secondary header-rules-button"
+          aria-label="Quy tắc tính cannibal"
+          title="Quy tắc tính cannibal"
+          aria-haspopup="dialog"
+          onClick={onRules}
+        >
+          <BookOpen size={17} aria-hidden="true" />
+          <span>Quy tắc</span>
+        </button>
+      ) : null}
       {view === "overview" ? (
         <HeaderDateSelect
           periods={periods}
@@ -113,7 +117,7 @@ export default function DashboardHeader({
         />
       ) : null}
       <div className="header-actions">
-        {view !== "rankings" ? (
+        {view === "overview" || view === "compare" ? (
           <>
             <button
               className="btn secondary"
