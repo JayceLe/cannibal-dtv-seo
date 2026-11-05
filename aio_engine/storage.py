@@ -60,4 +60,3 @@ class Store:
             return json.loads(gzip.decompress(data))
         data = gzip.compress(json.dumps(value, ensure_ascii=False, allow_nan=False).encode())
         self.request('POST', path, headers={'Content-Type': 'application/gzip', 'x-upsert': 'true'}, data=data)
-

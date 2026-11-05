@@ -29,6 +29,8 @@ PAGES = {
     SERP['organic'][1]: {'chunks': ['Chi phí, khi nào cần thay pin, loại pin phù hợp và thay ở đâu… ' * 12], 'vectors': [[.15, .2, .95]]},
     SERP['organic'][2]: {'chunks': [], 'vectors': []},
 }
+for page in PAGES.values():
+    page['chunks'] = [text + ' Giá thay pin iPhone là 800.000 đồng, thời gian 30 phút.' for text in page['chunks']]
 SEED = {'queries': QUERIES, 'vectors': VECTORS, 'serp': SERP}
 
 
@@ -113,6 +115,33 @@ class NotebookParity(unittest.TestCase):
         self.assertIn(chunks[91], chosen)
         self.assertIn(chunks[203], chosen)
         self.assertLessEqual(len(chosen), 24)
+
+    def test_semantically_close_but_different_intents_stay_separate(self):
+        ns = runtime.engine(CONFIG)
+        qs = ['Giá thay pin iPhone?', 'Bảo hành pin iPhone?', 'Chi phí thay pin iPhone?']
+        groups = ns['cluster_doors'](qs, [np.array([1., 0.])]*3, .85)
+        self.assertEqual([g['members'] for g in groups], [[qs[0], qs[2]], [qs[1]]])
+
+    def test_hybrid_candidates_reject_wrong_device_and_unanswered_price(self):
+        texts = ['Giá thay pin iPhone 16 là 900.000 đồng.',
+                 'Giá thay pin iPhone 15 là bao nhiêu? Liên hệ để biết thêm.',
+                 'Giá thay pin iPhone 15 là 800.000 đồng, bảo hành 12 tháng.']
+        chosen = evidence.select_passages(texts, ['Chi phí thay pin iPhone 15?'])
+        self.assertEqual(chosen, [texts[2]])
+
+    def test_hybrid_scans_whole_page_and_accepts_accent_and_alias_variants(self):
+        texts = ['Danh mục điện thoại và phụ kiện.' for _ in range(300)]
+        texts.append('Cost thay battery iPhone 15 la 800.000 dong, bao hanh 12 thang.')
+        self.assertEqual(evidence.select_passages(texts, ['Chi phí thay pin iPhone 15?']), [texts[-1]])
+
+    def test_readable_target_with_no_answer_does_not_invent_a_score(self):
+        seed = {'queries': ['Giá thay pin iPhone?'], 'vectors': [[1., 0.]], 'serp': SERP}
+        pages = {CONFIG['my_url']: {'chunks': [], 'vectors': [], 'readable': True},
+                 SERP['organic'][0]: {'chunks': ['Giá thay pin iPhone là 800.000 đồng.'], 'vectors': [[.8, .2]]}}
+        result = runtime.replay(runtime.engine(CONFIG), {'id':'a'*32, 'config':CONFIG}, seed, pages)
+        self.assertIsNone(result['rows'][0]['your_score'])
+        self.assertIsNone(result['rows'][0]['gap'])
+        self.assertTrue(result['rows'][0]['verdict'].startswith('INSUFFICIENT'))
 
     def test_fanout_normalizes_without_persistent_cache(self):
         self.assertEqual(runtime.distinct_queries(['Giá thay pin?', ' Giá thay pin? ', 'Bảo hành pin?']),

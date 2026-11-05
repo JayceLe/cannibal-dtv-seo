@@ -91,6 +91,8 @@ def engine(config, credentials=None):
               SERP_API_KEY=credentials.get('serp', ''),
               MANUAL_AIO_CITATIONS=[ns['clean'](x) for x in re.split(r'[\n,]+', config['manual_aio']) if ns['clean'](x)])
     ns['FANOUT_PROMPT'] += "\nEvery query must stay on the user's specific subject. Cover only facets that genuinely apply; do not invent product facts, prices, or named alternatives."
+    ns['FANOUT_PROMPT'] += "\nMake every query self-contained with the specific subject/model. Preserve different intents (price, warranty, duration, risks, compatibility); do not replace them with generic topic questions."
+    ns['cluster_doors'] = lambda queries, vectors, threshold: evidence.cluster_doors(queries, vectors, threshold, ns['cosine'])
     if credentials.get('gemini'):
         actual = genai.Client(api_key=credentials['gemini'], http_options={'timeout': 60000})
         budget = RequestBudget()
@@ -102,6 +104,15 @@ def engine(config, credentials=None):
     else:
         ns['requests'] = types.SimpleNamespace(get=public_get, post=requests.post)
     ns['embed_batch'] = lambda texts: embeddings.embed(texts, ns['client'], ns['EMBED_MODEL'], ns['time'].sleep, ns.get('print', print))
+    def retry_unavailable(fn, delay=2):
+        for attempt in range(3):
+            try:
+                return fn()
+            except Exception as exc:
+                if not ns['_is_503'](exc) or attempt == 2:
+                    raise
+                ns['time'].sleep(delay * (attempt + 1))
+    ns['_retry_503'] = retry_unavailable
     return ns
 
 
@@ -136,7 +147,7 @@ def distinct_queries(queries):
         if not isinstance(value, str):
             continue
         query = ' '.join(value.strip().strip('"\'').split())
-        key = re.sub(r'[^\w]+', '', query.casefold())
+        key = re.sub(r'[^\w]+', '', evidence.normalized(query))
         if 5 <= len(query) <= 250 and key not in seen:
             seen.add(key)
             result.append(query)
@@ -167,7 +178,10 @@ def replay(ns, state, seed, pages):
         if pairs:
             sources[url] = list(zip(*pairs))
     if own not in sources:
-        raise RuntimeError('Trang mục tiêu chưa có đoạn nội dung chấm được. Hãy thử audit lại.')
+        if pages.get(own, {}).get('readable'):
+            sources[own] = ([], [])
+        else:
+            raise RuntimeError('Trang mục tiêu chưa có đoạn nội dung chấm được. Hãy thử audit lại.')
     mean = np.mean(np.stack(door_vecs + [v for _, vs in sources.values() for v in vs]), axis=0)
     index = {url: evidence.passage_index(texts) for url, (texts, _) in sources.items()}
     centered = {url: [v - mean for v in vs] for url, (_, vs) in sources.items()}
@@ -176,7 +190,7 @@ def replay(ns, state, seed, pages):
         q, vector = door['representative'], vec - mean
         hits = {}
         for url, (texts, _) in sources.items():
-            hit = evidence.match(q, texts, vector, centered[url], ns['cosine'], *index[url])
+            hit = evidence.match(q, texts, vector, centered[url], ns['cosine'], *index[url], keyword=config['keyword'])
             if hit is not None:
                 hits[url] = hit
         mine = hits.pop(own, None)
@@ -201,7 +215,8 @@ def replay(ns, state, seed, pages):
     rows.sort(key=lambda row: row['gap'] if row['gap'] is not None else -float('inf'), reverse=True)
     return {'id': state['id'], 'config': config, 'rows': rows, 'doors': doors,
             'competitors': list(dict.fromkeys(seed['serp']['aio_citations'] + seed['serp']['organic']))[:config['top_competitors']],
-            'passages': passages, 'query_count': len(seed['queries']), 'read_competitors': len(sources)-1}
+            'passages': passages, 'query_count': len(seed['queries']),
+            'read_competitors': sum(bool(page.get('readable') or page['chunks']) for url, page in pages.items() if url != own)}
 
 
 def page_chunks(ns, store, state):
@@ -270,17 +285,18 @@ def step(store, job, credentials):
         elif state['stage'] == 'pages':
             index = state['page_index']
             chunks = page_chunks(ns, store, state)
-            if len(chunks) > 24:
+            readable = bool(chunks)
+            if chunks:
                 seed = store.artifact(job, 'seed')
                 query_vectors = [np.asarray(v, dtype='float32') for v in seed['vectors']]
                 valid = [(q, v) for q, v in zip(seed['queries'], query_vectors, strict=True) if v.size]
                 queries = [door['representative'] for door in ns['cluster_doors'](
                     [q for q, _ in valid], [v for _, v in valid], state['config']['threshold'])]
-                chosen = evidence.select_passages(chunks, queries)
+                chosen = evidence.select_passages(chunks, queries, keyword=config['keyword'])
                 ns['print'](f'Đoạn liên quan query: {len(chosen)}/{len(chunks)}')
                 chunks = chosen
             vectors = ns['embed_batch'](chunks) if chunks else []
-            store.artifact(job, f'page-{index}', {'chunks': chunks, 'vectors': [v.tolist() for v in vectors]})
+            store.artifact(job, f'page-{index}', {'chunks': chunks, 'vectors': [v.tolist() for v in vectors], 'readable': readable})
             state.update(page_index=index+1, progress=15+int(70*(index+1)/len(state['urls'])))
             if state['page_index'] == len(state['urls']):
                 state['stage'] = 'score'

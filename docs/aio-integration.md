@@ -4,7 +4,8 @@
 
 - Vẫn dùng một lần Gemini để sinh fan-out và embedding cho query/đoạn cần so sánh; SERP chỉ gọi cho từ khóa gốc. Mỗi audit sinh fan-out riêng, không đọc/ghi cache dùng lại giữa các audit.
 - Bỏ query trùng bằng code trước khi embedding. Prompt buộc các nhánh giữ đúng chủ đề và không tự bịa giá, sản phẩm hay đối thủ.
-- Tách nội dung thành đoạn tối đa khoảng 420 ký tự; dùng bộ lọc từ khóa, ý định và chủ đề để chọn tối đa 24 đoạn mỗi trang trước khi gọi embedding. Kết quả so sánh thiếu đoạn có bằng chứng được ghi là thiếu dữ liệu thay vì hiển thị gap sai.
+- Giữ Gemini sinh fan-out và tạo embedding ngữ nghĩa. Code xử lý tải/đọc trang, chuẩn hóa dấu và từ tương đương, kiểm tra model sản phẩm, gom door có cùng ý định, lọc bằng chứng và tính centering/gap theo notebook.
+- Tách nội dung thành đoạn khoảng 420 ký tự và quét toàn bộ trang. Mỗi door giữ tối đa hai ứng viên phù hợp; chỉ các đoạn này được gửi embedding, không nhúng các đoạn lấy mẫu ngẫu nhiên. Query giá cần có giá hoặc miễn phí; query thời gian cần có mốc thời gian cụ thể. Thiếu đoạn trả lời thì không suy ra điểm/gap.
 - Giữ trang đã tải và bước đã hoàn tất trong checkpoint của chính audit để tiếp tục. Không có cache embedding. Chỉ gom input trùng trong một request rồi khôi phục đúng thứ tự đầu vào.
 - Embedding kiểm tra đủ vector, kích thước và giá trị hợp lệ. Báo nguyên nhân Gemini (key/model/quota); tối đa hai lượt thử lại lỗi tạm thời theo thời gian Google yêu cầu. Lỗi key, model hoặc quota ngày không thử lại vòng lặp. Không chờ cố định theo giới hạn 90 vector/phút tự đặt.
 

@@ -47,8 +47,64 @@ _FACETS = (
 )
 
 
+def normalized(text):
+    text = unicodedata.normalize('NFD', text.casefold().replace('đ', 'd'))
+    text = ''.join(c for c in text if unicodedata.category(c) != 'Mn')
+    for source, target in [('battery', 'pin'), ('warranty', 'bao hanh'), ('backup', 'sao luu'), ('cost', 'chi phi')]:
+        text = re.sub(r'\b' + source + r'\b', target, text)
+    return text
+
+
+def facet_rules(query):
+    return [normalized(answer) for cue, answer in _FACETS if re.search(normalized(cue), normalized(query))]
+
+
+def compatible(query, text):
+    # Keep the model number with its product; a different device is not query evidence.
+    q, t = normalized(query), normalized(text)
+    brands = set('iphone ipad macbook samsung redmi oppo android'.split())
+    expected, actual = set(q.split()) & brands, set(t.split()) & brands
+    if expected and actual and not expected & actual:
+        return False
+    for model in models(q):
+        competing = [m for m in models(t) if m.split()[0] == model.split()[0]]
+        if competing and model not in competing:
+            return False
+    return True
+
+
+def models(text):
+    return set(re.findall(r'\b(?:iphone|ipad|macbook|samsung|redmi|oppo)\s+\d+\w*(?:\s+(?:pro|max|plus|ultra|mini))*', normalized(text)))
+
+
+def substantive(query, text):
+    q, t = normalized(query), normalized(text)
+    if len(text) < 20:
+        return False
+    if re.search(normalized(_FACETS[0][0]), q) and not re.search(r'\d[\d.,]*\s*(?:dong|vnd|d\b|₫|trieu|nghin)|[$€£]\s*\d|mien phi', t):
+        return False
+    if re.search(normalized(_FACETS[4][0]), q) and not re.search(r'\d+(?:[.,]\d+)?\s*(?:phut|gio|ngay|tuan|thang|nam)\b|trong ngay|ngay lap tuc', t):
+        return False
+    return True
+
+
+def cluster_doors(queries, vectors, threshold, cosine):
+    signatures = [frozenset(i for i, (cue, _) in enumerate(_FACETS) if i != 1 and re.search(normalized(cue), normalized(q))) for q in queries]
+    groups, assigned = [], set()
+    for i, query in enumerate(queries):
+        if i in assigned:
+            continue
+        members = [i]
+        for j in range(i+1, len(queries)):
+            if j not in assigned and signatures[i] == signatures[j] and models(query) == models(queries[j]) and cosine(vectors[i], vectors[j]) >= threshold:
+                members.append(j)
+                assigned.add(j)
+        groups.append(dict(representative=query, members=[queries[k] for k in members], member_indices=members))
+    return groups
+
+
 def terms(text):
-    return set(re.findall(r'\w+', unicodedata.normalize('NFC', text).casefold())) - _STOP
+    return set(re.findall(r'\w+', normalized(text))) - set(normalized(' '.join(_STOP)).split())
 
 
 def passage_index(texts):
@@ -58,48 +114,42 @@ def passage_index(texts):
     return words, weights
 
 
-def select_passages(texts, queries, limit=24):
+def select_passages(texts, queries, limit=None, keyword=''):
     """Cover each query with local evidence before spending embedding quota."""
-    if len(texts) <= limit:
-        return texts
     words, weights = passage_index(texts)
-    selected = set(range(min(2, len(texts))))
+    selected = set()
     ranked_by_query = []
     for query in queries:
         query_words = terms(query)
-        required = [answer for cue, answer in _FACETS if re.search(cue, query.casefold())]
+        required = facet_rules(query)
         ranked = []
         for i, tokens in enumerate(words):
-            if required and any(not re.search(pattern, texts[i].casefold()) for pattern in required):
+            if not compatible(keyword + ' ' + query, texts[i]) or not substantive(query, texts[i]) or any(not re.search(pattern, normalized(texts[i])) for pattern in required):
                 continue
             overlap = sum(weights[word] for word in query_words & tokens)
-            if overlap and (query_words - _INTENT) & tokens:
+            if overlap and (query_words - set(normalized(' '.join(_INTENT)).split())) & tokens:
                 ranked.append((overlap, i))
-        ranked_by_query.append([i for _, i in sorted(ranked, key=lambda row: (-row[0], row[1]))[:3]])
-    for rank in range(3):
+        ranked_by_query.append([i for _, i in sorted(ranked, key=lambda row: (-row[0], row[1]))[:2]])
+    for rank in range(2):
         for candidates in ranked_by_query:
-            if len(selected) >= limit:
+            if limit is not None and len(selected) >= limit:
                 break
             if len(candidates) > rank:
                 selected.add(candidates[rank])
-    # Two distributed fallbacks catch alternate wording without embedding the whole page.
-    for i in (len(texts) // 3, 2 * len(texts) // 3):
-        if len(selected) < limit:
-            selected.add(i)
     return [texts[i] for i in sorted(selected)]
 
 
-def match(query, texts, vector, vectors, cosine, words, weights):
+def match(query, texts, vector, vectors, cosine, words, weights, keyword=''):
     query_words = terms(query)
     weight = sum(weights.get(w, 1) for w in query_words) or 1
-    required = [answer for cue, answer in _FACETS if re.search(cue, query.casefold())]
+    required = facet_rules(query)
     best = None
     for i, (text, v, tokens) in enumerate(zip(texts, vectors, words, strict=True)):
-        if any(not re.search(pattern, text.casefold()) for pattern in required):
+        if not compatible(keyword + ' ' + query, text) or not substantive(query, text) or any(not re.search(pattern, normalized(text)) for pattern in required):
             continue
         score = cosine(vector, v)
         overlap = sum(weights[w] for w in query_words & tokens) / weight
-        if not overlap or not (query_words - _INTENT) & tokens or (overlap < .2 and score < .18):
+        if not overlap or not (query_words - set(normalized(' '.join(_INTENT)).split())) & tokens or (overlap < .2 and score < .18):
             continue
         priority = score + .18 * overlap
         if best is None or priority > best[0]:
