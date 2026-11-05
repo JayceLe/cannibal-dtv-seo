@@ -1,44 +1,44 @@
 :root {
-  color-scheme: dark;
-  --bg: #0f1117;
-  --surface: #181c27;
-  --surface-up: #202636;
-  --surface-active: #2b3348;
-  --input: #131722;
-  --border: #283144;
-  --border-strong: #3f4c68;
-  --line: #212838;
-  --text: #f4f5f8;
-  --muted: #9aa4b7;
-  --soft: #6d778d;
-  --accent: #0075de;
-  --accent-hover: #1a85e8;
-  --accent-active: #005bab;
-  --query-bg: #15263a;
-  --impression-bg: #281d39;
-  --focus: #0075de;
-  --query: #62aef0;
-  --impression: #d6b6f6;
-  --safe: #2ecc71;
-  --medium: #f08c3a;
-  --danger: #ff6492;
-  --review: #9aa4b7;
-  --safe-bg: #122b1e;
-  --medium-bg: #332114;
-  --danger-bg: #361928;
-  --safe-border: #1d5232;
-  --medium-border: #5c381c;
-  --danger-border: #632344;
+  color-scheme: light;
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-up: #f1f5f9;
+  --surface-active: #e2e8f0;
+  --input: #ffffff;
+  --border: #e2e8f0;
+  --border-strong: #94a3b8;
+  --line: #edf2f7;
+  --text: #181d26;
+  --muted: #475569;
+  --soft: #64748b;
+  --accent: #181d26;
+  --accent-hover: #2d3748;
+  --accent-active: #0d1218;
+  --query-bg: #eff6ff;
+  --impression-bg: #f5f3ff;
+  --focus: #1b61c9;
+  --query: #1b61c9;
+  --impression: #6366f1;
+  --safe: #047857;
+  --medium: #b45309;
+  --danger: #b91c1c;
+  --review: #64748b;
+  --safe-bg: #ecfdf5;
+  --medium-bg: #fffbeb;
+  --danger-bg: #fef2f2;
+  --safe-border: #a7f3d0;
+  --medium-border: #fde68a;
+  --danger-border: #fecaca;
   --radius-xs: 4px;
-  --radius-sm: 5px;
-  --radius-md: 8px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
   --radius-lg: 12px;
-  --radius-xl: 16px;
+  --radius-xl: 14px;
   --radius-full: 9999px;
   --radius-card: var(--radius-lg);
   --radius-panel: var(--radius-xl);
-  --radius-control: var(--radius-md);
-  --radius-input: var(--radius-xs);
+  --radius-control: 8px;
+  --radius-input: var(--radius-sm);
   --radius-menu: var(--radius-md);
   --radius-pill: var(--radius-full);
   --space-1: 4px;
@@ -106,8 +106,8 @@ a {
   text-decoration: none;
 }
 ::selection {
-  background: var(--surface-active);
-  color: #fff;
+  background: #e0e7ff;
+  color: #181d26;
 }
 input,
 textarea {
@@ -115,7 +115,7 @@ textarea {
 }
 button:focus-visible,
 a:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--focus);
   outline-offset: 4px;
 }
 input,
@@ -133,8 +133,8 @@ select {
 }
 input:focus,
 select:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgb(0 117 222 / 0.25);
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px rgb(27 97 201 / 0.15);
 }
 input::placeholder {
   color: var(--soft);
@@ -1009,7 +1009,7 @@ main {
 }
 .ratio-fraction > strong {
   max-width: 100%;
-  color: #fff;
+  color: var(--text);
   font-size: 32px;
   font-weight: 700;
   letter-spacing: -0.5px;
@@ -2509,7 +2509,7 @@ progress {
     translate: 0 -2px;
   }
   .highlight-card:hover .highlight-label {
-    color: #fff;
+    color: var(--text);
   }
 
   .highlight-card:hover .highlight-footer {
@@ -2521,24 +2521,20 @@ progress {
   }
 
   .category-list button:hover {
-    background: color-mix(in srgb, var(--surface), var(--category-color) 17%);
+    background: color-mix(in srgb, var(--surface-up), var(--category-color) 12%);
     border-color: var(--category-color);
-    color: #fff;
+    color: var(--text);
   }
   .category-list button:hover b {
-    background: color-mix(
-      in srgb,
-      var(--surface-up),
-      var(--category-color) 24%
-    );
-    color: #fff;
+    background: #cbd5e1;
+    color: var(--text);
   }
   .url-metric-row:hover {
     background: var(--surface-up);
     box-shadow: inset 3px 0 var(--border-strong);
   }
   .url-metric-row:hover .url-identity a {
-    color: #fff;
+    color: var(--query);
   }
   .search-field:hover {
     border-color: var(--border-strong);
@@ -2548,7 +2544,7 @@ progress {
   .segmented button:hover {
     background: var(--surface-active);
     border-color: var(--border-strong);
-    color: #fff;
+    color: var(--text);
   }
 }
 .category-list button:focus-visible,
@@ -2579,7 +2575,7 @@ progress {
 .distribution-legend
   button:is(:hover, :focus-visible, .is-highlighted)
   :is(span, strong) {
-  color: #fff;
+  color: var(--text);
 }
 .distribution-legend button.is-dimmed {
   background: transparent;
@@ -2991,7 +2987,7 @@ progress {
 .picker-list button.is-active {
   background: var(--surface-active);
   border-color: var(--border-strong);
-  color: #fff;
+  color: var(--text);
 }
 .picker-list button[aria-selected="true"] {
   color: var(--muted);
@@ -4037,7 +4033,7 @@ progress {
 }
 .report-metric-toggle button:hover {
   background: var(--surface-active);
-  color: #fff;
+  color: var(--text);
 }
 .report-chart-values {
   display: flex;
@@ -4471,7 +4467,7 @@ progress {
 .select-menu-options [role="option"].is-active {
   border-color: var(--border-strong);
   background: var(--surface-active);
-  color: #fff;
+  color: var(--text);
 }
 .select-menu-options [role="option"][aria-selected="true"] {
   background: var(--surface-up);
