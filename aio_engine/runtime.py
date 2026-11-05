@@ -133,6 +133,14 @@ def redact(message, credentials):
     return message
 
 
+def explain_error(message):
+    if 'free tier is not available for this project' in message.lower():
+        return ('Google từ chối Gemini API key vì project chưa được dùng gói miễn phí. '
+                'Hãy bật thanh toán cho project tại https://aistudio.google.com/billing '
+                'hoặc dùng API key của project khác có quyền truy cập Gemini. Sau đó chạy lại audit.')
+    return message
+
+
 def require_keys(config, credentials):
     if not credentials.get('gemini'):
         raise ValueError('Nhập Gemini API key trước khi chạy audit.')
@@ -320,7 +328,7 @@ def step(store, job, credentials):
             close_engine(ns)
         state['logs'] = (state.get('logs', []) + log.getvalue().splitlines())[-120:]
         # Provider messages can echo credentials; scrub before any checkpoint write.
-        state['error'] = redact(state.get('error', ''), credentials)
+        state['error'] = explain_error(redact(state.get('error', ''), credentials))
         state['logs'] = [redact(line, credentials) for line in state['logs']]
         store.save(job, state)
     return state

@@ -398,6 +398,12 @@ class StagedWorkflow(unittest.TestCase):
 
 
 class SecurityAndAPI(unittest.TestCase):
+    def test_project_billing_error_is_explained(self):
+        message = runtime.explain_error('403 PERMISSION_DENIED: The Gemini API free tier is not available for this project.')
+        self.assertIn('bật thanh toán', message)
+        self.assertIn('project khác', message)
+        self.assertEqual(runtime.explain_error('other error'), 'other error')
+
     def test_public_urls_only_and_dns_rebinding_guard(self):
         for url in ['file:///etc/passwd', 'http://localhost', 'http://a.local', 'https://user:pass@example.com']:
             with self.assertRaises(ValueError): security.public_address(url)

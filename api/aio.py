@@ -82,6 +82,7 @@ class handler(BaseHTTPRequestHandler):
             credentials = payload.get('credentials', {}) if isinstance(payload, dict) else {}
             if isinstance(credentials, dict):
                 message = runtime.redact(message, credentials)
+            message = runtime.explain_error(message)
             if not message:
                 message = 'Chưa hoàn tất thao tác. Thử lại hoặc tiếp tục phiên audit.'
             self.send(status, {'error': message[:2000], 'type': type(exc).__name__})
