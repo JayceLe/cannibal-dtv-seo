@@ -110,7 +110,7 @@ function ApiField({
   );
 }
 
-const generationModels = ["gemini-3.8-flash", "gemini-3.5-flash-lite", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"];
+const generationModels = ["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-2.5-flash", "gemini-2.5-pro"];
 
 export default function AioWorkspace({ userId }: { userId: string }) {
   const [customModel, setCustomModel] = useState(false);
@@ -360,7 +360,7 @@ export default function AioWorkspace({ userId }: { userId: string }) {
                     </label>
                   </div>
                   <SelectMenu
-                    label="Model Gemini"
+                    label="Model Gemini sinh query"
                     value={customModel || !generationModels.includes(config.llm_model) ? "custom" : config.llm_model}
                     onChange={(value) => {
                       setCustomModel(value === "custom");
@@ -373,6 +373,10 @@ export default function AioWorkspace({ userId }: { userId: string }) {
                       <input value={config.llm_model} required onChange={e => update("llm_model", e.target.value)} />
                     </label>
                   )}
+                  <SelectMenu label="Model embedding so sánh" value={config.embed_model}
+                    onChange={(value) => update("embed_model", value)}
+                    options={[{value: "gemini-embedding-001", label: "Gemini Embedding 001"}, {value: "gemini-embedding-2", label: "Gemini Embedding 2"}]} />
+                  {configChanged && <p className="aio-description">Cấu hình đã đổi. Chạy audit sẽ áp dụng model mới từ đầu.</p>}
                   <label className="aio-field">
                     URL đối thủ để so sánh
                     <textarea

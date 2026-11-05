@@ -268,6 +268,7 @@ def step(store, job, credentials):
         # A per-request print binding avoids redirecting other concurrent users' stdout.
         ns['print'] = lambda *args, **kwargs: print(*args, **{**kwargs, 'file': log})
         if state['stage'] == 'fanout':
+            ns['print'](f"Model sinh query: {config['llm_model']} · Model embedding: {config['embed_model']}")
             try:
                 queries = store.artifact(job, 'fanout')['queries']
             except FileNotFoundError:

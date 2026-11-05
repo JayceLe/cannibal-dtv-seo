@@ -64,6 +64,19 @@ def fixture_result():
 
 
 class NotebookParity(unittest.TestCase):
+    def test_selected_generation_model_reaches_gemini(self):
+        ns = runtime.engine({**CONFIG, 'llm_model': 'gemini-3.5-flash-lite'})
+        generate = Mock(return_value=SimpleNamespace(text='["Giá thay pin iPhone?"]'))
+        ns['client'] = SimpleNamespace(models=SimpleNamespace(generate_content=generate))
+        ns['generate_fanout']('thay pin iPhone', 5)
+        self.assertEqual(generate.call_args.kwargs['model'], 'gemini-3.5-flash-lite')
+
+    def test_embedding_2_sends_separate_content_for_each_text(self):
+        call = Mock(return_value=SimpleNamespace(embeddings=[SimpleNamespace(values=[1., 2.]), SimpleNamespace(values=[2., 1.])]))
+        client = SimpleNamespace(models=SimpleNamespace(embed_content=call))
+        embeddings.embed(['query', 'passage'], client, 'gemini-embedding-2', Mock(), Mock())
+        contents = call.call_args.kwargs['contents']
+        self.assertEqual([item.parts[0].text for item in contents], ['query', 'passage'])
     def test_calculation_matches_original_functions(self):
         # The exact audit() executes once with mocked I/O, once with staged replay.
         ns = runtime.engine(CONFIG)

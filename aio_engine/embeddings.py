@@ -1,6 +1,7 @@
 """Bounded synchronous embeddings; no persistent or cross-audit cache."""
 import re
 import numpy as np
+from google.genai import types
 
 
 def embed(texts, client, model, sleep, log, batch=20):
@@ -11,7 +12,8 @@ def embed(texts, client, model, sleep, log, batch=20):
         part = unique[offset:offset + batch]
         for attempt in range(3):
             try:
-                response = client.models.embed_content(model=model, contents=part)
+                contents = [types.Content(parts=[types.Part(text=text)]) for text in part] if model.split('/')[-1] == 'gemini-embedding-2' else part
+                response = client.models.embed_content(model=model, contents=contents)
                 values = [np.asarray(item.values, dtype='float32') for item in (response.embeddings or [])]
                 if len(values) != len(part) or any(v.ndim != 1 or not v.size or not np.isfinite(v).all() or not np.linalg.norm(v) for v in values):
                     raise RuntimeError('Gemini trả embedding thiếu hoặc không hợp lệ; dừng để tránh chấm sai.')
