@@ -7,9 +7,9 @@ import {uiColors} from '@/lib/design';
 import {tableBands,dayLabel,rankingSummary,sumRankingBands} from '@/lib/rankings';
 const Chart=dynamic(()=>import('./chart'),{ssr:false});
 type DaySummary=ReturnType<typeof rankingSummary>;
-export default function RankingTopTrend({dates,timeline,category,domain,total,onDetails}:{dates:string[];timeline:DaySummary[];category:string;domain:string;total:number;onDetails:()=>void}){
+export default function RankingTopTrend({dates,timeline,category}:{dates:string[];timeline:DaySummary[];category:string}){
  const [selected,setSelected]=useState(()=>tableBands.map((_,i)=>i));
- const days=dates.slice(-5),stats=timeline.slice(-5),latest=stats.at(-1);
+ const days=dates.slice(-5),stats=timeline.slice(-5);
  const option=useMemo<EChartsOption>(()=>({
   textStyle:{fontFamily:'Be Vietnam Pro',color:'#b3b3b3'},
   grid:{left:56,right:16,top:28,bottom:36},
@@ -27,6 +27,5 @@ export default function RankingTopTrend({dates,timeline,category,domain,total,on
   </div>
   <div className="rank-top-chart"><Chart label="Tổng số từ khóa của các nhóm Top đã chọn theo 5 ngày gần nhất trong khoảng ngày" option={option} height={280}/></div>
   {!selected.length?<p className="rank-top-hint" role="status">Chọn ít nhất một nhóm Top để xem số liệu.</p>:null}
-  <div className="rank-top-meta"><span>{domain}</span><button type="button" className="text-link" onClick={onDetails}>{number(total)} từ khóa ↗</button><span>{days.length} ngày</span><span>Top 100: {number(latest?.ranked??0)}</span><span>N/A: {number(latest?.missing??0)}</span></div>
  </section>;
 }

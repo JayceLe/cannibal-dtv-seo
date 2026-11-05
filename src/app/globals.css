@@ -1,37 +1,46 @@
 :root {
   color-scheme: dark;
-  --bg: #0b0b0b;
-  --surface: #171717;
-  --surface-up: #222222;
-  --surface-active: #303030;
-  --input: #202020;
-  --border: #343434;
-  --border-strong: #727272;
-  --line: #2b2b2b;
-  --text: #f5f5f5;
-  --muted: #b3b3b3;
-  --soft: #a7a7a7;
-  --accent: #277c4c;
-  --accent-hover: #2b8252;
-  --query-bg: #1b3046;
-  --impression-bg: #302242;
-  --focus: #ffffff;
-  --query: #62a1df;
-  --impression: #ad86d6;
-  --safe: #60b88a;
-  --medium: #e3b352;
-  --danger: #e9757c;
-  --review: #b3b3b3;
-  --safe-bg: #173a2a;
-  --medium-bg: #3d3017;
-  --danger-bg: #442029;
-  --safe-border: #397653;
-  --medium-border: #84662d;
-  --danger-border: #91454e;
-  --radius-card: 8px;
-  --radius-panel: 10px;
-  --radius-control: 6px;
-  --radius-menu: 8px;
+  --bg: #0f1117;
+  --surface: #181c27;
+  --surface-up: #202636;
+  --surface-active: #2b3348;
+  --input: #131722;
+  --border: #283144;
+  --border-strong: #3f4c68;
+  --line: #212838;
+  --text: #f4f5f8;
+  --muted: #9aa4b7;
+  --soft: #6d778d;
+  --accent: #0075de;
+  --accent-hover: #1a85e8;
+  --accent-active: #005bab;
+  --query-bg: #15263a;
+  --impression-bg: #281d39;
+  --focus: #0075de;
+  --query: #62aef0;
+  --impression: #d6b6f6;
+  --safe: #2ecc71;
+  --medium: #f08c3a;
+  --danger: #ff6492;
+  --review: #9aa4b7;
+  --safe-bg: #122b1e;
+  --medium-bg: #332114;
+  --danger-bg: #361928;
+  --safe-border: #1d5232;
+  --medium-border: #5c381c;
+  --danger-border: #632344;
+  --radius-xs: 4px;
+  --radius-sm: 5px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+  --radius-card: var(--radius-lg);
+  --radius-panel: var(--radius-xl);
+  --radius-control: var(--radius-md);
+  --radius-input: var(--radius-xs);
+  --radius-menu: var(--radius-md);
+  --radius-pill: var(--radius-full);
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -116,7 +125,7 @@ select {
   max-width: 100%;
   padding: 10px 14px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-input);
   background: var(--input);
   color: var(--text);
   outline: none;
@@ -125,7 +134,7 @@ select {
 input:focus,
 select:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgb(255 255 255 / 0.125);
+  box-shadow: 0 0 0 2px rgb(0 117 222 / 0.25);
 }
 input::placeholder {
   color: var(--soft);
@@ -222,7 +231,7 @@ main {
   width: 40px;
   height: 40px;
   border: 1px solid var(--border-strong);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   background: var(--surface-active);
   color: var(--text);
   font-size: 14px;
@@ -243,7 +252,7 @@ main {
   gap: 4px;
   padding: 4px;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   background: var(--surface);
   flex-shrink: 0;
 }
@@ -255,7 +264,7 @@ main {
   min-height: 40px;
   padding: 8px 16px;
   border: 0;
-  border-radius: 7px;
+  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--muted);
   font-size: 14px;
@@ -288,7 +297,7 @@ main {
   min-height: 46px;
   padding: 10px 16px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   background: var(--surface-up);
   color: var(--text);
   font-size: 14px;
@@ -302,6 +311,7 @@ main {
   background: var(--surface-active);
   border-color: var(--border-strong);
   color: #fff;
+  border-radius: var(--radius-pill);
 }
 .btn.primary:hover {
   background: var(--surface-active);
@@ -321,7 +331,7 @@ main {
   min-height: 44px;
   padding: 10px;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: transparent;
   color: var(--muted);
 }
@@ -337,7 +347,7 @@ main {
 .panel {
   min-width: 0;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius-panel);
   background: var(--surface);
 }
 /* Shared filter state, used by both cannibal reports. */

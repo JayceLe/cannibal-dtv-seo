@@ -8,13 +8,20 @@ Giao diện phục vụ thao tác đọc báo cáo SEO mỗi tuần. Phân cấp
 
 Luồng Tổng quan: bốn thẻ toàn site → khu phân tích có DMC3 bên trái, tỷ lệ và hai donut bên phải → bảng query. Sidebar dùng chung phạm vi cho cả khu phân tích, không chỉ cho bảng. Luồng So sánh: hai ngày → biến động nhóm → insight theo phạm vi → ba biểu đồ → bảng query và đối chiếu URL. Giữ nguyên thứ tự/nội dung bên trong Thứ hạng.
 
-## Token và chữ
+## Token và chữ (Hệ thiết kế Notion Dark)
 
-- Nền `#0b0b0b`, panel `#171717`, điều khiển `#222222`, chữ `#f5f5f5`, chữ phụ `#b3b3b3`.
-- Query `#75b5ff`, impression `#b69aff`, an toàn/cải thiện `#57d99b`, trung bình `#f2bd59`, nguy hiểm/tăng cannibal `#f7808e`. Xanh `#1ed760` cho hành động chính và dấu chọn.
-- Màu DMC3 lấy cùng một nguồn `categories.ts`, đồng bộ giữa donut, chú giải và bộ lọc.
+- Nền dark night `#0f1117`, panel `#181c27`, điều khiển & surface-up `#202636`, surface-active `#2b3348`, input `#131722`, viền hairline `#283144`, viền nhấn `#3f4c68`, hairline `#212838`, chữ `#f4f5f8`, chữ phụ `#9aa4b7`, caption `#6d778d`.
+- Hành động chính & structural accent duy nhất: Notion Blue `#0075de` (hover `#1a85e8`, active `#005bab`).
+- Dữ liệu & trạng thái theo bộ Sticker Palette của Notion: Query dùng Sticker Sky `#62aef0`, impression dùng Sticker Purple `#d6b6f6`, an toàn/cải thiện dùng Sticker Green `#2ecc71`, trung bình dùng Sticker Orange `#f08c3a`, nguy hiểm/tăng cannibal dùng Sticker Pink `#ff6492`.
+- Màu DMC3 đồng bộ giữa donut, chú giải và bộ lọc.
 - Be Vietnam Pro duy nhất. Tiêu đề chính 28/700; tiêu đề khối 19–24/600–700; nhãn 14/600; giá trị 26–32/700; thông tin phụ 13–16/500–600. Số dùng tabular-nums.
-- Bo panel10, thẻ8, điều khiển6, badge4. Menu và dialog có lớp nổi; không làm cả bảng nhấc lên khi hover.
+- Hệ bo góc chuẩn 6 cấp (Notion Border Radius Scale):
+  - `rounded.xs` (4px): ô nhập liệu, input, search field, chip inline.
+  - `rounded.sm` (5px): menu item, hàng danh sách, tab button.
+  - `rounded.md` (8px): nút tiện ích/utility buttons, trigger picker, popup menu.
+  - `rounded.lg` (12px): các thẻ nội dung (highlight card, ratio metric, comparison report card, evidence metric, dropzone, toast, rank band).
+  - `rounded.xl` (16px): khối lớn (panel, modal dialog, query detail dialog, rules dialog).
+  - `rounded.full` (9999px): nút hành động chính pill CTA (`button-primary`), badges, status pills (`.badge`, `.level-chip`, `.report-count`).
 
 ## Bố cục
 
@@ -71,8 +78,15 @@ Import dùng `FocusDialog` chung với chi tiết query: tiêu đề dính, nút
 Motion bổ sung: hover thẻ có spotlight24% và viền theo vai trò; wrapper icon dịch2px/240ms, trở về180ms, nhấn120ms. Chữ và số không scale. Dòng Nguy hiểm/vừa đổi trạng thái có lớp nền nhấn480ms đúng một lần khi vào vùng nhìn; bàn phím và reduced-motion không chạy. Header Three có đoạn trôi chậm hữu hạn2400ms sau intro960ms rồi đứng yên. Mọi observer/tween/lớp tạm được dọn khi unmount hoặc đổi reduced-motion. Chi tiết audit ở `plans/README.md`.
 
 
-## Màu sắc sau khi duyệt bố cục gốc (04/11/2026)
+## Màu sắc tối ưu theo Notion Dark System (05/11/2026)
 
-Giữ bố cục, font và chuyển động đã duyệt. Nền than đen trung tính; nút chính xanh lá đậm `#277c4c` với chữ trắng. Query dùng xanh dương `#62a1df`, impression dùng tím `#ad86d6`; tăng cannibal dùng đỏ `#e9757c`, giảm/cải thiện dùng xanh `#60b88a`, mức trung bình dùng vàng `#e3b352`. Bề mặt theo nội dung có màu đậm vừa, không dùng nền pastel sáng. Hover chỉ pha thêm 2% trắng để tránh bạc màu và giữ tương phản chữ.
-
-27 màu DMC3 tại `categories.ts` được hạ độ sáng, giữ thứ tự và màu cố định theo tên. `rankingColors` tại `design.ts` dùng chung cho chart và bảng thứ hạng. Không dùng màu DMC3 thay cho màu mức độ hay tăng/giảm. Kiểm tra cặp chữ/màu trạng thái đạt ≥4,5:1 ở bình thường và hover; dấu màu DMC3 ≥3:1 trên nền panel.
+Giữ nguyên bố cục giao diện, font chữ Be Vietnam Pro và chuyển động đã kiểm chứng. Nền than đen ngả chàm đêm Notion Night (`#0f1117`), panel bề mặt than mịn `#181c27` với viền hairline `#283144`.
+- Nút hành động chính (`.btn.primary`) mang màu Notion Blue `#0075de` với dạng pill (`rounded.full`), hover sáng lên `#1a85e8`, nhấn xuống `#005bab`.
+- Phân loại dữ liệu & mức độ hoàn toàn tuân theo bộ Sticker Palette của Notion:
+  - Query: Sticker Sky `#62aef0` (nền `#15263a`, viền `#254668`)
+  - Impression: Sticker Purple `#d6b6f6` (nền `#281d39`, viền `#493266`)
+  - Cải thiện / An toàn: Sticker Green `#2ecc71` (nền `#122b1e`, viền `#1d5232`)
+  - Trung bình / Cảnh báo: Sticker Orange `#f08c3a` (nền `#332114`, viền `#5c381c`)
+  - Tăng cannibal / Nguy hiểm: Sticker Pink `#ff6492` (nền `#361928`, viền `#632344`)
+  - Header Hero Night Band `#10141f` phối hợp chùm chòm sao 3D glowing constellations.
+- Toàn bộ thang bo góc tuân thủ chuẩn 6 cấp: Inputs `4px`, List/menu items `5px`, Controls/buttons `8px`, Thẻ nội dung `12px`, Panels/modals `16px`, Pill CTAs & Badges `9999px`. Kiểm tra độ tương phản đảm bảo chuẩn WCAG AA (≥4.5:1) trên mọi nền tối.

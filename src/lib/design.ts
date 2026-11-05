@@ -1,6 +1,31 @@
 // Shared chart colors follow the same roles as the CSS tokens.
-export const uiColors={background:'#0b0b0b',surface:'#171717',elevated:'#222222',line:'#343434',text:'#f5f5f5',muted:'#b3b3b3',soft:'#a7a7a7',focus:'#ffffff',query:'#62a1df',impression:'#ad86d6'} as const;
-export const semanticColors={safe:'#60b88a',medium:'#e3b352',danger:'#e9757c',review:'#b3b3b3',accent:'#277c4c'} as const;
+export const uiColors = {
+  background: '#0f1117',
+  surface: '#181c27',
+  elevated: '#202636',
+  line: '#283144',
+  text: '#f4f5f8',
+  muted: '#9aa4b7',
+  soft: '#6d778d',
+  focus: '#ffffff',
+  query: '#62aef0',
+  impression: '#d6b6f6',
+} as const;
 
-// Rank bands are categorical, independent of increase/decrease status colors.
-export const rankingColors={top3:uiColors.query,top5:'#3da67e',top10:'#d6a044',top20:'#d57567',top50:uiColors.impression,top100:'#8f9ead'} as const;
+export const semanticColors = {
+  safe: '#2ecc71',
+  medium: '#f08c3a',
+  danger: '#ff6492',
+  review: '#9aa4b7',
+  accent: '#0075de',
+} as const;
+
+// Rank bands are categorical, using Notion's sticker and structural palette.
+export const rankingColors = {
+  top3: '#62aef0',   // Sticker Sky
+  top5: '#2a9d99',   // Sticker Teal
+  top10: '#f08c3a',  // Sticker Orange
+  top20: '#ff6492',  // Sticker Pink
+  top50: '#d6b6f6',  // Sticker Purple
+  top100: '#7a869e', // Soft Slate
+} as const;
