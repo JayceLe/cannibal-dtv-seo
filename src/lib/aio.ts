@@ -62,6 +62,7 @@ export type AioRow = {
 export type AioPassage = {
   score: number | null;
   passage: string;
+  comparison?: { url: string; score: number; gap: number | null; passage: string } | null;
   rivals: { url: string; score: number; gap: number | null; passage: string }[];
 };
 export type AioResult = {

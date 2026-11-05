@@ -192,6 +192,17 @@ class NotebookParity(unittest.TestCase):
         response.reset_mock()
         review.apply(ns, two)
         response.assert_called_once()
+        lead = result()
+        lead['rows'][0].update(verdict='AHEAD - clear leader', gap=-.08)
+        lead['passages'][query]['passage'] = rival
+        lead['passages'][query]['rivals'] = []
+        lead['passages'][query]['comparison'] = {'passage': own, 'gap': -.08}
+        response.return_value.text = json.dumps([{'id': 0, 'label': 'target_better',
+            'own_quote': 'iPhone 15 mất 30 phút; iPhone 16 mất 60 phút',
+            'rival_quote': 'thông thường mất khoảng 30-60 phút', 'aspect': 'từng dòng máy'}])
+        verified_lead = review.apply(ns, lead)['rows'][0]
+        self.assertTrue(verified_lead['verdict'].startswith('AHEAD'))
+        self.assertEqual(verified_lead['gap'], -.08)
 
     def test_readable_target_with_no_answer_does_not_invent_a_score(self):
         seed = {'queries': ['Giá thay pin iPhone?'], 'vectors': [[1., 0.]], 'serp': SERP}

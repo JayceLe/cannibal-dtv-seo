@@ -217,7 +217,9 @@ def replay(ns, state, seed, pages):
             spread=scores['spread'] if measured else None,
             verdict=ns['verdict'](scores) if measured else 'INSUFFICIENT - no comparable passage',
             best_rival=leader or '', your_best_passage=excerpt[:180] + ('…' if excerpt else '')))
-        passages[q] = dict(score=score, passage=excerpt, rivals=[
+        comparison = (dict(url=leader, score=best, gap=best-score if mine else None,
+            passage=sources[leader][0][hits[leader][1]]) if leader else None)
+        passages[q] = dict(score=score, passage=excerpt, comparison=comparison, rivals=[
             dict(url=url, score=hits[url][0], gap=hits[url][0]-score if mine else None, passage=sources[url][0][hits[url][1]])
             for url in rivals if not mine or hits[url][0] > score][:3])
     rows.sort(key=lambda row: row['gap'] if row['gap'] is not None else -float('inf'), reverse=True)

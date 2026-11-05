@@ -26,6 +26,7 @@ export default function AioResults({ result }: { result: AioResult }) {
   const [door, setDoor] = useState(result.rows[0]?.door || "");
   const [rivals, setRivals] = useState("2");
   const passage = result.passages[door];
+  const shownRivals = passage?.rivals.length ? passage.rivals : passage?.comparison ? [passage.comparison] : [];
   const selected = result.rows.find((r) => r.door === door);
   const grouped = result.doors.find((d) => d.representative === door);
   const counts = result.rows.reduce<Record<string, number>>((acc, row) => {
@@ -232,20 +233,20 @@ export default function AioResults({ result }: { result: AioResult }) {
                 <p>{passage.passage || "Không có đoạn phù hợp."}</p>
               </article>
               <div className="aio-rivals">
-                {passage.rivals.slice(0, Number(rivals)).map((rival, index) => (
+                {shownRivals.slice(0, Number(rivals)).map((rival, index) => (
                   <article className="aio-passage" key={rival.url}>
                     <div className="aio-passage-head">
                       <span>Đối thủ {index + 1}</span>
                       <strong>
                         {aioScore(rival.score)}{" "}
-                        {rival.gap != null && <small>chênh điểm +{aioScore(rival.gap)}</small>}
+                        {rival.gap != null && <small>chênh điểm {rival.gap > 0 ? "+" : ""}{aioScore(rival.gap)}</small>}
                       </strong>
                     </div>
                     <AioUrl url={rival.url} />
                     <p>{rival.passage}</p>
                   </article>
                 ))}
-                {!passage.rivals.length ? (
+                {!shownRivals.length ? (
                   <div className="aio-empty">
                     <strong>{selected.gap == null ? "Chưa đủ bằng chứng để kết luận gap." : "Trang của bạn đang dẫn đầu door này."}</strong>
                     {selected.gap != null && <p>Không có đối thủ nào có điểm cao hơn để đối chiếu.</p>}
