@@ -1703,10 +1703,13 @@ td > small {
   background: var(--surface-active);
 }
 .leader-url .url-share-track i {
-  background: var(--surface-active);
+  background: var(--safe);
 }
 .runner-url .url-share-track i {
-  background: var(--surface-active);
+  background: var(--danger);
+}
+.other-url.eligible-url .url-share-track i {
+  background: var(--medium);
 }
 .page-footer {
   display: flex;
@@ -3218,13 +3221,13 @@ progress {
   color: var(--muted);
 }
 .query-detail-dialog .leader-url .url-share-track i {
-  background: var(--surface-active);
+  background: var(--safe);
 }
 .query-detail-dialog .runner-url .url-share-track i {
-  background: var(--surface-active);
+  background: var(--danger);
 }
 .query-detail-dialog .other-url.eligible-url .url-share-track i {
-  background: var(--surface-active);
+  background: var(--medium);
 }
 @media (hover: hover) and (pointer: fine) {
   .query-detail-dialog .url-metric-row:hover {
@@ -3652,13 +3655,13 @@ progress {
   width: 100%;
 }
 .period-url-row.leader-url .url-share-track i {
-  background: var(--surface-active);
+  background: var(--safe);
 }
 .period-url-row.runner-url .url-share-track i {
-  background: var(--surface-active);
+  background: var(--danger);
 }
 .period-url-row.other-url.eligible-url .url-share-track i {
-  background: var(--surface-active);
+  background: var(--medium);
 }
 .period-url-percent {
   display: block;

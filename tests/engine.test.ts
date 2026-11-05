@@ -41,7 +41,7 @@ test('linear cannibal impression sum matches sorted snapshots without mutating s
  for(let length=0;length<=32;length++){
   const urls=Array.from({length},(_,i)=>({url:String(i),impressions:(i*137+length*11)%1000,clicks:0,position:2,ratio:null}));
   const original=JSON.stringify(urls),sorted=urls.slice().sort((a,b)=>b.impressions-a.impressions),leader=sorted[0]?.impressions||0,total=sorted.reduce((s,u)=>s+u.impressions,0);
-  const expected=leader>0?sorted.slice(1).reduce((s,u)=>s+((total<20?u.impressions*5>leader*3:u.impressions*5>=leader)?u.impressions:0),0):0;
+  const expected=leader>0?sorted.slice(1).reduce((s,u)=>s+((total<20?u.impressions*5>leader*4:u.impressions*5>=leader)?u.impressions:0),0):0;
   assert.equal(cannibalImpressions({urls}),expected);assert.equal(JSON.stringify(urls),original);
  }
 });

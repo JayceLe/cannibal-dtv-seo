@@ -165,7 +165,7 @@ export function QueryDetails({
                 <strong>
                   {u.percent == null ? "—" : decimal(u.percent, 2) + "%"}
                 </strong>
-                <div className="url-share-track" style={{"--threshold-position": threshold === "> 60%" ? "60%" : "20%"} as React.CSSProperties}>
+                <div className="url-share-track" style={{"--threshold-position": threshold === "> 80%" ? "80%" : "20%"} as React.CSSProperties}>
                   <i style={{ width: `${Math.min(100, u.percent || 0)}%` }} />
                 </div>
               </div>

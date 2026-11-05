@@ -32,6 +32,10 @@ Theo phản hồi trực quan từ người dùng, toàn bộ phong cách viền
 - **Thẻ báo cáo so sánh & minh chứng (`.comparison-report-card`, `.evidence-metric`, `.rank-band`)**: Viền 1px sạch sẽ, nền sáng tinh giản, tương phản rõ rệt mà không gây cảm giác ngột ngạt.
 - **Nút danh mục DMC3 khi được chọn (`.category-list button.active`)**: Chuyển màu nền theo đúng màu sắc nhận diện của DMC3 đó (`var(--category-color)`). Toàn bộ chữ và chấm chuyển sang màu trắng sắc nét (`#ffffff`), badge đếm hiển thị dạng viên thuốc trắng trong mờ (`rgba(255, 255, 255, 0.25)`), đảm bảo tương phản tuyệt đối và không bị mất chữ.
 - **Bảng đối chiếu URL giữa 2 ngày (`.comparison-url-table`)**: Thiết kế thoáng đãng, padding rộng rãi (16px 20px), phân tách rõ ràng giữa 2 ngày bằng đường kẻ dọc 2px xuyên suốt, hiệu ứng hover đồng bộ theo từng cặp URL, badge TOP 1 / TOP 2 / URL 3+ gọn gàng không vạch viền dày.
+- **Hiệu ứng hover rõ rệt cho Sidebar DMC3 & Bộ lọc Chip**:
+  - Khi hover qua nút danh mục DMC3 (`.category-list button:hover`): Nền chuyển sang sắc thái 12% màu của chính DMC3 đó, viền đổi màu, chữ chuyển đậm `#0f172a`, đổ bóng mềm và trượt nhẹ 4px sang phải (`transform: translateX(4px)`), giúp người dùng nhận biết ngay lập tức con trỏ đang ở mục nào.
+  - Khi hover qua chip bộ lọc (`.level-chip:hover`): Chuyển màu nền và viền theo đúng ngữ nghĩa (xanh lá an toàn, vàng trung bình, đỏ nguy hiểm), nhấc nhẹ 1px (`transform: translateY(-1px)`).
+  - Loại bỏ hoàn toàn thanh thông tin phạm vi dư thừa (`.results-scope`) ở cả 2 tab Tổng quan và So sánh giúp danh sách query liền mạch, thoáng đãng.
 - **Dialog chi tiết Query (`FocusDialog`)**: 4 chỉ số KPI được chia thành 4 ô thẻ độc lập có viền bao rõ ràng; danh sách URL được định dạng bảng có khung viền ngoài, dòng tiêu đề riêng và phân cách dòng sắc nét.
 - **Bộ lọc mức độ (`.level-chip.active`)**: Số lượng `<b>` luôn giữ màu tương phản cao (chữ trắng trên nền đen hoặc cùng tone màu trạng thái), không bao giờ bị biến mất khi ấn chọn.
 

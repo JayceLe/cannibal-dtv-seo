@@ -31,10 +31,10 @@ export function rankGap(first:number|null,second:number|null):number|null{
 }
 /** Low-volume queries need a strictly stronger secondary URL; compare integers at the boundary. */
 export function qualifiesCannibal(impressions:number,leader:number,total:number){
- return leader>0&&(total<20?impressions*5>leader*3:impressions*5>=leader);
+ return leader>0&&(total<20?impressions*5>leader*4:impressions*5>=leader);
 }
 export function cannibalThresholdLabel(record:Pick<RecordRow,'urls'>){
- return record.urls.reduce((sum,u)=>sum+u.impressions,0)<20?'> 60%':'≥ 20%';
+ return record.urls.reduce((sum,u)=>sum+u.impressions,0)<20?'> 80%':'≥ 20%';
 }
 export function classify(urls: UrlMetric[], invalid = 0): Pick<RecordRow,'status'|'gap'|'cannibal'> {
  const a = urls[0], b = urls[1];

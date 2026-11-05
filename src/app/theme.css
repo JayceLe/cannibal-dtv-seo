@@ -278,17 +278,33 @@ select,
   color: #333840;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s;
+  transition: all 0.18s ease;
 }
 .category-list b {
   background: #f1f5f9;
   color: #475569;
   border-radius: var(--radius-pill);
+  transition: all 0.18s ease;
 }
-.category-list button:hover {
-  background: #ffffff;
-  border-color: var(--category-color, var(--border-strong));
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+.category-list button:hover:not(.active) {
+  background: color-mix(in srgb, var(--category-color, #181d26) 12%, #ffffff) !important;
+  border-color: var(--category-color, #181d26) !important;
+  color: #0f172a !important;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--category-color, #181d26) 22%, transparent) !important;
+  transform: translateX(4px);
+}
+.category-list button:hover:not(.active) span {
+  color: #0f172a !important;
+  font-weight: 700;
+}
+.category-list button:hover:not(.active) b {
+  background: color-mix(in srgb, var(--category-color, #181d26) 22%, #ffffff) !important;
+  color: #0f172a !important;
+  font-weight: 700;
+}
+.category-list button:hover:not(.active) i {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--category-color, #181d26) 40%, transparent);
+  transform: scale(1.25);
 }
 .category-list button.active {
   background: var(--category-color, #181d26) !important;
@@ -361,15 +377,36 @@ select,
   border: 1px solid var(--border);
   background: #f8fafc;
   color: var(--muted);
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition: all 0.18s ease;
+  cursor: pointer;
 }
 .level-chip > b {
   color: inherit !important;
 }
-.level-chip:hover {
-  background: #ffffff;
-  border-color: var(--border-strong);
-  color: var(--text);
+.level-chip:hover:not(.active) {
+  background: #e2e8f0 !important;
+  border-color: #94a3b8 !important;
+  color: #0f172a !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  transform: translateY(-1px);
+}
+.level-chip.safe:hover:not(.active) {
+  background: #dcfce7 !important;
+  border-color: #86efac !important;
+  color: #047857 !important;
+  box-shadow: 0 2px 8px rgba(4, 120, 87, 0.18) !important;
+}
+.level-chip.medium:hover:not(.active) {
+  background: #fef3c7 !important;
+  border-color: #fde68a !important;
+  color: #b45309 !important;
+  box-shadow: 0 2px 8px rgba(180, 83, 9, 0.18) !important;
+}
+.level-chip.danger:hover:not(.active) {
+  background: #fee2e2 !important;
+  border-color: #fca5a5 !important;
+  color: #b91c1c !important;
+  box-shadow: 0 2px 8px rgba(185, 28, 28, 0.18) !important;
 }
 .level-chip.active {
   border-color: var(--accent);
@@ -432,8 +469,7 @@ select,
   color: var(--muted);
 }
 .results-scope {
-  background: var(--surface-up);
-  border: 1px solid var(--border);
+  display: none !important;
 }
 th,
 .url-list-head,
@@ -878,21 +914,37 @@ th,
   border: 1px solid #fde68a;
 }
 .url-share-track {
+  height: 6px;
   background: #e2e8f0;
   border-radius: var(--radius-pill);
+  overflow: hidden;
+  position: relative;
 }
 .url-share-track i {
-  background: var(--muted);
+  display: block;
+  height: 100%;
   border-radius: var(--radius-pill);
+  background: #64748b;
+  transition: width 0.25s ease;
 }
-.leader-url .url-share-track i {
-  background: var(--safe);
+.leader-url .url-share-track i,
+.period-url-row.leader-url .url-share-track i,
+.query-detail-dialog .leader-url .url-share-track i {
+  background: #059669 !important;
 }
-.runner-url .url-share-track i {
-  background: var(--danger);
+.runner-url .url-share-track i,
+.period-url-row.runner-url .url-share-track i,
+.query-detail-dialog .runner-url .url-share-track i {
+  background: #dc2626 !important;
 }
-.other-url.eligible-url .url-share-track i {
-  background: var(--medium);
+.other-url.eligible-url .url-share-track i,
+.period-url-row.other-url.eligible-url .url-share-track i,
+.query-detail-dialog .other-url.eligible-url .url-share-track i {
+  background: #d97706 !important;
+}
+.other-url:not(.eligible-url) .url-share-track i,
+.period-url-row.other-url:not(.eligible-url) .url-share-track i {
+  background: #94a3b8 !important;
 }
 .period-eligible {
   color: var(--medium);
