@@ -22,10 +22,12 @@ const html = (query: string, urls: string[], next = false) => `
   </div>
   ${next ? '<a id="pnnext" href="/search?start=10">Tiếp</a>' : ""}`;
 
-test("Rank domain matching is exact or a real subdomain", () => {
+test("Rank domain matching ignores URL slug but keeps the exact host", () => {
   assert.equal(normalizeRankDomain("https://WWW.Example.com"), "example.com");
-  assert.throws(() => normalizeRankDomain("example.com/pin"));
-  assert.equal(isRankDomainMatch("https://blog.example.com/pin", "example.com"), true);
+  assert.equal(normalizeRankDomain("https://www.example.com/pin?source=seo"), "example.com");
+  assert.equal(normalizeRankDomain("example.com/pin"), "example.com");
+  assert.equal(isRankDomainMatch("https://www.example.com/another-slug", "example.com"), true);
+  assert.equal(isRankDomainMatch("https://blog.example.com/pin", "example.com"), false);
   assert.equal(isRankDomainMatch("https://notexample.com/pin", "example.com"), false);
 });
 
@@ -44,8 +46,8 @@ test("SCheckPro bridge checks the requested domain without a server key", async 
     const url = new URL(request.url);
     assert.equal(url.searchParams.get("q"), "thay pin iPhone");
     const page = url.searchParams.get("start") === "0"
-      ? html("thay pin iPhone", ["https://a.vn/pin"], true)
-      : html("thay pin iPhone", ["https://example.com/pin"]);
+      ? html("thay pin iPhone", ["https://a.vn/pin", "https://blog.example.com/old"], true)
+      : html("thay pin iPhone", ["https://example.com/pin", "https://example.com/other"]);
     document.dispatchEvent(new CustomEvent("RequestLinkSuccess", { detail: page }));
   };
   document.addEventListener("TestScheckPro", onTest);
@@ -55,7 +57,7 @@ test("SCheckPro bridge checks the requested domain without a server key", async 
     const found = await lookupSCheckProRank("example.com", "thay pin iPhone", 30);
     assert.equal(found.rank, 11);
     assert.equal(found.ranking_url, "https://example.com/pin");
-    assert.equal(found.checked, 2);
+    assert.equal(found.checked, 4);
   } finally {
     document.removeEventListener("TestScheckPro", onTest);
     document.removeEventListener("RequestLink", onRequest);

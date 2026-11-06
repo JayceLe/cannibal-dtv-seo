@@ -5,12 +5,12 @@ const requestTimeout = 20_000;
 
 export function normalizeRankDomain(value: string): string {
   const input = value.trim();
-  if (!input || /[\s/?#]/.test(input.replace(/^https?:\/\//i, ""))) {
+  if (!input || /\s/.test(input)) {
     throw new Error("Nhập domain hợp lệ, ví dụ dienthoaivui.com.vn.");
   }
   try {
     const url = new URL(/^https?:\/\//i.test(input) ? input : `https://${input}`);
-    if (!/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(url.hostname)) throw new Error();
+    if (url.username || url.password || !/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(url.hostname)) throw new Error();
     return url.hostname.toLowerCase().replace(/^www\./, "");
   } catch {
     throw new Error("Nhập domain hợp lệ, ví dụ dienthoaivui.com.vn.");
@@ -20,7 +20,7 @@ export function normalizeRankDomain(value: string): string {
 export function isRankDomainMatch(url: string, domain: string): boolean {
   try {
     const host = new URL(url).hostname.toLowerCase().replace(/^www\./, "");
-    return host === domain || host.endsWith(`.${domain}`);
+    return host === domain;
   } catch { return false; }
 }
 

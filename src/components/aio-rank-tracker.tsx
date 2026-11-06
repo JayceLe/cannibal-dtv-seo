@@ -5,7 +5,7 @@ import { gsap } from "gsap";
 import { Download, Upload, ArrowRight, Search, Square } from "lucide-react";
 import { aioRequest, downloadAio } from "@/lib/aio-client";
 import { motionEase, motionTiming } from "@/lib/motion-tokens";
-import { detectSCheckPro, lookupSCheckProRank } from "@/lib/scheckpro-rank";
+import { detectSCheckPro, lookupSCheckProRank, normalizeRankDomain } from "@/lib/scheckpro-rank";
 import {
   aioScore,
   type AioRankInput,
@@ -105,13 +105,18 @@ export default function AioRankTracker({ result }: { result: AioResult }) {
     setAnalysis(null);
   }
   async function lookupAll() {
-    if (!domain.trim()) { setError("Nhập domain để tra thứ hạng."); return; }
+    let trackingDomain: string;
+    try { trackingDomain = normalizeRankDomain(domain); }
+    catch (error) { setError(error instanceof Error ? error.message : "Domain không hợp lệ."); return; }
     if (!extensionReady) {
       setError("Chưa kết nối SCheckPro. Bật tiện ích trên Chrome rồi tải lại trang.");
       return;
     }
     stopLookup.current = false;
+    setDomain(trackingDomain);
     setLookupProgress(0);
+    setRows((current) => current.map((row) => lookupResults[row.door]?.rank != null
+      ? { ...row, rank: "", ranking_url: "" } : row));
     setLookupResults({});
     await task("lookup", async () => {
       for (let index = 0; index < result.doors.length; index++) {
@@ -120,7 +125,7 @@ export default function AioRankTracker({ result }: { result: AioResult }) {
         lookupController.current = controller;
         try {
           const found = await lookupSCheckProRank(
-            domain.trim(), result.doors[index].representative, depth, controller.signal,
+            trackingDomain, result.doors[index].representative, depth, controller.signal,
           );
           setLookupResults((current) => ({ ...current, [found.door]: found }));
           if (found.rank != null) {
@@ -171,14 +176,20 @@ export default function AioRankTracker({ result }: { result: AioResult }) {
         </span>
       </div>
       <p className="aio-description">
-        Tra thứ hạng Google của domain cho từng door, sau đó đối chiếu URL và kết quả audit.
+        Nhập domain cần tracking. Bảng lấy kết quả Google đầu tiên có cùng tên miền cho từng door, không xét slug của URL.
       </p>
       <div className="aio-rank-lookup" aria-label="Tra thứ hạng tự động">
         <label className="aio-rank-domain">
-          <span>Domain cần tracking</span>
+          <span>Domain tracking</span>
           <input type="text" inputMode="url" autoComplete="off" spellCheck={false}
-            placeholder="example.com" value={domain} disabled={!!busy}
-            onChange={(event) => { setDomain(event.target.value); setLookupResults({}); }} />
+            placeholder="dienthoaivui.com.vn hoặc URL của site" value={domain} disabled={!!busy}
+            onChange={(event) => {
+              setRows((current) => current.map((row) => lookupResults[row.door]?.rank != null
+                ? { ...row, rank: "", ranking_url: "" } : row));
+              setDomain(event.target.value);
+              setLookupResults({});
+              setAnalysis(null);
+            }} />
         </label>
         <label className="aio-rank-depth">
           <span>Phạm vi kiểm tra</span>
