@@ -17,6 +17,9 @@ import {
   ScanSearch,
   Settings2,
   Sparkles,
+  Layers,
+  FileSearch,
+  Target,
 } from "lucide-react";
 import {
   aioDefaults,
@@ -31,6 +34,7 @@ import { completeAioRun } from "@/lib/aio-runner";
 import AioResults from "./aio-results";
 import AioRankTracker from "./aio-rank-tracker";
 import AioHeroScene from "./aio-hero-scene";
+import AioProgressScene from "./aio-progress-scene";
 import "../app/aio.css";
 import "../app/aio-rank-lookup.css";
 
@@ -104,6 +108,8 @@ export default function AioWorkspace({ userId }: { userId: string }) {
   const motionRoot = useRef<HTMLDivElement>(null);
   const progressFill = useRef<HTMLSpanElement>(null);
   const waitingRef = useRef<HTMLDivElement>(null);
+  const progressSectionRef = useRef<HTMLElement>(null);
+
   const [customModel, setCustomModel] = useState(false);
   const [config, setConfig] = useState<AioConfig>({ ...aioDefaults });
   const [credentials, setCredentials] = useState<AioCredentials>({
@@ -139,9 +145,9 @@ export default function AioWorkspace({ userId }: { userId: string }) {
             0.15,
           )
           .fromTo(
-            ".aio-setup-grid > .aio-panel",
-            { autoAlpha: 0, y: 18 },
-            { autoAlpha: 1, y: 0, duration: 0.54, stagger: 0.1, clearProps: "all" },
+            ".aio-flow-stack > .aio-panel",
+            { autoAlpha: 0, y: 20 },
+            { autoAlpha: 1, y: 0, duration: 0.55, stagger: 0.12, clearProps: "all" },
             0.18,
           );
       }, motionRoot);
@@ -224,6 +230,17 @@ export default function AioWorkspace({ userId }: { userId: string }) {
     setBusy(true);
     setPaused(false);
     setError("");
+
+    // Smooth scroll down to progress section when starting run
+    setTimeout(() => {
+      progressSectionRef.current?.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+        block: "start",
+      });
+    }, 60);
+
     if (run) setRun({ ...run, error: "" });
     let current = run;
     const keys = {
@@ -256,7 +273,18 @@ export default function AioWorkspace({ userId }: { userId: string }) {
           action: "result",
           id: current.id,
         });
-        if (alive.current) setResult(data);
+        if (alive.current) {
+          setResult(data);
+          // Gently reveal results
+          setTimeout(() => {
+            document.querySelector(".aio-output")?.scrollIntoView({
+              behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+                ? "auto"
+                : "smooth",
+              block: "start",
+            });
+          }, 300);
+        }
       } else if (alive.current) setPaused(true);
     } catch (e) {
       if (!alive.current) return;
@@ -327,9 +355,10 @@ export default function AioWorkspace({ userId }: { userId: string }) {
         </div>
       </header>
 
-      <div className="aio-setup-grid">
+      <div className="aio-flow-stack">
+        {/* Section 01: Unified Setup Panel (Hình 2 thành 1 khối) */}
         <section
-          className="aio-panel aio-input-panel"
+          className="aio-panel aio-setup-unified-panel"
           aria-labelledby="aio-input-title"
         >
           <div className="aio-panel-head">
@@ -337,11 +366,17 @@ export default function AioWorkspace({ userId }: { userId: string }) {
               <span className="aio-eyebrow">01 / Thiết lập</span>
               <h2 id="aio-input-title">Nội dung cần audit</h2>
             </div>
+            <span className="aio-count">
+              Cấu hình từ khóa mục tiêu, nguồn đối chiếu và kết nối API
+            </span>
           </div>
+
           <form onSubmit={submit}>
-            <fieldset disabled={busy || restoring} className="aio-fields">
+            <fieldset disabled={busy || restoring} className="aio-unified-form-grid">
               <legend className="sr-only">Cấu hình audit AIO</legend>
-              <div className="aio-content-fields">
+
+              {/* Column 1: Core Fields & Action CTA */}
+              <div className="aio-form-left-col">
                 <label className="aio-field">
                   Từ khóa mục tiêu
                   <input
@@ -352,6 +387,7 @@ export default function AioWorkspace({ userId }: { userId: string }) {
                     onChange={(e) => update("keyword", e.target.value)}
                   />
                 </label>
+
                 <label className="aio-field">
                   URL bài viết của bạn
                   <input
@@ -362,6 +398,7 @@ export default function AioWorkspace({ userId }: { userId: string }) {
                     onChange={(e) => update("my_url", e.target.value)}
                   />
                 </label>
+
                 <div className="aio-credentials">
                   <div className="aio-section-label">
                     <KeyRound size={15} aria-hidden="true" />
@@ -386,6 +423,7 @@ export default function AioWorkspace({ userId }: { userId: string }) {
                     )}
                   </div>
                 </div>
+
                 <div className="aio-form-actions">
                   <button
                     type="submit"
@@ -417,136 +455,142 @@ export default function AioWorkspace({ userId }: { userId: string }) {
                 </div>
               </div>
 
-              <section className="aio-settings" aria-labelledby="aio-settings-title">
-                <div className="aio-settings-heading">
-                  <Settings2 size={16} aria-hidden="true" />
-                  <h3 id="aio-settings-title">Phạm vi phân tích</h3>
-                  <span>
-                    {config.n_queries} query · {config.top_competitors} đối thủ
-                  </span>
-                </div>
-                <div className="aio-settings-body">
-                  <SelectMenu
-                    label="Nhà cung cấp SERP"
-                    value={config.provider}
-                    onChange={(value) =>
-                      update("provider", value as AioConfig["provider"])
-                    }
-                    options={[
-                      { value: "serper", label: "Serper" },
-                      { value: "serpapi", label: "SerpAPI" },
-                      { value: "dataforseo", label: "DataForSEO" },
-                      { value: "none", label: "Không dùng SERP" },
-                    ]}
-                  />
-                  <div className="aio-three-fields">
+              {/* Column 2: Analysis Scope Box */}
+              <div className="aio-form-right-col">
+                <section className="aio-settings" aria-labelledby="aio-settings-title">
+                  <div className="aio-settings-heading">
+                    <Settings2 size={16} aria-hidden="true" />
+                    <h3 id="aio-settings-title">Phạm vi phân tích</h3>
+                    <span>
+                      {config.n_queries} query · {config.top_competitors} đối thủ
+                    </span>
+                  </div>
+                  <div className="aio-settings-body">
+                    <SelectMenu
+                      label="Nhà cung cấp SERP"
+                      value={config.provider}
+                      onChange={(value) =>
+                        update("provider", value as AioConfig["provider"])
+                      }
+                      options={[
+                        { value: "serper", label: "Serper" },
+                        { value: "serpapi", label: "SerpAPI" },
+                        { value: "dataforseo", label: "DataForSEO" },
+                        { value: "none", label: "Không dùng SERP" },
+                      ]}
+                    />
+                    <div className="aio-three-fields">
+                      <label className="aio-field">
+                        Số query
+                        <input
+                          type="number"
+                          min={5}
+                          max={30}
+                          step={1}
+                          value={config.n_queries}
+                          onChange={(e) =>
+                            update("n_queries", Number(e.target.value))
+                          }
+                        />
+                      </label>
+                      <label className="aio-field">
+                        Số đối thủ
+                        <input
+                          type="number"
+                          min={3}
+                          max={20}
+                          step={1}
+                          value={config.top_competitors}
+                          onChange={(e) =>
+                            update("top_competitors", Number(e.target.value))
+                          }
+                        />
+                      </label>
+                      <label className="aio-field">
+                        Ngưỡng gom door
+                        <input
+                          type="number"
+                          min={0.5}
+                          max={0.99}
+                          step={0.01}
+                          value={config.threshold}
+                          onChange={(e) =>
+                            update("threshold", Number(e.target.value))
+                          }
+                        />
+                      </label>
+                    </div>
+                    <SelectMenu
+                      label="Model Gemini sinh query"
+                      value={
+                        customModel || !generationModels.includes(config.llm_model)
+                          ? "custom"
+                          : config.llm_model
+                      }
+                      onChange={(value) => {
+                        setCustomModel(value === "custom");
+                        if (value !== "custom") update("llm_model", value);
+                      }}
+                      options={[
+                        ...generationModels.map((value) => ({
+                          value,
+                          label: value,
+                        })),
+                        { value: "custom", label: "Model khác…" },
+                      ]}
+                    />
+                    {(customModel ||
+                      !generationModels.includes(config.llm_model)) && (
+                      <label className="aio-field">
+                        Tên model
+                        <input
+                          value={config.llm_model}
+                          required
+                          onChange={(e) => update("llm_model", e.target.value)}
+                        />
+                      </label>
+                    )}
+                    <SelectMenu
+                      label="Model embedding so sánh"
+                      value={config.embed_model}
+                      onChange={(value) => update("embed_model", value)}
+                      options={[
+                        {
+                          value: "gemini-embedding-001",
+                          label: "Gemini Embedding 001",
+                        },
+                        {
+                          value: "gemini-embedding-2",
+                          label: "Gemini Embedding 2",
+                        },
+                      ]}
+                    />
+                    {configChanged && (
+                      <p className="aio-description">
+                        Cấu hình đã đổi. Chạy audit sẽ áp dụng model mới từ đầu.
+                      </p>
+                    )}
                     <label className="aio-field">
-                      Số query
-                      <input
-                        type="number"
-                        min={5}
-                        max={30}
-                        step={1}
-                        value={config.n_queries}
-                        onChange={(e) =>
-                          update("n_queries", Number(e.target.value))
-                        }
-                      />
-                    </label>
-                    <label className="aio-field">
-                      Số đối thủ
-                      <input
-                        type="number"
-                        min={3}
-                        max={20}
-                        step={1}
-                        value={config.top_competitors}
-                        onChange={(e) =>
-                          update("top_competitors", Number(e.target.value))
-                        }
-                      />
-                    </label>
-                    <label className="aio-field">
-                      Ngưỡng gom door
-                      <input
-                        type="number"
-                        min={0.5}
-                        max={0.99}
-                        step={0.01}
-                        value={config.threshold}
-                        onChange={(e) =>
-                          update("threshold", Number(e.target.value))
-                        }
+                      URL đối thủ để so sánh
+                      <textarea
+                        rows={2}
+                        value={config.manual_aio}
+                        onChange={(e) => update("manual_aio", e.target.value)}
+                        placeholder="Mỗi URL một dòng"
                       />
                     </label>
                   </div>
-                  <SelectMenu
-                    label="Model Gemini sinh query"
-                    value={
-                      customModel || !generationModels.includes(config.llm_model)
-                        ? "custom"
-                        : config.llm_model
-                    }
-                    onChange={(value) => {
-                      setCustomModel(value === "custom");
-                      if (value !== "custom") update("llm_model", value);
-                    }}
-                    options={[
-                      ...generationModels.map((value) => ({
-                        value,
-                        label: value,
-                      })),
-                      { value: "custom", label: "Model khác…" },
-                    ]}
-                  />
-                  {(customModel ||
-                    !generationModels.includes(config.llm_model)) && (
-                    <label className="aio-field">
-                      Tên model
-                      <input
-                        value={config.llm_model}
-                        required
-                        onChange={(e) => update("llm_model", e.target.value)}
-                      />
-                    </label>
-                  )}
-                  <SelectMenu
-                    label="Model embedding so sánh"
-                    value={config.embed_model}
-                    onChange={(value) => update("embed_model", value)}
-                    options={[
-                      {
-                        value: "gemini-embedding-001",
-                        label: "Gemini Embedding 001",
-                      },
-                      {
-                        value: "gemini-embedding-2",
-                        label: "Gemini Embedding 2",
-                      },
-                    ]}
-                  />
-                  {configChanged && (
-                    <p className="aio-description">
-                      Cấu hình đã đổi. Chạy audit sẽ áp dụng model mới từ đầu.
-                    </p>
-                  )}
-                  <label className="aio-field">
-                    URL đối thủ để so sánh
-                    <textarea
-                      rows={3}
-                      value={config.manual_aio}
-                      onChange={(e) => update("manual_aio", e.target.value)}
-                      placeholder="Mỗi URL một dòng"
-                    />
-                  </label>
-                </div>
-              </section>
+                </section>
+              </div>
             </fieldset>
           </form>
         </section>
 
+        {/* Section 02: Dedicated Progress Panel (Đặt dưới khối thiết lập) */}
         <section
-          className="aio-panel aio-progress-panel"
+          id="aio-progress-section"
+          ref={progressSectionRef}
+          className="aio-panel aio-progress-unified-panel"
           data-state={result ? "done" : busy ? "busy" : run ? "paused" : "ready"}
           aria-labelledby="aio-progress-title"
         >
@@ -565,61 +609,114 @@ export default function AioWorkspace({ userId }: { userId: string }) {
                         : "Sẵn sàng bắt đầu"}
               </h2>
             </div>
-            {busy ? (
-              <button
-                className="btn secondary"
-                disabled={paused}
-                onClick={() => {
-                  stop.current = true;
-                  setPaused(true);
-                }}
-              >
-                <Pause size={15} aria-hidden="true" />
-                {paused ? "Đang dừng…" : "Tạm dừng"}
-              </button>
-            ) : run ? (
-              <span className="aio-count">{run.progress}%</span>
-            ) : null}
+            <div className="aio-progress-head-actions">
+              {busy ? (
+                <button
+                  className="btn secondary"
+                  disabled={paused}
+                  onClick={() => {
+                    stop.current = true;
+                    setPaused(true);
+                  }}
+                >
+                  <Pause size={15} aria-hidden="true" />
+                  {paused ? "Đang dừng…" : "Tạm dừng"}
+                </button>
+              ) : null}
+              {run ? (
+                <div className="aio-progress-counter-badge">
+                  <span className="aio-count-number">{run.progress}%</span>
+                </div>
+              ) : null}
+            </div>
+          </div>
+
+          {/* 3D Holographic AI Neural Engine Visualizer */}
+          <div className="aio-neural-visualizer-container">
+            <AioProgressScene phase={currentPhase} busy={busy} />
+            <div className="aio-neural-overlay-badge">
+              <span className="aio-neural-dot" />
+              <span>
+                {currentPhase === 0
+                  ? "Stage 01: Semantic Query Fan-out & Clustering"
+                  : currentPhase === 1
+                    ? `Stage 02: Crawling & Extracting Pages (${run?.page_index || 0}/${run?.urls?.length || 0})`
+                    : currentPhase === 2
+                      ? "Stage 03: Vector Embedding & Similarity Scoring"
+                      : "AIO Engine: Analysis Harmonized"}
+              </span>
+            </div>
           </div>
 
           {run ? (
             <>
+              {/* Rich 3-Stage Cards */}
               <ol className="aio-stages" aria-label="Các bước audit">
-                {stages.map((stage, index) => (
-                  <li
-                    key={stage}
-                    data-state={
-                      currentPhase > index
-                        ? "done"
-                        : run && currentPhase === index
-                          ? "current"
-                          : "waiting"
-                    }
-                    aria-current={
-                      run && currentPhase === index ? "step" : undefined
-                    }
-                  >
-                    <span className="aio-stage-number">
-                      {currentPhase > index ? (
-                        <Check size={16} aria-hidden="true" />
-                      ) : (
-                        String(index + 1).padStart(2, "0")
+                {stages.map((stage, index) => {
+                  const isDone = currentPhase > index;
+                  const isCurrent = run && currentPhase === index;
+                  return (
+                    <li
+                      key={stage}
+                      data-state={isDone ? "done" : isCurrent ? "current" : "waiting"}
+                      aria-current={isCurrent ? "step" : undefined}
+                      className={`aio-stage-card aio-stage-card-${index + 1}`}
+                    >
+                      <div className="aio-stage-top">
+                        <span className="aio-stage-number">
+                          {isDone ? (
+                            <Check size={16} aria-hidden="true" />
+                          ) : (
+                            String(index + 1).padStart(2, "0")
+                          )}
+                        </span>
+                        <span className="aio-stage-status-pill">
+                          {isDone ? "Hoàn thành" : isCurrent ? "Đang chạy" : "Chờ xử lý"}
+                        </span>
+                      </div>
+                      <div className="aio-stage-info">
+                        <strong>{stage}</strong>
+                        <span>
+                          {index === 0
+                            ? "Fan-out từ từ khóa, gom các query tương tự"
+                            : index === 1
+                              ? "Đọc trang mục tiêu và các nguồn đối chiếu"
+                              : "Centering vector và so với đối thủ dẫn đầu"}
+                        </span>
+                      </div>
+
+                      {/* Live micro-visualizer for active stage */}
+                      {isCurrent && (
+                        <div className="aio-stage-live-meter">
+                          {index === 0 && (
+                            <div className="aio-live-queries-chips">
+                              <span>thay pin iphone</span>
+                              <span>giá thay pin</span>
+                              <span>pin chính hãng</span>
+                            </div>
+                          )}
+                          {index === 1 && (
+                            <div className="aio-live-crawl-bar">
+                              <span className="aio-crawl-dot" />
+                              <span className="aio-crawl-text">
+                                Đang đọc URL {run?.page_index || 0} / {run?.urls?.length || 0}
+                              </span>
+                            </div>
+                          )}
+                          {index === 2 && (
+                            <div className="aio-live-vector-bar">
+                              <span className="aio-vector-pulse" />
+                              <span className="aio-vector-text">Cosine distance: calculating…</span>
+                            </div>
+                          )}
+                        </div>
                       )}
-                    </span>
-                    <div>
-                      <strong>{stage}</strong>
-                      <span>
-                        {index === 0
-                          ? "Fan-out từ từ khóa, gom các query tương tự"
-                          : index === 1
-                            ? "Đọc trang mục tiêu và các nguồn đối chiếu"
-                            : "Centering vector và so với đối thủ dẫn đầu"}
-                      </span>
-                    </div>
-                  </li>
-                ))}
+                    </li>
+                  );
+                })}
               </ol>
 
+              {/* High-Precision Progress Track */}
               <div
                 className="aio-progress-track"
                 role="progressbar"
@@ -649,7 +746,7 @@ export default function AioWorkspace({ userId }: { userId: string }) {
                               : "Nhập từ khóa, URL và API để chạy audit đầu tiên."}
               </p>
 
-              {/* Waiting state visualizer and animated skeleton cards */}
+              {/* Waiting state animated skeleton preview cards */}
               {busy && (
                 <div className="aio-waiting-area" ref={waitingRef} aria-live="polite">
                   <div className="aio-live-scanner">
@@ -728,10 +825,20 @@ export default function AioWorkspace({ userId }: { userId: string }) {
               )}
             </>
           ) : (
+            /* Idle Ready Flow */
             <div className="aio-ready-flow" aria-label="Ba bước audit">
               {stages.map((stage, index) => (
                 <div key={stage} className={`aio-ready-card aio-ready-card-${index + 1}`}>
-                  <span className="aio-ready-num">{String(index + 1).padStart(2, "0")}</span>
+                  <div className="aio-ready-card-top">
+                    <span className="aio-ready-num">{String(index + 1).padStart(2, "0")}</span>
+                    {index === 0 ? (
+                      <Layers size={18} className="aio-ready-icon" />
+                    ) : index === 1 ? (
+                      <FileSearch size={18} className="aio-ready-icon" />
+                    ) : (
+                      <Target size={18} className="aio-ready-icon" />
+                    )}
+                  </div>
                   <strong>{stage}</strong>
                   <p>
                     {index === 0
