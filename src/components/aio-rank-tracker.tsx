@@ -2,14 +2,16 @@
 
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
-import { Download, Upload, ArrowRight } from "lucide-react";
+import { Download, Upload, ArrowRight, Search, Square } from "lucide-react";
 import { aioRequest, downloadAio } from "@/lib/aio-client";
 import { motionEase, motionTiming } from "@/lib/motion-tokens";
 import {
   aioScore,
   type AioRankInput,
+  type AioRankLookup,
   type AioRankResult,
   type AioResult,
+  type AioCredentials,
 } from "@/lib/aio";
 import { AioUrl } from "./aio-results";
 
@@ -23,8 +25,17 @@ const actions: Record<string, string> = {
   "6": "Ưu tiên thấp",
 };
 
-export default function AioRankTracker({ result }: { result: AioResult }) {
+export default function AioRankTracker({ result, credentials = { gemini: "", serp: "" } }: { result: AioResult; credentials?: AioCredentials }) {
   const panelRef = useRef<HTMLElement>(null);
+  const [domain, setDomain] = useState(() => {
+    try { return new URL(result.config.my_url).hostname.replace(/^www\./, ""); }
+    catch { return ""; }
+  });
+  const [depth, setDepth] = useState<10 | 30 | 100>(30);
+  const [lookupProgress, setLookupProgress] = useState(0);
+  const [lookupResults, setLookupResults] = useState<Record<string, AioRankLookup>>({});
+  const lookupController = useRef<AbortController | null>(null);
+  const stopLookup = useRef(false);
   const [rows, setRows] = useState<AioRankInput[]>(() =>
     result.doors.map((d) => ({
       door: d.representative,
@@ -36,6 +47,10 @@ export default function AioRankTracker({ result }: { result: AioResult }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState("");
   const working = useRef(false);
+  useEffect(() => () => {
+    stopLookup.current = true;
+    lookupController.current?.abort();
+  }, []);
   useEffect(() => {
     const media = gsap.matchMedia();
     media.add("(prefers-reduced-motion: no-preference)", () => {
@@ -72,10 +87,53 @@ export default function AioRankTracker({ result }: { result: AioResult }) {
     }
   }
   function update(index: number, field: "rank" | "ranking_url", value: string) {
+    const door = rows[index]?.door;
     setRows((current) =>
       current.map((row, i) => (i === index ? { ...row, [field]: value } : row)),
     );
+    if (door) setLookupResults((current) => {
+      const next = { ...current };
+      delete next[door];
+      return next;
+    });
     setAnalysis(null);
+  }
+  async function lookupAll() {
+    if (!domain.trim()) { setError("Nhập domain để tra thứ hạng."); return; }
+    if (!credentials.serp.trim() || result.config.provider === "none") {
+      setError("Nhập API key SERP trong phần thiết lập AIO để tra thứ hạng.");
+      return;
+    }
+    stopLookup.current = false;
+    setLookupProgress(0);
+    setLookupResults({});
+    await task("lookup", async () => {
+      for (let index = 0; index < result.doors.length; index++) {
+        if (stopLookup.current) break;
+        const controller = new AbortController();
+        lookupController.current = controller;
+        try {
+          const found = await aioRequest<AioRankLookup>({
+            action: "lookup_rank", id: result.id,
+            domain: domain.trim(), door: result.doors[index].representative,
+            depth, credentials: { serp: credentials.serp.trim() },
+          }, controller.signal);
+          setLookupResults((current) => ({ ...current, [found.door]: found }));
+          if (found.rank != null) {
+            setRows((current) => current.map((row) => row.door === found.door
+              ? { ...row, rank: found.rank, ranking_url: found.ranking_url }
+              : row));
+            setAnalysis(null);
+          }
+        } catch (error) {
+          if (controller.signal.aborted) break;
+          throw error;
+        } finally {
+          lookupController.current = null;
+          setLookupProgress(index + 1);
+        }
+      }
+    });
   }
   async function importFile(file?: File) {
     if (!file) return;
@@ -93,6 +151,7 @@ export default function AioRankTracker({ result }: { result: AioResult }) {
         file: btoa(raw),
       });
       setRows(data.input);
+      setLookupResults({});
       setAnalysis(data);
     });
   }
@@ -108,9 +167,47 @@ export default function AioRankTracker({ result }: { result: AioResult }) {
         </span>
       </div>
       <p className="aio-description">
-        Nhập rank Google và URL đang xếp hạng cho từng door. Không có rank thì
-        để trống cả rank và URL.
+        Tra thứ hạng Google của domain cho từng door, sau đó đối chiếu URL và kết quả audit.
       </p>
+      <div className="aio-rank-lookup" aria-label="Tra thứ hạng tự động">
+        <label className="aio-rank-domain">
+          <span>Domain cần tracking</span>
+          <input type="text" inputMode="url" autoComplete="off" spellCheck={false}
+            placeholder="example.com" value={domain} disabled={!!busy}
+            onChange={(event) => { setDomain(event.target.value); setLookupResults({}); }} />
+        </label>
+        <label className="aio-rank-depth">
+          <span>Phạm vi kiểm tra</span>
+          <select value={depth} disabled={!!busy}
+            onChange={(event) => setDepth(Number(event.target.value) as 10 | 30 | 100)}>
+            <option value={10}>Top 10 · nhanh</option>
+            <option value={30}>Top 30 · cân bằng</option>
+            <option value={100}>Top 100 · đầy đủ</option>
+          </select>
+        </label>
+        {busy === "lookup" ? (
+          <button type="button" className="btn secondary" onClick={() => {
+            stopLookup.current = true;
+            lookupController.current?.abort();
+          }}><Square size={15} aria-hidden="true" /> Dừng</button>
+        ) : (
+          <button type="button" className="btn primary" disabled={!!busy}
+            onClick={() => void lookupAll()}>
+            <Search size={16} aria-hidden="true" /> Tra rank tự động
+          </button>
+        )}
+        <p className="aio-rank-lookup-note">
+          Dùng {result.config.provider === "none" ? "API SERP" : result.config.provider} đã nhập. Chỉ tra khi bạn bấm; không lưu kết quả tra cứu.
+          {" "}Nếu chưa tìm thấy, rank bạn nhập trước đó vẫn được giữ để đối chiếu.
+          {busy === "lookup" ? ` Đang kiểm tra ${lookupProgress}/${rows.length} door…` : ""}
+        </p>
+        {busy === "lookup" ? (
+          <div className="aio-rank-lookup-progress" role="progressbar" aria-label="Tiến độ tra rank"
+            aria-valuemin={0} aria-valuemax={rows.length} aria-valuenow={lookupProgress}>
+            <span style={{ width: `${rows.length ? lookupProgress / rows.length * 100 : 0}%` }} />
+          </div>
+        ) : null}
+      </div>
       <div className="aio-toolbar">
         <button
           className="btn secondary"
@@ -185,7 +282,15 @@ export default function AioRankTracker({ result }: { result: AioResult }) {
           <tbody>
             {rows.map((row, index) => (
               <tr key={row.door}>
-                <th scope="row">{row.door}</th>
+                <th scope="row">{row.door}
+                  {lookupResults[row.door] ? (
+                    <small className="aio-rank-lookup-status">
+                      {lookupResults[row.door].rank != null
+                        ? `Đã thấy ở vị trí ${lookupResults[row.door].rank}`
+                        : `Chưa thấy trong ${lookupResults[row.door].checked} kết quả đã kiểm`}
+                    </small>
+                  ) : null}
+                </th>
                 <td>
                   <input
                     type="text"

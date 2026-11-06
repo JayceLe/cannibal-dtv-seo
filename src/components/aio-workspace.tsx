@@ -32,6 +32,7 @@ import AioResults from "./aio-results";
 import AioRankTracker from "./aio-rank-tracker";
 import AioHeroScene from "./aio-hero-scene";
 import "../app/aio.css";
+import "../app/aio-rank-lookup.css";
 
 const stages = ["Sinh query & gom door", "Đọc nội dung", "Chấm điểm"];
 const phase = (run: AioRun | null) =>
@@ -768,7 +769,7 @@ export default function AioWorkspace({ userId }: { userId: string }) {
           <div className="aio-next-step">
             <span>03 / Chuyển kết quả thành hành động</span>
           </div>
-          <AioRankTracker result={result} />
+          <AioRankTracker result={result} credentials={credentials} />
         </div>
       ) : null}
     </div>

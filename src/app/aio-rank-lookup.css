@@ -1,0 +1,83 @@
+.aio-rank-lookup {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) 210px auto;
+  align-items: end;
+  gap: 14px;
+  margin: 18px 0 22px;
+  padding: 18px;
+  border: 1px solid var(--aio-line);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f7f9fd, #fcfbf9);
+}
+
+.aio-rank-domain,
+.aio-rank-depth {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  color: var(--aio-muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.aio-rank-domain input,
+.aio-rank-depth select {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--aio-line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--aio-ink);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.aio-rank-domain input:focus-visible,
+.aio-rank-depth select:focus-visible {
+  outline: 2px solid var(--aio-blue);
+  outline-offset: 2px;
+}
+
+.aio-rank-lookup .btn { min-height: 44px; white-space: nowrap; }
+
+.aio-rank-lookup-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--aio-muted);
+  font-size: 13px;
+}
+
+.aio-rank-lookup-progress {
+  grid-column: 1 / -1;
+  height: 5px;
+  overflow: hidden;
+  border-radius: 5px;
+  background: #e4eaf3;
+}
+
+.aio-rank-lookup-progress > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--aio-blue);
+  transition: width 220ms ease-out;
+}
+
+.aio-rank-lookup-status {
+  display: block;
+  margin-top: 5px;
+  color: var(--aio-muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (max-width: 900px) {
+  .aio-rank-lookup { grid-template-columns: minmax(0, 1fr) 170px; }
+  .aio-rank-lookup > .btn { grid-column: 1 / -1; justify-self: start; }
+}
+
+@media (max-width: 600px) {
+  .aio-rank-lookup { grid-template-columns: minmax(0, 1fr); }
+}

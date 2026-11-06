@@ -81,6 +81,14 @@ export type AioRankInput = {
   rank: number | string | null;
   ranking_url: string;
 };
+export type AioRankLookup = {
+  door: string;
+  domain: string;
+  rank: number | null;
+  ranking_url: string;
+  checked: number;
+  depth: 10 | 30 | 100;
+};
 export type AioQueue = {
   action: string;
   door: string;

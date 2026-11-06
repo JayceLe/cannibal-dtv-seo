@@ -6,6 +6,7 @@ from http.server import BaseHTTPRequestHandler
 from urllib.parse import urlsplit
 from aio_engine.storage import Store
 from aio_engine import runtime
+from aio_engine import rank_lookup
 
 MAX_BODY = 3 * 1024 * 1024
 
@@ -32,6 +33,9 @@ def dispatch(store, payload):
         return result, None
     if action == 'ranks':
         return runtime.rank_analysis(result, payload.get('rows')), None
+    if action == 'lookup_rank':
+        return rank_lookup.lookup(result, credentials, payload.get('domain'),
+                                  payload.get('door'), payload.get('depth', 30)), None
     if action in ('template', 'export_ranks'):
         return runtime.rank_file(result, payload.get('rows') if action == 'export_ranks' else None), 'dtv_step9_ranks.xlsx'
     if action == 'import_ranks':

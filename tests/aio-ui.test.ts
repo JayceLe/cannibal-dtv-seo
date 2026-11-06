@@ -114,6 +114,9 @@ test("Rank Tracker keeps editable complete doors and all XLSX controls", () => {
     React.createElement(AioRankTracker, { result }),
   );
   for (const label of [
+    "Domain cần tracking",
+    "Tra rank tự động",
+    "Top 100 · đầy đủ",
     "Tải mẫu XLSX",
     "Import rank XLSX",
     "Xuất bảng đang nhập",
