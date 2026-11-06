@@ -7,7 +7,8 @@
 - Giữ Gemini sinh fan-out và tạo embedding ngữ nghĩa. Code xử lý tải/đọc trang, chuẩn hóa dấu và từ tương đương, kiểm tra model sản phẩm, gom door có cùng ý định, lọc bằng chứng và tính centering/gap theo notebook.
 - Tách nội dung thành đoạn khoảng 420 ký tự và quét toàn bộ trang. Mỗi door giữ tối đa hai ứng viên phù hợp; chỉ các đoạn này được gửi embedding, không nhúng các đoạn lấy mẫu ngẫu nhiên. Query giá cần có giá hoặc miễn phí; query thời gian cần có mốc thời gian cụ thể. Thiếu đoạn trả lời thì không suy ra điểm/gap.
 - Với query đơn giản có một đoạn khớp rõ hơn, bỏ ứng viên thứ hai trước khi embedding. Query nhiều vế và hai ứng viên có độ khớp gần nhau vẫn giữ cả hai. Bộ lọc này chạy bằng code, không gọi Gemini.
-- Điểm cosine chỉ sắp xếp bằng chứng. Các door có đoạn ở cả hai phía được Gemini kiểm tra ở **một lượt gọi gộp cuối audit**, với query, biến thể door và đoạn trích đã chọn. Kết quả chỉ được nhận nếu có trích dẫn nguyên văn từ cả hai phía; dữ kiện số hoặc phạm vi sản phẩm mâu thuẫn không được coi là tương đương. Nếu model/quota lỗi hoặc chứng cứ thiếu, kết luận hạ về “chưa đủ căn cứ” và gap để trống. Không suy ra toàn trang thiếu nội dung chỉ từ một đoạn.
+- Điểm, gap, rank và verdict luôn giữ công thức/ngưỡng của notebook trên các đoạn đã lọc: LOW CONFIDENCE, PARITY (field gần như trùng hoặc chênh nhỏ), AHEAD, BEHIND close, BEHIND clear. Không ghi đè verdict hoặc xóa gap khi Gemini không đối chiếu được nội dung.
+- Mức **đối chiếu nội dung** hiển thị riêng bên cạnh verdict điểm: thiếu đoạn ở mỗi phía, cùng dữ kiện định lượng, hai câu trả lời tương đương, một phía trả lời rõ hơn, khác dữ kiện/điều kiện hoặc chưa xác thực. Nhận xét Gemini chỉ được nhận khi trích nguyên văn từ cả hai đoạn và khớp phạm vi query. Tối đa 8 door có gap được gửi trong một request gộp, mỗi đoạn tối đa 320 ký tự; các door còn lại vẫn có điểm và nhãn đối chiếu dựa trên code. Quota/model lỗi không làm mất kết quả tính điểm.
 - Giữ trang đã tải và bước đã hoàn tất trong checkpoint của chính audit để tiếp tục. Không có cache dùng chung giữa các audit. Đoạn trùng nguyên văn trong cùng audit dùng lại đúng vector đã có; từng batch embedding thành công được lưu ngay vào checkpoint để lỗi quota ở batch sau không gọi lại batch trước.
 - Embedding kiểm tra đủ vector, kích thước và giá trị hợp lệ. Báo nguyên nhân Gemini (key/model/quota); tối đa hai lượt thử lại lỗi tạm thời theo thời gian Google yêu cầu. Lỗi key, model hoặc quota ngày không thử lại vòng lặp. Không chờ cố định theo giới hạn 90 vector/phút tự đặt.
 
@@ -18,7 +19,7 @@ Tab **AIO** đưa `aio_dtv.ipynb` vào Cannibal Query bằng giao diện React. 
 1. Mở workspace bằng mật khẩu đang dùng, chọn tab AIO.
 2. Nhập từ khóa mục tiêu và URL. Dán Gemini API key và SERP API key, hoặc nhập từng key từ file TXT/JSON (`api_key` hoặc `key`). DataForSEO dùng chuỗi `login:password` như notebook.
 3. Cấu hình mặc định giữ nguyên notebook: 15 query, 10 đối thủ, ngưỡng gom door 0,85, thị trường VN/vi, chunk 1.800 ký tự và overlap 200. Model sinh query/embedding, thị trường, citation bổ sung và provider đều có thể chỉnh.
-4. Chạy audit; xem điểm, gap, thứ tự trong field, spread, verdict, biến thể đã gom và các đoạn nội dung đối chiếu. Đối thủ hiển thị khi có điểm cao hơn trang mục tiêu, tối đa 3 (mặc định 2).
+4. Chạy audit; xem điểm, gap, thứ tự trong field, spread, verdict, nhãn xác thực nội dung, biến thể đã gom và các đoạn đối chiếu. Đối thủ có điểm cao hơn được hiển thị tối đa 3 (mặc định 2).
 5. Điền rank Google và URL cho từng door, hoặc tải mẫu XLSX rồi import lại. Giữ đủ door; ô không có rank phải để trống cả rank và URL. Xuất bảng đang nhập và xem hàng đợi hành động.
 
 API key chỉ nằm trong bộ nhớ tab và request HTTPS gửi đến backend, không nằm trong checkpoint, log đã lưu, localStorage hoặc sessionStorage. SessionStorage chỉ giữ ID audit để phục hồi khi tải lại trang trong cùng phiên. Đổi tab không dừng audit. Đăng xuất hoặc đổi tài khoản hủy trạng thái giao diện; lần mở tiếp cần nhập lại key.
@@ -42,9 +43,9 @@ Không có Python, NumPy hoặc embedding vector trong bundle trình duyệt. Ta
 ## Giữ nguyên logic
 
 - Fan-out từ **keyword**, không từ nội dung trang. Temperature 0,7 và cấu hình prompt nguyên bản.
-- Cosine float32, clustering greedy theo vector seed; ngưỡng gom door nguyên bản.
+- Cosine float32 và ngưỡng gom door nguyên bản; web thêm kiểm tra facet/model trước khi gom để tránh gộp các ý định khác nhau.
 - Citation thủ công + AIO + organic theo thứ tự gốc, deduplicate và giới hạn số đối thủ. Trang không đọc được giữ hành vi skip; trang mục tiêu không đọc được thì dừng.
-- Dùng mean vector chung để centering; chấm điểm so với **đối thủ dẫn đầu**, không so trung bình field.
+- Dùng mean vector chung để centering trên các đoạn đã lọc; chấm điểm so với **đối thủ dẫn đầu**, không so trung bình field.
 - Field size <3: LOW CONFIDENCE. Spread <0,03: PARITY. Gap/spread ≤−0,15: AHEAD; <0,15: PARITY; <0,50: BEHIND close; còn lại: BEHIND clear. Gap/score/spread giữ 4 số thập phân, z giữ 2 trong hàm gốc.
 - Batch tối đa 20 input, chỉ dùng lại vector của cùng model và đoạn trùng nguyên văn trong chính audit. Lỗi embedding không được biến thành vector rỗng rồi chấm điểm tiếp.
 - Mã rank dùng chuẩn NFC, casefold và khoảng trắng, kiểm tra đầy đủ door + metadata + chữ ký audit. URL giữ nguyên phân biệt chữ hoa trong path/query; bỏ scheme, www, fragment, slash cuối khi đối chiếu như notebook.
@@ -66,7 +67,7 @@ POST `/api/aio`, header `Authorization: Bearer <workspace JWT>`, cùng origin.
 | template / export_ranks | id, rows nếu export | XLSX có metadata audit ẩn |
 | import_ranks | id, name, file base64 | Kiểm tra XLSX và phân tích rank |
 
-`fanout → pages → score → done`. Query fan-out được lưu trước khi lấy SERP. Các trang được tải trước với tối đa 5 kết nối song song và lưu checkpoint trước khi embedding. Mỗi request embedding một trang theo thứ tự gốc, với batch tối đa 20 input và retry có giới hạn. Khi chấm, mỗi đoạn luôn đi cùng vector của nó. AIO chọn đoạn theo query đại diện bằng cosine sau centering, mức trùng từ và các dấu hiệu ý định như chi phí, bảo hành hoặc thời gian. Gap bằng điểm đoạn đối thủ tốt nhất trừ điểm đoạn trang mục tiêu. Nếu một phía thiếu đoạn phù hợp thì không có gap. Các kết quả đã lưu giữ nguyên phiên bản cũ. Nội dung đã tải được tái sử dụng khi tiếp tục sau lỗi quota hoặc hết thời gian. Lock RPC có lease 330 giây để tránh hai thao tác step đồng thời. Hết ngân sách xử lý sẽ báo tiếp tục, giữ stage hiện tại và vector đã hoàn tất. Một request đang chạy không bị hủy giữa lúc lưu checkpoint khi bấm Tạm dừng.
+`fanout → pages → score → done`. Query fan-out được lưu trước khi lấy SERP. Các trang được tải trước với tối đa 5 kết nối song song và lưu checkpoint trước khi embedding. Mỗi request embedding một trang theo thứ tự gốc, với batch tối đa 20 input và retry có giới hạn. Khi chấm, mỗi đoạn luôn đi cùng vector của nó. AIO chọn đoạn theo query đại diện bằng cosine sau centering, mức trùng từ và các dấu hiệu ý định như chi phí, bảo hành hoặc thời gian. Gap bằng điểm đoạn đối thủ tốt nhất trừ điểm đoạn trang mục tiêu. Nếu một phía thiếu đoạn phù hợp thì không có gap; nếu bước nhận xét Gemini không chạy được thì điểm và verdict đã tính vẫn được giữ. Các kết quả đã lưu giữ nguyên phiên bản cũ. Nội dung đã tải được tái sử dụng khi tiếp tục sau lỗi quota hoặc hết thời gian. Lock RPC có lease 330 giây để tránh hai thao tác step đồng thời. Hết ngân sách xử lý sẽ báo tiếp tục, giữ stage hiện tại và vector đã hoàn tất. Một request đang chạy không bị hủy giữa lúc lưu checkpoint khi bấm Tạm dừng.
 
 Không hứa exactly-once cho API tính phí: nếu response đã tới nhưng lưu checkpoint thất bại hoặc function bị kill đột ngột, bước đang dở có thể gọi lại provider. Các bước trước đã lưu vẫn được dùng lại. Không chạy nền độc lập khi tab đã đóng; cần mở lại phiên và tiếp tục.
 

@@ -30,6 +30,8 @@ const result: AioResult = {
       your_rank: "2/3",
       spread: 0.4,
       verdict: "BEHIND - clear gap, rewrite this block",
+      evidence_label: "Dữ kiện hoặc điều kiện khác nhau",
+      reason: "Hai đoạn có điều kiện khác nhau; kiểm tra trước khi sửa.",
       best_rival: "https://competitor.example/pin",
       your_best_passage: "Đoạn nội dung ngắn…",
     },
@@ -70,6 +72,11 @@ test("AIO key imports accept notebook credentials without storing or inventing v
   assert.equal(aioScore(null), "—");
   assert.equal(aioTone("BEHIND - close"), "danger");
   assert.equal(aioVerdict("AHEAD - clear leader"), "Dẫn đầu");
+  assert.equal(aioVerdict("BEHIND - close, small rewrite wins"), "Gap điểm nhỏ");
+  assert.equal(aioVerdict("BEHIND - clear gap, rewrite this block"), "Gap điểm rõ");
+  assert.equal(aioVerdict("PARITY - field indistinguishable, ignore"), "Điểm tương đương");
+  assert.equal(aioVerdict("PARITY - too close to call"), "Chênh lệch nhỏ");
+  assert.equal(aioVerdict("INSUFFICIENT - no comparable passage"), "Thiếu đoạn khớp");
 });
 
 test("AIO results retain every audit field, door variants and side-by-side passages", () => {
@@ -93,6 +100,7 @@ test("AIO results retain every audit field, door variants and side-by-side passa
     "0,2967",
     "2/3",
     "BEHIND - clear gap",
+    "Dữ kiện hoặc điều kiện khác nhau",
   ])
     assert.ok(html.includes(label), label);
   assert.ok(!html.includes("<script>"));

@@ -55,7 +55,7 @@ export default function AioResults({ result }: { result: AioResult }) {
             <strong>{result.query_count}</strong> query fan-out
           </span>
           <span className="aio-tone-danger">
-            <strong>{counts.danger || 0}</strong> cần cải thiện
+            <strong>{counts.danger || 0}</strong> door có gap điểm
           </span>
           <span className="aio-tone-medium">
             <strong>{counts.medium || 0}</strong> ngang nhau
@@ -85,7 +85,7 @@ export default function AioResults({ result }: { result: AioResult }) {
                   Đối thủ tốt nhất
                 </th>
                 <th scope="col" className="aio-numeric">
-                  Gap đã đối chiếu
+                  Gap theo điểm
                 </th>
                 <th scope="col" className="aio-numeric">
                   Xếp trong nhóm
@@ -127,6 +127,7 @@ export default function AioResults({ result }: { result: AioResult }) {
                     >
                       {aioVerdict(row.verdict)}
                     </span>
+                    {row.evidence_label && <small className="aio-evidence-label">{row.evidence_label}</small>}
                   </td>
                   <td className="aio-numeric">
                     <strong>{aioScore(row.your_score)}</strong>
@@ -143,6 +144,7 @@ export default function AioResults({ result }: { result: AioResult }) {
                         <ChevronDown size={14} aria-hidden="true" /> Xem
                       </summary>
                       <div className="aio-row-detail">
+                        <p><strong>Đối chiếu nội dung:</strong> {row.evidence_label || "Chưa đối chiếu"}</p>
                         <p>{row.reason || row.verdict}</p>
                         <p>
                           <strong>Đối thủ: </strong>
@@ -180,7 +182,7 @@ export default function AioResults({ result }: { result: AioResult }) {
             <span className="aio-eyebrow">Đối chiếu nội dung</span>
             <h2 id="aio-passages-title">Bằng chứng theo từng door</h2>
           </div>
-          <span className="aio-count">Đối chiếu đoạn trả lời theo query</span>
+          <span className="aio-count">Đoạn đã đọc và so sánh theo query</span>
         </div>
         <div className="aio-passage-controls">
           <SearchPicker
@@ -210,7 +212,11 @@ export default function AioResults({ result }: { result: AioResult }) {
                 {aioVerdict(selected.verdict)}
               </span>
             </div>
-            {selected.reason && <p className="aio-count">{selected.reason}</p>}
+            {selected.reason && (
+              <p className="aio-evidence-note">
+                <strong>{selected.evidence_label || "Đối chiếu nội dung"}:</strong> {selected.reason}
+              </p>
+            )}
             {grouped && grouped.members.length > 1 ? (
               <details className="aio-disclosure">
                 <summary>
@@ -248,8 +254,7 @@ export default function AioResults({ result }: { result: AioResult }) {
                 ))}
                 {!shownRivals.length ? (
                   <div className="aio-empty">
-                    <strong>{selected.gap == null ? "Chưa đủ bằng chứng để kết luận gap." : "Trang của bạn đang dẫn đầu door này."}</strong>
-                    {selected.gap != null && <p>Không có đối thủ nào có điểm cao hơn để đối chiếu.</p>}
+                    <strong>{selected.gap == null ? "Không có đoạn đối thủ phù hợp trong dữ liệu đã đọc." : "Không có đối thủ chấm được để hiển thị."}</strong>
                   </div>
                 ) : null}
               </div>

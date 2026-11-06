@@ -153,56 +153,83 @@ class NotebookParity(unittest.TestCase):
         weak = 'Pin iPhone được bảo hành trong 12 tháng, thời gian xử lý 60 phút.'
         self.assertEqual(evidence.select_passages([direct, weak], [query]), [direct])
 
-    def test_review_requires_literal_evidence_and_handles_any_query_facet(self):
+    def test_review_keeps_notebook_score_and_requires_literal_evidence(self):
         query = 'Thay pin iPhone từng dòng máy mất bao lâu?'
         own = 'Thay pin iPhone thông thường mất khoảng 30-60 phút.'
         rival = 'iPhone 15 mất 30 phút; iPhone 16 mất 60 phút để thay pin.'
         def result():
             return {'rows': [{'door': query, 'verdict': 'BEHIND - close', 'gap': .0833}],
-                    'passages': {query: {'passage': own, 'rivals': [{'passage': rival, 'gap': .0833}]}}}
+                    'doors': [{'representative': query, 'members': [query]}],
+                    'passages': {query: {'passage': own, 'comparison': {'passage': rival}}}}
         ns = runtime.engine(CONFIG)
         ns['print'] = Mock()
         response = Mock(return_value=SimpleNamespace(text=json.dumps([{'id': 0, 'label': 'rival_better',
-            'own_quote': 'thông thường mất khoảng 30-60 phút', 'rival_quote': 'iPhone 15 mất 30 phút; iPhone 16 mất 60 phút',
+            'own_quote': 'thông thường mất khoảng 30-60 phút',
+            'rival_quote': 'iPhone 15 mất 30 phút; iPhone 16 mất 60 phút',
             'aspect': 'từng dòng máy'}])))
         ns['client'] = SimpleNamespace(models=SimpleNamespace(generate_content=response))
         verified = review.apply(ns, result())['rows'][0]
-        self.assertTrue(verified['verdict'].startswith('BEHIND'))
+        self.assertEqual((verified['verdict'], verified['gap']), ('BEHIND - close', .0833))
+        self.assertEqual(verified['evidence_label'], 'Đối thủ trả lời rõ hơn')
         self.assertIn('từng dòng máy', verified['reason'])
-        self.assertEqual(verified['gap'], .0833)
-        response.return_value.text = json.dumps([{'id': 0, 'label': 'equivalent', 'own_quote': 'thông thường mất khoảng 30-60 phút',
-                                                  'rival_quote': 'iPhone 15 mất 30 phút; iPhone 16 mất 60 phút', 'aspect': ''}])
-        equal = review.apply(ns, result())['rows'][0]
-        self.assertTrue(equal['verdict'].startswith('INSUFFICIENT'))
-        self.assertIsNone(equal['gap'])
-        self.assertTrue(review._can_be_equivalent('Thay pin iPhone mất bao lâu?',
-            'Thay pin iPhone mất 30-60 phút.', 'Thay pin iPhone chính hãng mất 30-60 phút.'))
-        response.return_value.text = json.dumps([{'id': 0, 'label': 'rival_better', 'own_quote': 'không có trong trang',
-                                                  'rival_quote': 'iPhone 15 mất 30 phút; iPhone 16 mất 60 phút', 'aspect': 'từng dòng máy'}])
-        unverified = review.apply(ns, result())['rows'][0]
-        self.assertTrue(unverified['verdict'].startswith('INSUFFICIENT'))
-        self.assertIsNone(unverified['gap'])
-        another = 'Pin iPhone có bảo hành bao lâu?'
-        two = result()
-        two['rows'].append({'door': another, 'verdict': 'BEHIND - clear', 'gap': .12})
-        two['passages'][another] = {'passage': own, 'rivals': [{'passage': rival, 'gap': .12}]}
-        response.return_value.text = json.dumps([{'id': i, 'label': 'unclear',
-            'own_quote': 'thông thường mất khoảng 30-60 phút',
-            'rival_quote': 'iPhone 15 mất 30 phút; iPhone 16 mất 60 phút', 'aspect': ''} for i in range(2)])
-        response.reset_mock()
-        review.apply(ns, two)
-        response.assert_called_once()
-        lead = result()
-        lead['rows'][0].update(verdict='AHEAD - clear leader', gap=-.08)
-        lead['passages'][query]['passage'] = rival
-        lead['passages'][query]['rivals'] = []
-        lead['passages'][query]['comparison'] = {'passage': own, 'gap': -.08}
-        response.return_value.text = json.dumps([{'id': 0, 'label': 'target_better',
-            'own_quote': 'iPhone 15 mất 30 phút; iPhone 16 mất 60 phút',
-            'rival_quote': 'thông thường mất khoảng 30-60 phút', 'aspect': 'từng dòng máy'}])
-        verified_lead = review.apply(ns, lead)['rows'][0]
-        self.assertTrue(verified_lead['verdict'].startswith('AHEAD'))
-        self.assertEqual(verified_lead['gap'], -.08)
+        response.return_value.text = json.dumps([{'id': 0, 'label': 'rival_better',
+            'own_quote': 'không có trong trang', 'rival_quote': 'iPhone 15 mất 30 phút; iPhone 16 mất 60 phút',
+            'aspect': 'từng dòng máy'}])
+        rejected = review.apply(ns, result())['rows'][0]
+        self.assertEqual((rejected['verdict'], rejected['gap']), ('BEHIND - close', .0833))
+        self.assertEqual(rejected['evidence_label'], 'Chưa đối chiếu nội dung')
+        response.side_effect = RuntimeError('quota')
+        limited = review.apply(ns, result())['rows'][0]
+        self.assertEqual((limited['verdict'], limited['gap']), ('BEHIND - close', .0833))
+        self.assertEqual(limited['evidence_label'], 'Chưa đối chiếu nội dung')
+
+    def test_equal_quantitative_evidence_skips_extra_gemini_call(self):
+        query = 'Thay pin iPhone mất bao lâu?'
+        result = {'rows': [{'door': query, 'verdict': 'BEHIND - close', 'gap': .08}],
+                  'passages': {query: {'passage': 'Thay pin iPhone mất 30 phút tại cửa hàng.',
+                                      'comparison': {'passage': 'Thời gian thay pin iPhone là 30 phút.'}}}}
+        ns = runtime.engine(CONFIG)
+        generate = Mock()
+        ns['client'] = SimpleNamespace(models=SimpleNamespace(generate_content=generate))
+        reviewed = review.apply(ns, result)['rows'][0]
+        self.assertEqual(reviewed['evidence_label'], 'Cùng dữ kiện định lượng')
+        self.assertEqual((reviewed['verdict'], reviewed['gap']), ('BEHIND - close', .08))
+        generate.assert_not_called()
+        # A warranty number is not an answer to a service-time question.
+        self.assertEqual(review._answer_facts(query, 'Bảo hành pin 12 tháng.'), set())
+
+    def test_review_caps_one_request_and_never_overwrites_numeric_verdicts(self):
+        rows = [{'door': f'Cách thay pin iPhone mẫu {i}?', 'verdict': 'BEHIND - clear', 'gap': .2}
+                for i in range(12)]
+        passages = {row['door']: {'passage': f'Trang bạn nói về pin iPhone mẫu {i}.',
+                                  'comparison': {'passage': f'Đối thủ giải thích thay pin iPhone mẫu {i}.'}}
+                    for i, row in enumerate(rows)}
+        ns = runtime.engine(CONFIG)
+        ns['print'] = Mock()
+        generate = Mock(return_value=SimpleNamespace(text='[]'))
+        ns['client'] = SimpleNamespace(models=SimpleNamespace(generate_content=generate))
+        result = review.apply(ns, {'rows': rows, 'passages': passages})
+        generate.assert_called_once()
+        sent = json.loads(generate.call_args.kwargs['contents'][0].rsplit('\n', 1)[1])
+        self.assertEqual(len(sent), review.MAX_AI_DOORS)
+        self.assertTrue(all(row['verdict'] == 'BEHIND - clear' and row['gap'] == .2 for row in result['rows']))
+        self.assertTrue(all(row['evidence_label'] == 'Chưa đối chiếu nội dung' for row in result['rows']))
+
+    def test_different_prices_cannot_be_called_a_verified_content_gap(self):
+        query = 'Giá thay pin iPhone là bao nhiêu?'
+        own = 'Giá thay pin iPhone là 800.000 đồng.'
+        rival = 'Giá thay pin iPhone là 900.000 đồng.'
+        ns = runtime.engine(CONFIG)
+        ns['print'] = Mock()
+        response = [{'id': 0, 'label': 'rival_better', 'own_quote': own, 'rival_quote': rival,
+                     'aspect': 'Giá thay pin iPhone'}]
+        ns['client'] = SimpleNamespace(models=SimpleNamespace(
+            generate_content=Mock(return_value=SimpleNamespace(text=json.dumps(response)))))
+        result = {'rows': [{'door': query, 'verdict': 'BEHIND - clear', 'gap': .2}],
+                  'passages': {query: {'passage': own, 'comparison': {'passage': rival}}}}
+        row = review.apply(ns, result)['rows'][0]
+        self.assertEqual(row['evidence_label'], 'Dữ kiện hoặc điều kiện khác nhau')
+        self.assertEqual((row['verdict'], row['gap']), ('BEHIND - clear', .2))
 
     def test_readable_target_with_no_answer_does_not_invent_a_score(self):
         seed = {'queries': ['Giá thay pin iPhone?'], 'vectors': [[1., 0.]], 'serp': SERP}
@@ -323,8 +350,7 @@ class StagedWorkflow(unittest.TestCase):
         with patch('sys.stdout', new=io.StringIO()): expected = fixture_result()
         reviewed = store.artifact(state['id'], 'result')['rows']
         for actual, baseline in zip(reviewed, expected['rows'], strict=True):
-            self.assertEqual({k: v for k, v in actual.items() if k not in ('gap', 'verdict', 'reason')},
-                             {k: v for k, v in baseline.items() if k not in ('gap', 'verdict', 'reason')})
+            self.assertEqual({k: v for k, v in actual.items() if k not in ('reason', 'evidence_label')}, baseline)
         self.assertEqual(store.cached, {})
         persisted = json.dumps([store.states, list(store.artifacts.values()), store.cached])
         for key in keys.values(): self.assertNotIn(key, persisted)

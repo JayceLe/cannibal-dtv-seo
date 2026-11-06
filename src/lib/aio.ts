@@ -56,6 +56,7 @@ export type AioRow = {
   spread: number | null;
   verdict: string;
   reason?: string;
+  evidence_label?: string;
   best_rival: string;
   your_best_passage: string;
 };
@@ -109,11 +110,19 @@ export const aioTone = (value: string) =>
 export const aioVerdict = (value: string) =>
   value.startsWith("AHEAD")
     ? "Dẫn đầu"
-    : value.startsWith("BEHIND")
-      ? "Cần cải thiện"
-      : value.startsWith("PARITY")
-        ? "Ngang nhau"
-        : value.startsWith("INSUFFICIENT") ? "Chưa đủ căn cứ" : "Ít đối thủ";
+    : value.startsWith("BEHIND - clear")
+      ? "Gap điểm rõ"
+      : value.startsWith("BEHIND")
+        ? "Gap điểm nhỏ"
+        : value.startsWith("PARITY - field")
+          ? "Điểm tương đương"
+          : value.startsWith("PARITY")
+            ? "Chênh lệch nhỏ"
+            : value.startsWith("INSUFFICIENT - no comparable passage")
+              ? "Thiếu đoạn khớp"
+              : value.startsWith("INSUFFICIENT")
+                ? "Chưa đủ căn cứ"
+                : "Ít đối thủ";
 export const aioScore = (value: number | null, digits = 4) =>
   value == null
     ? "—"
