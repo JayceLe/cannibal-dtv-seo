@@ -6,5 +6,11 @@
       "includeFiles": "aio_engine/**",
       "excludeFiles": "{data/**,public/**,docs/**,tests/**,.ux-baseline/**,node_modules/**,.next/**,plans/**,spotify/**}"
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/spyserp",
+      "schedule": "0 3 * * 1"
+    }
+  ]
 }
