@@ -1,8 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { gsap } from "gsap";
 import { Download, Upload, ArrowRight } from "lucide-react";
 import { aioRequest, downloadAio } from "@/lib/aio-client";
+import { motionEase, motionTiming } from "@/lib/motion-tokens";
 import {
   aioScore,
   type AioRankInput,
@@ -22,6 +24,7 @@ const actions: Record<string, string> = {
 };
 
 export default function AioRankTracker({ result }: { result: AioResult }) {
+  const panelRef = useRef<HTMLElement>(null);
   const [rows, setRows] = useState<AioRankInput[]>(() =>
     result.doors.map((d) => ({
       door: d.representative,
@@ -33,6 +36,27 @@ export default function AioRankTracker({ result }: { result: AioResult }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState("");
   const working = useRef(false);
+  useEffect(() => {
+    const media = gsap.matchMedia();
+    media.add("(prefers-reduced-motion: no-preference)", () => {
+      const context = gsap.context(() => {
+        gsap.fromTo(
+          ":scope > .aio-panel-head, :scope > .aio-description, :scope > .aio-toolbar",
+          { opacity: 0.72, y: 7 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: motionTiming.open,
+            stagger: 0.04,
+            ease: motionEase.reveal,
+            clearProps: "opacity,transform",
+          },
+        );
+      }, panelRef);
+      return () => context.revert();
+    });
+    return () => media.revert();
+  }, [result.id]);
   async function task(name: string, work: () => Promise<void>) {
     if (working.current) return;
     working.current = true;
@@ -73,7 +97,7 @@ export default function AioRankTracker({ result }: { result: AioResult }) {
     });
   }
   return (
-    <section className="aio-panel" aria-labelledby="aio-ranks-title">
+    <section ref={panelRef} className="aio-panel" aria-labelledby="aio-ranks-title">
       <div className="aio-panel-head">
         <div>
           <span className="aio-eyebrow">Rank Tracker</span>

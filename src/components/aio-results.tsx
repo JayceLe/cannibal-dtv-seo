@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { gsap } from "gsap";
 import { ExternalLink, ChevronDown, ArrowDownRight } from "lucide-react";
 import { aioScore, aioTone, aioVerdict, type AioResult } from "@/lib/aio";
+import { motionEase, motionTiming } from "@/lib/motion-tokens";
 import SearchPicker from "./search-picker";
 import SelectMenu from "./select-menu";
 
@@ -23,6 +25,8 @@ export function AioUrl({
 }
 
 export default function AioResults({ result }: { result: AioResult }) {
+  const summaryRef = useRef<HTMLDivElement>(null);
+  const passagesRef = useRef<HTMLElement>(null);
   const [door, setDoor] = useState(result.rows[0]?.door || "");
   const [rivals, setRivals] = useState("2");
   const passage = result.passages[door];
@@ -34,6 +38,50 @@ export default function AioResults({ result }: { result: AioResult }) {
     acc[tone] = (acc[tone] || 0) + 1;
     return acc;
   }, {});
+  useEffect(() => {
+    const media = gsap.matchMedia();
+    media.add("(prefers-reduced-motion: no-preference)", () => {
+      const context = gsap.context(() => {
+        gsap.fromTo(
+          summaryRef.current?.children || [],
+          { opacity: 0, y: 7 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: motionTiming.open,
+            stagger: 0.035,
+            ease: motionEase.reveal,
+            clearProps: "opacity,transform",
+          },
+        );
+      }, summaryRef);
+      return () => context.revert();
+    });
+    return () => media.revert();
+  }, [result.id]);
+  useEffect(() => {
+    const media = gsap.matchMedia();
+    media.add("(prefers-reduced-motion: no-preference)", () => {
+      const context = gsap.context(() => {
+        const targets = passagesRef.current?.querySelectorAll(
+          ".aio-passage-title, .aio-evidence-note, .aio-passage-grid",
+        );
+        if (!targets?.length) return;
+        gsap.fromTo(
+          targets,
+          { opacity: 0.58 },
+          {
+            opacity: 1,
+            duration: motionTiming.update,
+            ease: motionEase.ui,
+            clearProps: "opacity",
+          },
+        );
+      }, passagesRef);
+      return () => context.revert();
+    });
+    return () => media.revert();
+  }, [door, result.id]);
   return (
     <>
       <section
@@ -50,7 +98,7 @@ export default function AioResults({ result }: { result: AioResult }) {
             được
           </span>
         </div>
-        <div className="aio-result-summary" aria-label="Tóm tắt kết quả">
+        <div ref={summaryRef} className="aio-result-summary" aria-label="Tóm tắt kết quả">
           <span>
             <strong>{result.query_count}</strong> query fan-out
           </span>
@@ -177,6 +225,7 @@ export default function AioResults({ result }: { result: AioResult }) {
         </details>
       </section>
       <section
+        ref={passagesRef}
         className="aio-panel aio-passages-panel"
         id="aio-passages"
         aria-labelledby="aio-passages-title"

@@ -1,12 +1,16 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
+import { gsap } from "gsap";
+import "@fontsource/inter/400.css";
+import "@fontsource/inter/500.css";
+import "@fontsource/inter/600.css";
+import "@fontsource/inter/700.css";
 import {
   ArrowRight,
   Check,
   Eye,
   EyeOff,
-  FileKey2,
   KeyRound,
   Pause,
   RotateCcw,
@@ -15,7 +19,6 @@ import {
 } from "lucide-react";
 import {
   aioDefaults,
-  readApiKey,
   type AioConfig,
   type AioCredentials,
   type AioResult,
@@ -26,6 +29,7 @@ import SelectMenu from "./select-menu";
 import { completeAioRun } from "@/lib/aio-runner";
 import AioResults from "./aio-results";
 import AioRankTracker from "./aio-rank-tracker";
+import AioHeroScene from "./aio-hero-scene";
 import "../app/aio.css";
 
 const stages = ["Sinh query & gom door", "Đọc nội dung", "Chấm điểm"];
@@ -42,25 +46,13 @@ function ApiField({
   label,
   value,
   onChange,
-  onError,
 }: {
   label: string;
   value: string;
   onChange: (key: string) => void;
-  onError: (error: string) => void;
 }) {
   const id = useId();
   const [visible, setVisible] = useState(false);
-  async function load(file?: File) {
-    if (!file) return;
-    try {
-      if (file.size > 16384) throw new Error("File API key tối đa 16 KB.");
-      onChange(readApiKey(await file.text()));
-      onError("");
-    } catch (e) {
-      onError(e instanceof Error ? e.message : "Chưa đọc được file API key.");
-    }
-  }
   return (
     <div className="aio-field">
       <label htmlFor={id}>{label}</label>
@@ -91,19 +83,6 @@ function ApiField({
           )}
         </button>
       </span>
-      <label className="aio-key-file">
-        <FileKey2 size={14} aria-hidden="true" />
-        Nhập từ file .txt / .json
-        <input
-          type="file"
-          accept=".txt,.json,text/plain,application/json"
-          aria-label={`Nhập ${label} từ file`}
-          onChange={(e) => {
-            void load(e.target.files?.[0]);
-            e.target.value = "";
-          }}
-        />
-      </label>
     </div>
   );
 }
@@ -111,6 +90,8 @@ function ApiField({
 const generationModels = ["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-2.5-flash", "gemini-2.5-pro"];
 
 export default function AioWorkspace({ userId }: { userId: string }) {
+  const motionRoot = useRef<HTMLDivElement>(null);
+  const progressFill = useRef<HTMLSpanElement>(null);
   const [customModel, setCustomModel] = useState(false);
   const [config, setConfig] = useState<AioConfig>({ ...aioDefaults });
   const [credentials, setCredentials] = useState<AioCredentials>({
@@ -127,6 +108,61 @@ export default function AioWorkspace({ userId }: { userId: string }) {
     stop = useRef(false),
     alive = useRef(true);
   const storageKey = `aio-last-run:${userId}`;
+  useEffect(() => {
+    const media = gsap.matchMedia();
+    media.add("(prefers-reduced-motion: no-preference)", () => {
+      const context = gsap.context(() => {
+        gsap
+          .timeline({ defaults: { ease: "power3.out" } })
+          .fromTo(
+            ".aio-hero-copy > *",
+            { autoAlpha: 0, y: 18 },
+            { autoAlpha: 1, y: 0, duration: 0.56, stagger: 0.07, clearProps: "all" },
+          )
+          .fromTo(
+            ".aio-hero-status",
+            { autoAlpha: 0, y: 8 },
+            { autoAlpha: 1, y: 0, duration: 0.32, clearProps: "all" },
+            0.18,
+          )
+          .fromTo(
+            ".aio-setup-grid > .aio-panel",
+            { autoAlpha: 0, y: 16 },
+            { autoAlpha: 1, y: 0, duration: 0.5, stagger: 0.09, clearProps: "all" },
+            0.18,
+          );
+      }, motionRoot);
+      return () => context.revert();
+    });
+    return () => media.revert();
+  }, []);
+  const progress = run?.progress ?? 0;
+  useEffect(() => {
+    const fill = progressFill.current;
+    if (!fill) return;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let tween: gsap.core.Tween | undefined;
+    if (reducedMotion.matches) {
+      gsap.set(fill, { scaleX: progress / 100 });
+    } else {
+      tween = gsap.to(fill, {
+        scaleX: progress / 100,
+        duration: 0.65,
+        ease: "power2.out",
+        overwrite: true,
+      });
+    }
+    const onPreferenceChange = () => {
+      if (!reducedMotion.matches) return;
+      tween?.kill();
+      gsap.set(fill, { scaleX: progress / 100 });
+    };
+    reducedMotion.addEventListener("change", onPreferenceChange);
+    return () => {
+      reducedMotion.removeEventListener("change", onPreferenceChange);
+      tween?.kill();
+    };
+  }, [progress]);
   useEffect(() => {
     alive.current = true;
     try { sessionStorage.removeItem(storageKey); } catch { /* Storage may be disabled. */ }
@@ -221,28 +257,31 @@ export default function AioWorkspace({ userId }: { userId: string }) {
   const configChanged =
     !!run && JSON.stringify(config) !== JSON.stringify(run.config);
   return (
-    <div className="aio-workspace">
+    <div className="aio-workspace" ref={motionRoot}>
       <header className="aio-page-head">
-        <div className="aio-hero-copy">
-          <span className="aio-hero-kicker">
-            <ScanSearch size={17} aria-hidden="true" />
-            AIO / CONTENT AUDIT
-          </span>
-          <h1>Audit nội dung AIO</h1>
-          <p>Từ query fan-out đến bằng chứng nội dung và hành động ưu tiên.</p>
-        </div>
-        <div
-          className="aio-hero-status"
-          data-state={result ? "done" : busy ? "busy" : "ready"}
-        >
-          <span className="aio-status-dot" aria-hidden="true" />
-          {result
-            ? "Đã hoàn tất"
-            : busy
-              ? "Đang phân tích"
-              : run
-                ? "Có thể tiếp tục"
-                : "Sẵn sàng"}
+        <AioHeroScene />
+        <div className="aio-hero-inner">
+          <div className="aio-hero-copy">
+            <span className="aio-hero-kicker">
+              <ScanSearch size={17} aria-hidden="true" />
+              AIO / CONTENT AUDIT
+            </span>
+            <h1>Audit nội dung AIO</h1>
+            <p>Từ query fan-out đến bằng chứng nội dung và hành động ưu tiên.</p>
+          </div>
+          <div
+            className="aio-hero-status"
+            data-state={result ? "done" : busy ? "busy" : "ready"}
+          >
+            <span className="aio-status-dot" aria-hidden="true" />
+            {result
+              ? "Đã hoàn tất"
+              : busy
+                ? "Đang phân tích"
+                : run
+                  ? "Có thể tiếp tục"
+                  : "Sẵn sàng"}
+          </div>
         </div>
       </header>
       <div className="aio-setup-grid">
@@ -292,7 +331,6 @@ export default function AioWorkspace({ userId }: { userId: string }) {
                       onChange={(key) =>
                         setCredentials((v) => ({ ...v, gemini: key }))
                       }
-                      onError={setError}
                     />
                     {config.provider !== "none" && (
                       <ApiField
@@ -301,10 +339,25 @@ export default function AioWorkspace({ userId }: { userId: string }) {
                         onChange={(key) =>
                           setCredentials((v) => ({ ...v, serp: key }))
                         }
-                        onError={setError}
                       />
                     )}
                   </div>
+                </div>
+                <div className="aio-form-actions">
+                  <button
+                    type="submit"
+                    className="btn primary"
+                    disabled={busy || restoring}
+                  >
+                    {busy
+                      ? "Đang chạy audit…"
+                      : run && !configChanged && run.stage !== "done"
+                        ? "Tiếp tục audit"
+                        : run?.stage === "done" || configChanged
+                          ? "Chạy audit mới"
+                          : "Chạy audit"}
+                    <ArrowRight size={16} aria-hidden="true" />
+                  </button>
                 </div>
               </div>
               <section className="aio-settings" aria-labelledby="aio-settings-title">
@@ -400,22 +453,6 @@ export default function AioWorkspace({ userId }: { userId: string }) {
                 </div>
               </section>
             </fieldset>
-            <div className="aio-form-actions">
-              <button
-                type="submit"
-                className="btn primary"
-                disabled={busy || restoring}
-              >
-                {busy
-                  ? "Đang chạy audit…"
-                  : run && !configChanged && run.stage !== "done"
-                    ? "Tiếp tục audit"
-                    : run?.stage === "done" || configChanged
-                      ? "Chạy audit mới"
-                      : "Chạy audit"}
-                <ArrowRight size={16} aria-hidden="true" />
-              </button>
-            </div>
           </form>
         </section>
         <section
@@ -499,9 +536,7 @@ export default function AioWorkspace({ userId }: { userId: string }) {
                 aria-valuemax={100}
                 aria-valuenow={run.progress || 0}
               >
-                <span
-                  style={{ transform: `scaleX(${(run.progress || 0) / 100})` }}
-                />
+                <span ref={progressFill} />
               </div>
               <p className="aio-progress-caption" role="status">
             {restoring
