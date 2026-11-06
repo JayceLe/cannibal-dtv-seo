@@ -33,8 +33,8 @@ begin
   lease:=gen_random_uuid();
   update private.spyserp_sync set lease_id=lease,lease_until=now()+interval '6 minutes' where project_id=c.project_id;
   return jsonb_build_object('lease',lease,'receipts',c.receipts,'dates',(
-   select coalesce(jsonb_object_agg(d,n),'{}') from (
-    select d,count(*) n from public.seo_rankings r cross join lateral jsonb_object_keys(r.positions) d
+   select coalesce(jsonb_object_agg(d,x.observed_count),'{}') from (
+    select d,count(*) observed_count from public.seo_rankings r cross join lateral jsonb_object_keys(r.positions) d
     where r.owner_id=c.owner_id and r.domain=c.domain and r.engine=c.engine group by d
    ) x));
  end if;

@@ -31,10 +31,19 @@ export function makeSpyserpClient(token:string,projectId:number,transport:typeof
   return async function read<T>(method:string,params:Record<string,unknown>={}):Promise<T> {
     if(!READ_METHODS.has(method)) throw new Error('Only approved read-only SpySERP methods are allowed');
     for(let attempt=0;attempt<3;attempt++) {
-      const response=await transport('https://spyserp.com/panel/api',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...params,token,method,project_id:PROJECT}),cache:'no-store',signal:AbortSignal.timeout(45000)});
+      let response:Response;
+      try { response=await transport('https://spyserp.com/panel/api',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...params,token,method,project_id:PROJECT}),cache:'no-store',signal:AbortSignal.timeout(45000)}); } catch {
+        if(attempt<2){await pause(3000*(attempt+1));continue;}
+        throw new Error(`SpySERP ${method} network timeout`);
+      }
       if(response.status===429 || response.status>=500) {if(attempt<2){await pause(3000*(attempt+1));continue;}}
-      const data=await response.json();
-      if(!response.ok || data.status_msg) throw new Error(`SpySERP read failed (${response.status}): ${String(data.status_msg||'Invalid response').replaceAll(token,'[redacted]')}`);
+      const text=await response.text();
+      let data;
+      try {data=JSON.parse(text);} catch {
+        if(attempt<2){await pause(3000*(attempt+1));continue;}
+        throw new Error(`SpySERP ${method} returned non-JSON (${response.status})`);
+      }
+      if(!response.ok || data.status_msg) throw new Error(`SpySERP ${method} read failed (${response.status}): ${String(data.status_msg||'Invalid response').replaceAll(token,'[redacted]')}`);
       return data as T;
     }
     throw new Error('SpySERP temporarily unavailable');
@@ -74,7 +83,7 @@ export async function syncSpyserp(verifyOnly=false) {
     for(const schedule of (verifyOnly?[latest]:completed)) {
       const date=snapshotDate(schedule.time_completed);
       // Existing imported history needs no transfer; always reconcile the latest once.
-      if(!verifyOnly && (state.receipts[String(schedule.id)] || (schedule.id!==latest.id && state.dates[date]))) {skipped++;continue;}
+      if(!verifyOnly && (state.receipts[String(schedule.id)] || (schedule.id!==latest.id && state.dates[date]>=(schedule.parseData?.total||schedule.data.keywords_count)))) {skipped++;continue;}
       const expected=schedule.parseData?.total||schedule.data.keywords_count;
       if(!Number.isSafeInteger(expected)||expected<1||expected>100000)throw new Error('Invalid snapshot keyword count');
       const fetchPage=async (page:number)=>{
@@ -90,7 +99,7 @@ export async function syncSpyserp(verifyOnly=false) {
       if(!actualPageSize)throw new Error('Empty SpySERP page');
       const pages=Math.ceil(expected/actualPageSize);
       for(let first=1;first<pages;first+=4) {
-        await pause(1100);
+        await pause(1500);
         const batch=await Promise.all(Array.from({length:Math.min(4,pages-first)},(_,i)=>fetchPage(first+i)));
         for(const page of batch) rows.push(...page);
       }
