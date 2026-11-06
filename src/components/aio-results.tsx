@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ExternalLink, ChevronDown } from "lucide-react";
+import { ExternalLink, ChevronDown, ArrowDownRight } from "lucide-react";
 import { aioScore, aioTone, aioVerdict, type AioResult } from "@/lib/aio";
 import SearchPicker from "./search-picker";
 import SelectMenu from "./select-menu";
@@ -102,6 +102,10 @@ export default function AioResults({ result }: { result: AioResult }) {
                   <th scope="row">
                     <button
                       className="aio-door-button"
+                      type="button"
+                      aria-label={`Xem đoạn đối chiếu: ${row.door}`}
+                      aria-current={door === row.door ? "true" : undefined}
+                      aria-controls="aio-passages"
                       onClick={() => {
                         setDoor(row.door);
                         document
@@ -114,9 +118,11 @@ export default function AioResults({ result }: { result: AioResult }) {
                               ? "instant"
                               : "smooth",
                           });
+                        document.getElementById("aio-passages-title")?.focus({ preventScroll: true });
                       }}
                     >
                       {row.door}
+                      <ArrowDownRight size={15} aria-hidden="true" />
                     </button>
                     <small>{row.merged_variants} biến thể</small>
                   </th>
@@ -171,14 +177,14 @@ export default function AioResults({ result }: { result: AioResult }) {
         </details>
       </section>
       <section
-        className="aio-panel"
+        className="aio-panel aio-passages-panel"
         id="aio-passages"
         aria-labelledby="aio-passages-title"
       >
         <div className="aio-panel-head">
           <div>
             <span className="aio-eyebrow">Đối chiếu nội dung</span>
-            <h2 id="aio-passages-title">Bằng chứng theo từng door</h2>
+            <h2 id="aio-passages-title" tabIndex={-1}>Bằng chứng theo từng door</h2>
           </div>
           <span className="aio-count">Đoạn đã đọc và so sánh theo query</span>
         </div>

@@ -43,13 +43,11 @@ function ApiField({
   value,
   onChange,
   onError,
-  required = true,
 }: {
   label: string;
   value: string;
   onChange: (key: string) => void;
   onError: (error: string) => void;
-  required?: boolean;
 }) {
   const id = useId();
   const [visible, setVisible] = useState(false);
@@ -78,7 +76,7 @@ function ApiField({
           autoComplete="off"
           spellCheck={false}
           maxLength={4096}
-          required={required}
+          required
         />
         <button
           type="button"
@@ -224,82 +222,95 @@ export default function AioWorkspace({ userId }: { userId: string }) {
     !!run && JSON.stringify(config) !== JSON.stringify(run.config);
   return (
     <div className="aio-workspace">
-      <div className="aio-page-head">
-        <div>
-
+      <header className="aio-page-head">
+        <div className="aio-hero-copy">
+          <span className="aio-hero-kicker">
+            <ScanSearch size={17} aria-hidden="true" />
+            AIO / CONTENT AUDIT
+          </span>
           <h1>Audit nội dung AIO</h1>
-          <p>
-            Đối chiếu nội dung theo query fan-out, sau đó kết hợp rank và URL để
-            ưu tiên xử lý.
-          </p>
+          <p>Từ query fan-out đến bằng chứng nội dung và hành động ưu tiên.</p>
         </div>
-        <span className="aio-step-tag">
-          <ScanSearch size={17} aria-hidden="true" />
-          Audit → đối chiếu → hành động
-        </span>
-      </div>
+        <div
+          className="aio-hero-status"
+          data-state={result ? "done" : busy ? "busy" : "ready"}
+        >
+          <span className="aio-status-dot" aria-hidden="true" />
+          {result
+            ? "Đã hoàn tất"
+            : busy
+              ? "Đang phân tích"
+              : run
+                ? "Có thể tiếp tục"
+                : "Sẵn sàng"}
+        </div>
+      </header>
       <div className="aio-setup-grid">
-        <section className="aio-panel" aria-labelledby="aio-input-title">
+        <section
+          className="aio-panel aio-input-panel"
+          aria-labelledby="aio-input-title"
+        >
           <div className="aio-panel-head">
             <div>
-
-              <h2 id="aio-input-title">Thiết lập nội dung</h2>
+              <span className="aio-eyebrow">01 / Thiết lập</span>
+              <h2 id="aio-input-title">Nội dung cần audit</h2>
             </div>
           </div>
           <form onSubmit={submit}>
             <fieldset disabled={busy || restoring} className="aio-fields">
               <legend className="sr-only">Cấu hình audit AIO</legend>
               <div className="aio-content-fields">
-              <label className="aio-field">
-                Từ khóa mục tiêu
-                <input
-                  required
-                  maxLength={500}
-                  placeholder="Ví dụ: thay pin iPhone 13"
-                  value={config.keyword}
-                  onChange={(e) => update("keyword", e.target.value)}
-                />
-              </label>
-              <label className="aio-field">
-                URL bài viết của bạn
-                <input
-                  required
-                  type="url"
-                  placeholder="https://dienthoaivui.com.vn/..."
-                  value={config.my_url}
-                  onChange={(e) => update("my_url", e.target.value)}
-                />
-              </label>
-              <div className="aio-credentials">
-                <div className="aio-section-label">
-                  <KeyRound size={15} aria-hidden="true" />
-                  <h3>Kết nối API</h3>
-                </div>
-                <div className="aio-two-fields">
-                  <ApiField
-                    label="Gemini API key"
-                    value={credentials.gemini}
-                    onChange={(key) =>
-                      setCredentials((v) => ({ ...v, gemini: key }))
-                    }
-                    onError={setError}
+                <label className="aio-field">
+                  Từ khóa mục tiêu
+                  <input
+                    required
+                    maxLength={500}
+                    placeholder="Ví dụ: thay pin iPhone 13"
+                    value={config.keyword}
+                    onChange={(e) => update("keyword", e.target.value)}
                   />
-                  <ApiField
-                    label={serpName}
-                    required={config.provider !== "none"}
-                    value={credentials.serp}
-                    onChange={(key) =>
-                      setCredentials((v) => ({ ...v, serp: key }))
-                    }
-                    onError={setError}
+                </label>
+                <label className="aio-field">
+                  URL bài viết của bạn
+                  <input
+                    required
+                    type="url"
+                    placeholder="https://dienthoaivui.com.vn/..."
+                    value={config.my_url}
+                    onChange={(e) => update("my_url", e.target.value)}
                   />
+                </label>
+                <div className="aio-credentials">
+                  <div className="aio-section-label">
+                    <KeyRound size={15} aria-hidden="true" />
+                    <h3>Kết nối API</h3>
+                  </div>
+                  <div className="aio-two-fields">
+                    <ApiField
+                      label="Gemini API key"
+                      value={credentials.gemini}
+                      onChange={(key) =>
+                        setCredentials((v) => ({ ...v, gemini: key }))
+                      }
+                      onError={setError}
+                    />
+                    {config.provider !== "none" && (
+                      <ApiField
+                        label={serpName}
+                        value={credentials.serp}
+                        onChange={(key) =>
+                          setCredentials((v) => ({ ...v, serp: key }))
+                        }
+                        onError={setError}
+                      />
+                    )}
+                  </div>
                 </div>
-              </div>
               </div>
               <section className="aio-settings" aria-labelledby="aio-settings-title">
                 <div className="aio-settings-heading">
                   <Settings2 size={16} aria-hidden="true" />
-                  <h3 id="aio-settings-title">Cấu hình audit</h3>
+                  <h3 id="aio-settings-title">Phạm vi phân tích</h3>
                   <span>
                     {config.n_queries} query · {config.top_competitors} đối thủ
                   </span>
@@ -397,9 +408,11 @@ export default function AioWorkspace({ userId }: { userId: string }) {
               >
                 {busy
                   ? "Đang chạy audit…"
-                  : run?.stage === "done"
-                    ? "Chạy audit mới"
-                    : "Chạy audit"}
+                  : run && !configChanged && run.stage !== "done"
+                    ? "Tiếp tục audit"
+                    : run?.stage === "done" || configChanged
+                      ? "Chạy audit mới"
+                      : "Chạy audit"}
                 <ArrowRight size={16} aria-hidden="true" />
               </button>
             </div>
@@ -407,11 +420,12 @@ export default function AioWorkspace({ userId }: { userId: string }) {
         </section>
         <section
           className="aio-panel aio-progress-panel"
+          data-state={result ? "done" : busy ? "busy" : run ? "paused" : "ready"}
           aria-labelledby="aio-progress-title"
         >
           <div className="aio-panel-head">
             <div>
-
+              <span className="aio-eyebrow">02 / Tiến trình</span>
               <h2 id="aio-progress-title">
                 {result
                   ? "Audit đã hoàn tất"
@@ -427,6 +441,7 @@ export default function AioWorkspace({ userId }: { userId: string }) {
             {busy ? (
               <button
                 className="btn secondary"
+                disabled={paused}
                 onClick={() => {
                   stop.current = true;
                   setPaused(true);
@@ -439,7 +454,9 @@ export default function AioWorkspace({ userId }: { userId: string }) {
               <span className="aio-count">{run.progress}%</span>
             ) : null}
           </div>
-          <ol className="aio-stages" aria-label="Các bước audit">
+          {run ? (
+            <>
+              <ol className="aio-stages" aria-label="Các bước audit">
             {stages.map((stage, index) => (
               <li
                 key={stage}
@@ -473,20 +490,20 @@ export default function AioWorkspace({ userId }: { userId: string }) {
                 </div>
               </li>
             ))}
-          </ol>
-          <div
-            className="aio-progress-track"
-            role="progressbar"
-            aria-label="Tiến độ audit"
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={run?.progress || 0}
-          >
-            <span
-              style={{ transform: `scaleX(${(run?.progress || 0) / 100})` }}
-            />
-          </div>
-          <p className="aio-progress-caption" role="status">
+              </ol>
+              <div
+                className="aio-progress-track"
+                role="progressbar"
+                aria-label="Tiến độ audit"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={run.progress || 0}
+              >
+                <span
+                  style={{ transform: `scaleX(${(run.progress || 0) / 100})` }}
+                />
+              </div>
+              <p className="aio-progress-caption" role="status">
             {restoring
               ? "Đang kiểm tra phiên audit gần nhất…"
               : busy && paused
@@ -500,9 +517,20 @@ export default function AioWorkspace({ userId }: { userId: string }) {
                     : busy
                       ? "API đang xử lý, có thể cần chờ theo giới hạn quota."
                       : paused
-                        ? "Nhập API key rồi chọn “Chạy audit” để tiếp tục phiên đã lưu."
+                        ? "Chọn “Tiếp tục audit” để chạy phần còn lại."
                         : "Nhập từ khóa, URL và API để chạy audit đầu tiên."}
-          </p>
+              </p>
+            </>
+          ) : (
+            <div className="aio-ready-flow" aria-label="Ba bước audit">
+              {stages.map((stage, index) => (
+                <div key={stage}>
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <strong>{stage}</strong>
+                </div>
+              ))}
+            </div>
+          )}
           {error || run?.error ? (
             <div className="error-message" role="alert">
               {error || run?.error}
@@ -517,23 +545,14 @@ export default function AioWorkspace({ userId }: { userId: string }) {
               <pre>{run.logs.join("\n")}</pre>
             </details>
           ) : null}
-          {!run ? (
-            <div className="aio-method">
-              <span className="aio-eyebrow">
-                Giữ nguyên cách tính từ notebook
-              </span>
-              <p>
-                Door là nhóm query có cùng ý định. Điểm được so với đối thủ dẫn
-                đầu sau khi centering; phần rank Google được nhập riêng ở bước
-                tiếp theo.
-              </p>
-            </div>
-          ) : null}
         </section>
       </div>
       {result ? (
         <div className="aio-output" key={result.id}>
           <AioResults result={result} />
+          <div className="aio-next-step">
+            <span>03 / Chuyển kết quả thành hành động</span>
+          </div>
           <AioRankTracker result={result} />
         </div>
       ) : null}
