@@ -769,7 +769,7 @@ export default function AioWorkspace({ userId }: { userId: string }) {
           <div className="aio-next-step">
             <span>03 / Chuyển kết quả thành hành động</span>
           </div>
-          <AioRankTracker result={result} credentials={credentials} />
+          <AioRankTracker result={result} />
         </div>
       ) : null}
     </div>

@@ -5,13 +5,13 @@ import { gsap } from "gsap";
 import { Download, Upload, ArrowRight, Search, Square } from "lucide-react";
 import { aioRequest, downloadAio } from "@/lib/aio-client";
 import { motionEase, motionTiming } from "@/lib/motion-tokens";
+import { detectSCheckPro, lookupSCheckProRank } from "@/lib/scheckpro-rank";
 import {
   aioScore,
   type AioRankInput,
   type AioRankLookup,
   type AioRankResult,
   type AioResult,
-  type AioCredentials,
 } from "@/lib/aio";
 import { AioUrl } from "./aio-results";
 
@@ -25,7 +25,7 @@ const actions: Record<string, string> = {
   "6": "Ưu tiên thấp",
 };
 
-export default function AioRankTracker({ result, credentials = { gemini: "", serp: "" } }: { result: AioResult; credentials?: AioCredentials }) {
+export default function AioRankTracker({ result }: { result: AioResult }) {
   const panelRef = useRef<HTMLElement>(null);
   const [domain, setDomain] = useState(() => {
     try { return new URL(result.config.my_url).hostname.replace(/^www\./, ""); }
@@ -34,6 +34,7 @@ export default function AioRankTracker({ result, credentials = { gemini: "", ser
   const [depth, setDepth] = useState<10 | 30 | 100>(30);
   const [lookupProgress, setLookupProgress] = useState(0);
   const [lookupResults, setLookupResults] = useState<Record<string, AioRankLookup>>({});
+  const [extensionReady, setExtensionReady] = useState<boolean | null>(null);
   const lookupController = useRef<AbortController | null>(null);
   const stopLookup = useRef(false);
   const [rows, setRows] = useState<AioRankInput[]>(() =>
@@ -50,6 +51,11 @@ export default function AioRankTracker({ result, credentials = { gemini: "", ser
   useEffect(() => () => {
     stopLookup.current = true;
     lookupController.current?.abort();
+  }, []);
+  useEffect(() => {
+    const controller = new AbortController();
+    void detectSCheckPro(controller.signal).then((ready) => setExtensionReady(ready));
+    return () => controller.abort();
   }, []);
   useEffect(() => {
     const media = gsap.matchMedia();
@@ -100,8 +106,8 @@ export default function AioRankTracker({ result, credentials = { gemini: "", ser
   }
   async function lookupAll() {
     if (!domain.trim()) { setError("Nhập domain để tra thứ hạng."); return; }
-    if (!credentials.serp.trim() || result.config.provider === "none") {
-      setError("Nhập API key SERP trong phần thiết lập AIO để tra thứ hạng.");
+    if (!extensionReady) {
+      setError("Chưa kết nối SCheckPro. Bật tiện ích trên Chrome rồi tải lại trang.");
       return;
     }
     stopLookup.current = false;
@@ -113,11 +119,9 @@ export default function AioRankTracker({ result, credentials = { gemini: "", ser
         const controller = new AbortController();
         lookupController.current = controller;
         try {
-          const found = await aioRequest<AioRankLookup>({
-            action: "lookup_rank", id: result.id,
-            domain: domain.trim(), door: result.doors[index].representative,
-            depth, credentials: { serp: credentials.serp.trim() },
-          }, controller.signal);
+          const found = await lookupSCheckProRank(
+            domain.trim(), result.doors[index].representative, depth, controller.signal,
+          );
           setLookupResults((current) => ({ ...current, [found.door]: found }));
           if (found.rank != null) {
             setRows((current) => current.map((row) => row.door === found.door
@@ -191,14 +195,16 @@ export default function AioRankTracker({ result, credentials = { gemini: "", ser
             lookupController.current?.abort();
           }}><Square size={15} aria-hidden="true" /> Dừng</button>
         ) : (
-          <button type="button" className="btn primary" disabled={!!busy}
+          <button type="button" className="btn primary" disabled={!!busy || extensionReady !== true}
             onClick={() => void lookupAll()}>
             <Search size={16} aria-hidden="true" /> Tra rank tự động
           </button>
         )}
         <p className="aio-rank-lookup-note">
-          Dùng {result.config.provider === "none" ? "API SERP" : result.config.provider} đã nhập. Chỉ tra khi bạn bấm; không lưu kết quả tra cứu.
-          {" "}Nếu chưa tìm thấy, rank bạn nhập trước đó vẫn được giữ để đối chiếu.
+          {extensionReady === null ? "Đang kiểm tra SCheckPro trên Chrome…"
+            : extensionReady ? "SCheckPro đã kết nối · không cần API key."
+              : <>Chưa tìm thấy <a href="https://chromewebstore.google.com/detail/scheckpro/aiacepmnmgokkgjaplbbloiccdmmfcaa" target="_blank" rel="noopener noreferrer">SCheckPro</a>. Bật tiện ích trên Chrome và tải lại trang.</>}
+          {" "}Chỉ tra khi bạn bấm; không lưu kết quả tra cứu. Rank nhập tay vẫn được giữ nếu chưa tìm thấy.
           {busy === "lookup" ? ` Đang kiểm tra ${lookupProgress}/${rows.length} door…` : ""}
         </p>
         {busy === "lookup" ? (
