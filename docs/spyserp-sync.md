@@ -26,7 +26,9 @@ The worker is scoped to the configured project, existing workspace, domain and G
 
 Verification on 2026-11-06: 28,948 unique keywords fetched across 97 source pages.
 Latest completed report 20863287, measured date 2026-11-01: 28,195 Top 100,
-452 outside Top 100, 301 unavailable. All agree with source report and website.
+452 outside Top 100, 301 unavailable. All agree with source report and website. The complete scheduled path returned HTTP 200
+and committed its receipt in about 74 seconds; changed=0 because the existing
+2026-11-01 snapshot exactly matched the API. No duplicated rows or dates.
 
 Operations (privileged SQL): inspect private.spyserp_sync.last_result and receipts;
 inspect cron.job and cron.job_run_details; HTTP outcomes stay in net._http_response
