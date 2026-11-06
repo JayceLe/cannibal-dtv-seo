@@ -16,6 +16,7 @@ import {
   RotateCcw,
   ScanSearch,
   Settings2,
+  Sparkles,
 } from "lucide-react";
 import {
   aioDefaults,
@@ -77,9 +78,9 @@ function ApiField({
           onClick={() => setVisible(!visible)}
         >
           {visible ? (
-            <EyeOff size={17} aria-hidden="true" />
+            <EyeOff size={16} aria-hidden="true" />
           ) : (
-            <Eye size={17} aria-hidden="true" />
+            <Eye size={16} aria-hidden="true" />
           )}
         </button>
       </span>
@@ -87,11 +88,21 @@ function ApiField({
   );
 }
 
-const generationModels = ["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-2.5-flash", "gemini-2.5-pro"];
+const generationModels = [
+  "gemini-3.8-flash",
+  "gemini-3.7-flash",
+  "gemini-3.6-flash",
+  "gemini-3.5-flash",
+  "gemini-3.5-flash-lite",
+  "gemini-3.1-flash-lite",
+  "gemini-2.5-flash",
+  "gemini-2.5-pro",
+];
 
 export default function AioWorkspace({ userId }: { userId: string }) {
   const motionRoot = useRef<HTMLDivElement>(null);
   const progressFill = useRef<HTMLSpanElement>(null);
+  const waitingRef = useRef<HTMLDivElement>(null);
   const [customModel, setCustomModel] = useState(false);
   const [config, setConfig] = useState<AioConfig>({ ...aioDefaults });
   const [credentials, setCredentials] = useState<AioCredentials>({
@@ -108,6 +119,7 @@ export default function AioWorkspace({ userId }: { userId: string }) {
     stop = useRef(false),
     alive = useRef(true);
   const storageKey = `aio-last-run:${userId}`;
+
   useEffect(() => {
     const media = gsap.matchMedia();
     media.add("(prefers-reduced-motion: no-preference)", () => {
@@ -116,19 +128,19 @@ export default function AioWorkspace({ userId }: { userId: string }) {
           .timeline({ defaults: { ease: "power3.out" } })
           .fromTo(
             ".aio-hero-copy > *",
-            { autoAlpha: 0, y: 18 },
-            { autoAlpha: 1, y: 0, duration: 0.56, stagger: 0.07, clearProps: "all" },
+            { autoAlpha: 0, y: 16 },
+            { autoAlpha: 1, y: 0, duration: 0.52, stagger: 0.08, clearProps: "all" },
           )
           .fromTo(
             ".aio-hero-status",
-            { autoAlpha: 0, y: 8 },
-            { autoAlpha: 1, y: 0, duration: 0.32, clearProps: "all" },
-            0.18,
+            { autoAlpha: 0, scale: 0.95 },
+            { autoAlpha: 1, scale: 1, duration: 0.4, clearProps: "all" },
+            0.15,
           )
           .fromTo(
             ".aio-setup-grid > .aio-panel",
-            { autoAlpha: 0, y: 16 },
-            { autoAlpha: 1, y: 0, duration: 0.5, stagger: 0.09, clearProps: "all" },
+            { autoAlpha: 0, y: 18 },
+            { autoAlpha: 1, y: 0, duration: 0.54, stagger: 0.1, clearProps: "all" },
             0.18,
           );
       }, motionRoot);
@@ -136,6 +148,7 @@ export default function AioWorkspace({ userId }: { userId: string }) {
     });
     return () => media.revert();
   }, []);
+
   const progress = run?.progress ?? 0;
   useEffect(() => {
     const fill = progressFill.current;
@@ -163,14 +176,38 @@ export default function AioWorkspace({ userId }: { userId: string }) {
       tween?.kill();
     };
   }, [progress]);
+
+  // Entrance for waiting cards when busy starts
+  useEffect(() => {
+    if (busy && waitingRef.current) {
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (!reducedMotion) {
+        gsap.fromTo(
+          waitingRef.current.querySelectorAll(".aio-skeleton-card"),
+          { opacity: 0, y: 12 },
+          { opacity: 1, y: 0, duration: 0.45, stagger: 0.08, ease: "power2.out" },
+        );
+      }
+    }
+  }, [busy]);
+
   useEffect(() => {
     alive.current = true;
-    try { sessionStorage.removeItem(storageKey); } catch { /* Storage may be disabled. */ }
-    return () => { alive.current = false; stop.current = true; };
+    try {
+      sessionStorage.removeItem(storageKey);
+    } catch {
+      /* Storage may be disabled. */
+    }
+    return () => {
+      alive.current = false;
+      stop.current = true;
+    };
   }, [storageKey]);
+
   function update<K extends keyof AioConfig>(key: K, value: AioConfig[K]) {
     setConfig((before) => ({ ...before, [key]: value }));
   }
+
   async function execute(fresh: boolean) {
     if (working.current || restoring) return;
     if (
@@ -205,10 +242,11 @@ export default function AioWorkspace({ userId }: { userId: string }) {
       }
       if (!current) return;
       current = await completeAioRun(current, {
-        step: id => aioRequest<AioRun>({ action: "step", id, credentials: keys }),
+        step: (id) => aioRequest<AioRun>({ action: "step", id, credentials: keys }),
         onUpdate: setRun,
         shouldStop: () => stop.current || !alive.current,
-        wait: milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds)),
+        wait: (milliseconds) =>
+          new Promise((resolve) => setTimeout(resolve, milliseconds)),
       });
       if (!alive.current) return;
       setRun(current);
@@ -243,10 +281,12 @@ export default function AioWorkspace({ userId }: { userId: string }) {
       if (alive.current) setBusy(false);
     }
   }
+
   function submit(e: FormEvent) {
     e.preventDefault();
     void execute(!run || (run.stage === "done" && result !== null) || configChanged);
   }
+
   const serpName =
     config.provider === "dataforseo"
       ? "DataForSEO · login:password"
@@ -256,6 +296,7 @@ export default function AioWorkspace({ userId }: { userId: string }) {
   const currentPhase = phase(run);
   const configChanged =
     !!run && JSON.stringify(config) !== JSON.stringify(run.config);
+
   return (
     <div className="aio-workspace" ref={motionRoot}>
       <header className="aio-page-head">
@@ -263,7 +304,7 @@ export default function AioWorkspace({ userId }: { userId: string }) {
         <div className="aio-hero-inner">
           <div className="aio-hero-copy">
             <span className="aio-hero-kicker">
-              <ScanSearch size={17} aria-hidden="true" />
+              <ScanSearch size={16} aria-hidden="true" />
               AIO / CONTENT AUDIT
             </span>
             <h1>Audit nội dung AIO</h1>
@@ -284,6 +325,7 @@ export default function AioWorkspace({ userId }: { userId: string }) {
           </div>
         </div>
       </header>
+
       <div className="aio-setup-grid">
         <section
           className="aio-panel aio-input-panel"
@@ -349,17 +391,31 @@ export default function AioWorkspace({ userId }: { userId: string }) {
                     className="btn primary"
                     disabled={busy || restoring}
                   >
-                    {busy
-                      ? "Đang chạy audit…"
-                      : run && !configChanged && run.stage !== "done"
-                        ? "Tiếp tục audit"
-                        : run?.stage === "done" || configChanged
-                          ? "Chạy audit mới"
-                          : "Chạy audit"}
-                    <ArrowRight size={16} aria-hidden="true" />
+                    {busy ? (
+                      <>
+                        <Sparkles size={16} className="aio-spin-icon" aria-hidden="true" />
+                        Đang chạy audit…
+                      </>
+                    ) : run && !configChanged && run.stage !== "done" ? (
+                      <>
+                        Tiếp tục audit
+                        <ArrowRight size={16} aria-hidden="true" />
+                      </>
+                    ) : run?.stage === "done" || configChanged ? (
+                      <>
+                        Chạy audit mới
+                        <ArrowRight size={16} aria-hidden="true" />
+                      </>
+                    ) : (
+                      <>
+                        Chạy audit
+                        <ArrowRight size={16} aria-hidden="true" />
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
+
               <section className="aio-settings" aria-labelledby="aio-settings-title">
                 <div className="aio-settings-heading">
                   <Settings2 size={16} aria-hidden="true" />
@@ -425,22 +481,54 @@ export default function AioWorkspace({ userId }: { userId: string }) {
                   </div>
                   <SelectMenu
                     label="Model Gemini sinh query"
-                    value={customModel || !generationModels.includes(config.llm_model) ? "custom" : config.llm_model}
+                    value={
+                      customModel || !generationModels.includes(config.llm_model)
+                        ? "custom"
+                        : config.llm_model
+                    }
                     onChange={(value) => {
                       setCustomModel(value === "custom");
                       if (value !== "custom") update("llm_model", value);
                     }}
-                    options={[...generationModels.map(value => ({value, label: value})), {value: "custom", label: "Model khác…"}]}
+                    options={[
+                      ...generationModels.map((value) => ({
+                        value,
+                        label: value,
+                      })),
+                      { value: "custom", label: "Model khác…" },
+                    ]}
                   />
-                  {(customModel || !generationModels.includes(config.llm_model)) && (
-                    <label className="aio-field">Tên model
-                      <input value={config.llm_model} required onChange={e => update("llm_model", e.target.value)} />
+                  {(customModel ||
+                    !generationModels.includes(config.llm_model)) && (
+                    <label className="aio-field">
+                      Tên model
+                      <input
+                        value={config.llm_model}
+                        required
+                        onChange={(e) => update("llm_model", e.target.value)}
+                      />
                     </label>
                   )}
-                  <SelectMenu label="Model embedding so sánh" value={config.embed_model}
+                  <SelectMenu
+                    label="Model embedding so sánh"
+                    value={config.embed_model}
                     onChange={(value) => update("embed_model", value)}
-                    options={[{value: "gemini-embedding-001", label: "Gemini Embedding 001"}, {value: "gemini-embedding-2", label: "Gemini Embedding 2"}]} />
-                  {configChanged && <p className="aio-description">Cấu hình đã đổi. Chạy audit sẽ áp dụng model mới từ đầu.</p>}
+                    options={[
+                      {
+                        value: "gemini-embedding-001",
+                        label: "Gemini Embedding 001",
+                      },
+                      {
+                        value: "gemini-embedding-2",
+                        label: "Gemini Embedding 2",
+                      },
+                    ]}
+                  />
+                  {configChanged && (
+                    <p className="aio-description">
+                      Cấu hình đã đổi. Chạy audit sẽ áp dụng model mới từ đầu.
+                    </p>
+                  )}
                   <label className="aio-field">
                     URL đối thủ để so sánh
                     <textarea
@@ -455,6 +543,7 @@ export default function AioWorkspace({ userId }: { userId: string }) {
             </fieldset>
           </form>
         </section>
+
         <section
           className="aio-panel aio-progress-panel"
           data-state={result ? "done" : busy ? "busy" : run ? "paused" : "ready"}
@@ -491,43 +580,45 @@ export default function AioWorkspace({ userId }: { userId: string }) {
               <span className="aio-count">{run.progress}%</span>
             ) : null}
           </div>
+
           {run ? (
             <>
               <ol className="aio-stages" aria-label="Các bước audit">
-            {stages.map((stage, index) => (
-              <li
-                key={stage}
-                data-state={
-                  currentPhase > index
-                    ? "done"
-                    : run && currentPhase === index
-                      ? "current"
-                      : "waiting"
-                }
-                aria-current={
-                  run && currentPhase === index ? "step" : undefined
-                }
-              >
-                <span className="aio-stage-number">
-                  {currentPhase > index ? (
-                    <Check size={16} aria-hidden="true" />
-                  ) : (
-                    String(index + 1).padStart(2, "0")
-                  )}
-                </span>
-                <div>
-                  <strong>{stage}</strong>
-                  <span>
-                    {index === 0
-                      ? "Fan-out từ từ khóa, gom các query tương tự"
-                      : index === 1
-                        ? "Đọc trang mục tiêu và các nguồn đối chiếu"
-                        : "Centering vector và so với đối thủ dẫn đầu"}
-                  </span>
-                </div>
-              </li>
-            ))}
+                {stages.map((stage, index) => (
+                  <li
+                    key={stage}
+                    data-state={
+                      currentPhase > index
+                        ? "done"
+                        : run && currentPhase === index
+                          ? "current"
+                          : "waiting"
+                    }
+                    aria-current={
+                      run && currentPhase === index ? "step" : undefined
+                    }
+                  >
+                    <span className="aio-stage-number">
+                      {currentPhase > index ? (
+                        <Check size={16} aria-hidden="true" />
+                      ) : (
+                        String(index + 1).padStart(2, "0")
+                      )}
+                    </span>
+                    <div>
+                      <strong>{stage}</strong>
+                      <span>
+                        {index === 0
+                          ? "Fan-out từ từ khóa, gom các query tương tự"
+                          : index === 1
+                            ? "Đọc trang mục tiêu và các nguồn đối chiếu"
+                            : "Centering vector và so với đối thủ dẫn đầu"}
+                      </span>
+                    </div>
+                  </li>
+                ))}
               </ol>
+
               <div
                 className="aio-progress-track"
                 role="progressbar"
@@ -538,39 +629,127 @@ export default function AioWorkspace({ userId }: { userId: string }) {
               >
                 <span ref={progressFill} />
               </div>
+
               <p className="aio-progress-caption" role="status">
-            {restoring
-              ? "Đang kiểm tra phiên audit gần nhất…"
-              : busy && paused
-                ? "Hoàn tất bước đang chạy rồi tạm dừng."
-                : run?.stage === "done"
-                  ? `${run.door_count} door đã có kết quả. Xem bảng bên dưới.`
-                  : busy && run?.retry_after
-                    ? "Đang chờ quota API, audit sẽ tự tiếp tục…"
-                  : run?.stage === "pages"
-                    ? `${run.page_index} / ${run.urls?.length || 0} trang đã xử lý${paused ? " · Tiến độ đã lưu" : ""}`
-                    : busy
-                      ? "API đang xử lý, có thể cần chờ theo giới hạn quota."
-                      : paused
-                        ? "Chọn “Tiếp tục audit” để chạy phần còn lại."
-                        : "Nhập từ khóa, URL và API để chạy audit đầu tiên."}
+                {restoring
+                  ? "Đang kiểm tra phiên audit gần nhất…"
+                  : busy && paused
+                    ? "Hoàn tất bước đang chạy rồi tạm dừng."
+                    : run?.stage === "done"
+                      ? `${run.door_count} door đã có kết quả. Xem bảng bên dưới.`
+                      : busy && run?.retry_after
+                        ? "Đang chờ quota API, audit sẽ tự tiếp tục…"
+                        : run?.stage === "pages"
+                          ? `${run.page_index} / ${run.urls?.length || 0} trang đã xử lý${paused ? " · Tiến độ đã lưu" : ""}`
+                          : busy
+                            ? "API đang xử lý, có thể cần chờ theo giới hạn quota."
+                            : paused
+                              ? "Chọn “Tiếp tục audit” để chạy phần còn lại."
+                              : "Nhập từ khóa, URL và API để chạy audit đầu tiên."}
               </p>
+
+              {/* Waiting state visualizer and animated skeleton cards */}
+              {busy && (
+                <div className="aio-waiting-area" ref={waitingRef} aria-live="polite">
+                  <div className="aio-live-scanner">
+                    <div className="aio-scanner-pulse">
+                      <span className="aio-pulse-ring" />
+                      <span className="aio-pulse-dot" />
+                    </div>
+                    <div className="aio-scanner-info">
+                      <div className="aio-scanner-title">
+                        <strong>
+                          {currentPhase === 0
+                            ? "Đang sinh query fan-out và gom cụm door…"
+                            : currentPhase === 1
+                              ? `Đang đọc nội dung bài viết và đối thủ (${run.page_index || 0}/${run.urls?.length || 0})…`
+                              : "Đang tính toán vector embeddings và đối chiếu điểm số…"}
+                        </strong>
+                        <span className="aio-scanner-tag">
+                          {currentPhase === 0
+                            ? "Query Fan-out"
+                            : currentPhase === 1
+                              ? "Crawl Pages"
+                              : "Vector Scoring"}
+                        </span>
+                      </div>
+                      <div className="aio-scanner-beam-track">
+                        <span className="aio-scanner-beam" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="aio-skeleton-grid" aria-label="Đang chuẩn bị kết quả door">
+                    <div className="aio-skeleton-card">
+                      <div className="aio-skeleton-head">
+                        <span className="aio-shimmer aio-skel-title" />
+                        <span className="aio-shimmer aio-skel-badge" />
+                      </div>
+                      <div className="aio-skeleton-body">
+                        <span className="aio-shimmer aio-skel-line w-85" />
+                        <span className="aio-shimmer aio-skel-line w-65" />
+                        <div className="aio-skel-score-row">
+                          <span className="aio-shimmer aio-skel-box" />
+                          <span className="aio-shimmer aio-skel-box" />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="aio-skeleton-card">
+                      <div className="aio-skeleton-head">
+                        <span className="aio-shimmer aio-skel-title" />
+                        <span className="aio-shimmer aio-skel-badge" />
+                      </div>
+                      <div className="aio-skeleton-body">
+                        <span className="aio-shimmer aio-skel-line w-90" />
+                        <span className="aio-shimmer aio-skel-line w-70" />
+                        <div className="aio-skel-score-row">
+                          <span className="aio-shimmer aio-skel-box" />
+                          <span className="aio-shimmer aio-skel-box" />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="aio-skeleton-card">
+                      <div className="aio-skeleton-head">
+                        <span className="aio-shimmer aio-skel-title" />
+                        <span className="aio-shimmer aio-skel-badge" />
+                      </div>
+                      <div className="aio-skeleton-body">
+                        <span className="aio-shimmer aio-skel-line w-80" />
+                        <span className="aio-shimmer aio-skel-line w-60" />
+                        <div className="aio-skel-score-row">
+                          <span className="aio-shimmer aio-skel-box" />
+                          <span className="aio-shimmer aio-skel-box" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </>
           ) : (
             <div className="aio-ready-flow" aria-label="Ba bước audit">
               {stages.map((stage, index) => (
-                <div key={stage}>
-                  <span>{String(index + 1).padStart(2, "0")}</span>
+                <div key={stage} className={`aio-ready-card aio-ready-card-${index + 1}`}>
+                  <span className="aio-ready-num">{String(index + 1).padStart(2, "0")}</span>
                   <strong>{stage}</strong>
+                  <p>
+                    {index === 0
+                      ? "Mở rộng 5–30 query ngữ nghĩa và phân loại nhóm ý định tìm kiếm."
+                      : index === 1
+                        ? "Bóc tách từng đoạn văn bản so sánh từ bài của bạn và đối thủ."
+                        : "Đo độ lệch vector embedding, xếp hạng và xác định khoảng trống nội dung."}
+                  </p>
                 </div>
               ))}
             </div>
           )}
+
           {error || run?.error ? (
             <div className="error-message" role="alert">
               {error || run?.error}
             </div>
           ) : null}
+
           {run?.logs.length ? (
             <details className="aio-disclosure">
               <summary>
@@ -582,6 +761,7 @@ export default function AioWorkspace({ userId }: { userId: string }) {
           ) : null}
         </section>
       </div>
+
       {result ? (
         <div className="aio-output" key={result.id}>
           <AioResults result={result} />

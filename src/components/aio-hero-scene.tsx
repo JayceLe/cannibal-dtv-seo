@@ -9,13 +9,14 @@ type GsapModule = typeof import("gsap");
 
 type Sticker = {
   group: ThreeTypes.Group;
-  x: number;
-  y: number;
+  baseX: number;
+  baseY: number;
   scale: number;
   tilt: number;
+  phase: number;
 };
 
-/** A decorative scene. It renders only when its pose or size changes. */
+/** A refined Notion-style 3D sticker constellation scene with physics-inspired float and parallax. */
 function createScene(
   host: HTMLElement,
   hero: HTMLElement,
@@ -43,17 +44,24 @@ function createScene(
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
   const scene = new THREE.Scene();
-  const camera = new THREE.OrthographicCamera(-300, 300, 130, -130, 1, 1000);
+  const camera = new THREE.OrthographicCamera(-320, 320, 140, -140, 1, 1000);
   camera.position.z = 500;
+
   const constellation = new THREE.Group();
   scene.add(constellation);
-  scene.add(new THREE.AmbientLight(0xffffff, 0.8));
-  const light = new THREE.DirectionalLight(0xffffff, 0.8);
-  light.position.set(-120, 200, 300);
-  scene.add(light);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+  const mainLight = new THREE.DirectionalLight(0xffffff, 0.7);
+  mainLight.position.set(-150, 220, 320);
+  scene.add(mainLight);
+
+  const fillLight = new THREE.DirectionalLight(0xb5c6ff, 0.35);
+  fillLight.position.set(180, -100, 200);
+  scene.add(fillLight);
 
   const geometries = new Set<ThreeTypes.BufferGeometry>();
   const materials = new Set<ThreeTypes.Material>();
+
   const material = (color: number, opacity = 1) => {
     const value = new THREE.MeshLambertMaterial({
       color,
@@ -64,18 +72,20 @@ function createScene(
     materials.add(value);
     return value;
   };
+
   const white = material(0xffffff);
   const paper = material(0xf8f7ff);
-  const ink = material(0x213183);
-  const paleInk = material(0x8f9dd6);
-  const sky = material(0x62aef0);
-  const purple = material(0xd6b6f6);
-  const pink = material(0xff64c8);
-  const teal = material(0x2a9d99);
-  const green = material(0x1aae39);
-  const shadow = material(0x07143a, 0.19);
+  const darkInk = material(0x213183);
+  const softSky = material(0x62aef0);
+  const softPurple = material(0xd6b6f6);
+  const softPink = material(0xff64c8);
+  const softTeal = material(0x2a9d99);
+  const softGreen = material(0x1aae39);
+  const softOrange = material(0xdd5b00);
+  const softShadow = material(0x07143a, 0.16);
   const starMaterial = new THREE.MeshBasicMaterial({ color: 0xffd5ee, side: THREE.DoubleSide });
   materials.add(starMaterial);
+
   const unitPlane = new THREE.PlaneGeometry(1, 1);
   geometries.add(unitPlane);
 
@@ -96,14 +106,15 @@ function createScene(
       depth: 2,
       bevelEnabled: true,
       bevelSegments: 1,
-      bevelSize: 1.4,
-      bevelThickness: 1.4,
+      bevelSize: 1.2,
+      bevelThickness: 1.2,
       curveSegments: 5,
       steps: 1,
     });
     geometries.add(geometry);
     return geometry;
   };
+
   const addPlane = (
     group: ThreeTypes.Group,
     fill: ThreeTypes.Material,
@@ -118,6 +129,7 @@ function createScene(
     mesh.scale.set(width, height, 1);
     group.add(mesh);
   };
+
   const addBacking = (
     group: ThreeTypes.Group,
     width: number,
@@ -126,66 +138,89 @@ function createScene(
     radius = 16,
   ) => {
     const geometry = rounded(width, height, radius);
-    const softShadow = new THREE.Mesh(geometry, shadow);
-    softShadow.position.set(7, -8, -5);
-    group.add(softShadow);
+    const shadowMesh = new THREE.Mesh(geometry, softShadow);
+    shadowMesh.position.set(6, -9, -5);
+    group.add(shadowMesh);
     group.add(new THREE.Mesh(geometry, fill));
   };
+
   const stickers: Sticker[] = [];
+
   const addDocument = (
     fill: ThreeTypes.Material,
     x: number,
     y: number,
     scale: number,
     tilt: number,
+    phase: number,
     style: "answer" | "source",
   ) => {
     const group = new THREE.Group();
-    addBacking(group, 156, 114, fill);
-    addPlane(group, style === "answer" ? ink : white, -41, 30, 52, 7);
+    addBacking(group, 156, 114, fill, 15);
+    addPlane(group, style === "answer" ? darkInk : white, -41, 30, 52, 7);
     addPlane(group, style === "answer" ? paper : white, -2, 10, 130, 5);
     addPlane(group, style === "answer" ? paper : white, -16, -4, 102, 5);
     addPlane(group, style === "answer" ? paper : white, -27, -18, 80, 5);
     if (style === "source") {
-      addPlane(group, paleInk, -44, -37, 46, 5);
+      addPlane(group, darkInk, -44, -36, 46, 5);
     } else {
-      const dot = new THREE.Mesh(new THREE.CircleGeometry(10, 20), green);
+      const dot = new THREE.Mesh(new THREE.CircleGeometry(9, 20), softGreen);
       geometries.add(dot.geometry);
       dot.position.set(52, -34, 7);
       group.add(dot);
     }
     constellation.add(group);
-    stickers.push({ group, x, y, scale, tilt });
+    stickers.push({ group, baseX: x, baseY: y, scale, tilt, phase });
   };
+
   const addQuery = (
     fill: ThreeTypes.Material,
     x: number,
     y: number,
     scale: number,
     tilt: number,
+    phase: number,
   ) => {
     const group = new THREE.Group();
-    addBacking(group, 164, 48, fill, 22);
-    const search = new THREE.Mesh(new THREE.RingGeometry(8, 10, 24), white);
+    addBacking(group, 164, 46, fill, 23);
+    const search = new THREE.Mesh(new THREE.RingGeometry(7, 9.5, 24), white);
     geometries.add(search.geometry);
     search.position.set(-57, 0, 7);
     group.add(search);
-    addPlane(group, white, -45, -10, 15, 4, 7);
-    addPlane(group, white, 8, 5, 93, 5);
-    addPlane(group, white, -7, -7, 63, 4);
+    addPlane(group, white, -46, -9, 14, 3.5, 7);
+    addPlane(group, white, 8, 4, 92, 5);
+    addPlane(group, white, -8, -7, 60, 4);
     constellation.add(group);
-    stickers.push({ group, x, y, scale, tilt });
+    stickers.push({ group, baseX: x, baseY: y, scale, tilt, phase });
   };
 
-  addDocument(purple, -0.28, 0.20, 0.88, -0.13, "source");
-  addDocument(sky, 0.24, 0.02, 1, 0.11, "answer");
-  addQuery(pink, -0.20, -0.27, 0.94, 0.08);
-  addQuery(teal, 0.30, 0.30, 0.70, -0.09);
+  const addTag = (
+    fill: ThreeTypes.Material,
+    x: number,
+    y: number,
+    scale: number,
+    tilt: number,
+    phase: number,
+  ) => {
+    const group = new THREE.Group();
+    addBacking(group, 118, 36, fill, 18);
+    addPlane(group, white, -24, 0, 14, 4, 7);
+    addPlane(group, white, 14, 0, 56, 4.5, 7);
+    constellation.add(group);
+    stickers.push({ group, baseX: x, baseY: y, scale, tilt, phase });
+  };
 
+  addDocument(softPurple, -0.29, 0.21, 0.88, -0.12, 0.2, "source");
+  addDocument(softSky, 0.24, 0.03, 1, 0.10, 1.8, "answer");
+  addQuery(softPink, -0.20, -0.27, 0.94, 0.07, 3.1);
+  addQuery(softTeal, 0.31, 0.31, 0.72, -0.08, 4.2);
+  addTag(softOrange, 0.18, -0.32, 0.82, 0.05, 5.0);
+
+  // Star shapes
   const starShape = new THREE.Shape();
   for (let i = 0; i < 8; i += 1) {
     const angle = (Math.PI * i) / 4;
-    const radius = i % 2 === 0 ? 14 : 5;
+    const radius = i % 2 === 0 ? 14 : 5.5;
     const x = Math.sin(angle) * radius;
     const y = Math.cos(angle) * radius;
     if (i === 0) starShape.moveTo(x, y);
@@ -194,41 +229,94 @@ function createScene(
   starShape.closePath();
   const starGeometry = new THREE.ShapeGeometry(starShape);
   geometries.add(starGeometry);
+
   const stars = [
-    { x: -0.38, y: 0.39, scale: 0.65 },
-    { x: 0.39, y: -0.30, scale: 1 },
-    { x: 0.05, y: 0.41, scale: 0.5 },
+    { x: -0.38, y: 0.39, scale: 0.65, phase: 0.4 },
+    { x: 0.39, y: -0.28, scale: 0.95, phase: 1.7 },
+    { x: 0.06, y: 0.42, scale: 0.52, phase: 3.2 },
+    { x: -0.08, y: -0.38, scale: 0.45, phase: 4.5 },
   ].map((point) => {
     const mesh = new THREE.Mesh(starGeometry, starMaterial);
     constellation.add(mesh);
     return { mesh, ...point };
   });
 
+  // Constellation connecting lines
+  const linePoints = [
+    new THREE.Vector3(-140, 60, -2),
+    new THREE.Vector3(120, 10, -2),
+    new THREE.Vector3(-90, -75, -2),
+    new THREE.Vector3(150, 90, -2),
+    new THREE.Vector3(90, -90, -2),
+  ];
+  const lineGeometry = new THREE.BufferGeometry().setFromPoints(linePoints);
+  geometries.add(lineGeometry);
+  const lineMat = new THREE.LineBasicMaterial({
+    color: 0x8f9dd6,
+    transparent: true,
+    opacity: 0.18,
+  });
+  materials.add(lineMat);
+  const constellationLines = new THREE.Line(lineGeometry, lineMat);
+  constellation.add(constellationLines);
+
   let disposed = false;
+  let animId: number | null = null;
+  let lastTime = 0;
+
   const render = () => {
-    if (!disposed && !document.hidden) renderer.render(scene, camera);
+    if (!disposed && !document.hidden) {
+      renderer.render(scene, camera);
+    }
   };
+
   const resize = () => {
     if (disposed) return;
     const { width, height } = host.getBoundingClientRect();
     if (width < 1 || height < 1) return;
-    const scale = Math.min(1.04, Math.max(0.58, width / 580, height / 275));
+    const scale = Math.min(1.05, Math.max(0.58, width / 580, height / 275));
     camera.left = -width / 2;
     camera.right = width / 2;
     camera.top = height / 2;
     camera.bottom = -height / 2;
     camera.updateProjectionMatrix();
-    stickers.forEach(({ group, x, y, scale: stickerScale, tilt }) => {
-      group.position.set(x * width, y * height, 0);
-      group.scale.setScalar(scale * stickerScale);
-      group.rotation.z = tilt;
+
+    stickers.forEach((s) => {
+      s.group.position.x = s.baseX * width;
+      s.group.position.y = s.baseY * height;
+      s.group.scale.setScalar(scale * s.scale);
+      s.group.rotation.z = s.tilt;
     });
-    stars.forEach(({ mesh, x, y, scale: starScale }) => {
-      mesh.position.set(x * width, y * height, 3);
-      mesh.scale.setScalar(scale * starScale);
+
+    stars.forEach((st) => {
+      st.mesh.position.set(st.x * width, st.y * height, 3);
+      st.mesh.scale.setScalar(scale * st.scale);
     });
+
     renderer.setSize(width, height, false);
     render();
+  };
+
+  // Sinusoidal floating animation loop
+  const animate = (time: number) => {
+    if (disposed) return;
+    const sec = time * 0.001;
+    if (sec - lastTime > 0.02) {
+      lastTime = sec;
+      const { height } = host.getBoundingClientRect();
+      stickers.forEach((s) => {
+        const floatOffset = Math.sin(sec * 1.35 + s.phase) * 6;
+        s.group.position.y = s.baseY * height + floatOffset;
+        s.group.rotation.z = s.tilt + Math.cos(sec * 1.1 + s.phase) * 0.018;
+      });
+
+      stars.forEach((st) => {
+        st.mesh.rotation.z = sec * 0.15;
+      });
+
+      render();
+    }
+    animId = requestAnimationFrame(animate);
   };
 
   const motion = { x: 0, y: 0 };
@@ -248,30 +336,35 @@ function createScene(
       render();
     },
   });
+
   const onPointerMove = (event: PointerEvent) => {
     if (event.pointerType !== "mouse") return;
     const bounds = hero.getBoundingClientRect();
-    toX(((event.clientX - bounds.left) / bounds.width - 0.5) * 0.12);
-    toY(((event.clientY - bounds.top) / bounds.height - 0.5) * -0.08);
+    toX(((event.clientX - bounds.left) / bounds.width - 0.5) * 0.14);
+    toY(((event.clientY - bounds.top) / bounds.height - 0.5) * -0.09);
   };
+
   const onPointerLeave = () => {
     toX(0);
     toY(0);
   };
+
   const intro = gsap.fromTo(
     constellation.position,
-    { y: -12 },
-    { y: 0, duration: 0.72, ease: "power3.out", onUpdate: render },
+    { y: -16, opacity: 0 },
+    { y: 0, opacity: 1, duration: 0.75, ease: "power3.out", onUpdate: render },
   );
 
   const observer = new ResizeObserver(resize);
   observer.observe(host);
   hero.addEventListener("pointermove", onPointerMove, { passive: true });
   hero.addEventListener("pointerleave", onPointerLeave);
+
   let contextLost = false;
   const dispose = () => {
     if (disposed) return;
     disposed = true;
+    if (animId !== null) cancelAnimationFrame(animId);
     observer.disconnect();
     intro.kill();
     toX.tween.kill();
@@ -279,26 +372,31 @@ function createScene(
     hero.removeEventListener("pointermove", onPointerMove);
     hero.removeEventListener("pointerleave", onPointerLeave);
     canvas.removeEventListener("webglcontextlost", onContextLost);
-    geometries.forEach((geometry) => geometry.dispose());
-    materials.forEach((item) => item.dispose());
+    geometries.forEach((g) => g.dispose());
+    materials.forEach((m) => m.dispose());
     renderer.dispose();
     if (!contextLost) renderer.forceContextLoss();
     canvas.remove();
     host.removeAttribute("data-webgl");
   };
+
   const onContextLost = (event: Event) => {
     event.preventDefault();
     contextLost = true;
     dispose();
   };
+
   canvas.addEventListener("webglcontextlost", onContextLost);
+
   try {
     host.append(canvas);
     resize();
     host.dataset.webgl = "true";
+    animId = requestAnimationFrame(animate);
   } catch {
     dispose();
   }
+
   return dispose;
 }
 
@@ -317,8 +415,10 @@ export default function AioHeroScene() {
     let generation = 0;
     let loading = false;
     let disposeScene: (() => void) | undefined;
+
     const reconcile = () => {
-      const allowed = active && desktop.matches && !reducedMotion.matches && visible && !document.hidden;
+      const allowed =
+        active && desktop.matches && !reducedMotion.matches && visible && !document.hidden;
       if (!allowed) {
         generation += 1;
         loading = false;
@@ -336,23 +436,26 @@ export default function AioHeroScene() {
           loading = false;
         })
         .catch(() => {
-          // The static stickers remain visible when WebGL cannot start.
           loading = false;
         });
     };
-    const observer = typeof IntersectionObserver === "undefined"
-      ? null
-      : new IntersectionObserver(([entry]) => {
-          const next = entry?.isIntersecting ?? false;
-          if (visible === next) return;
-          visible = next;
-          reconcile();
-        });
+
+    const observer =
+      typeof IntersectionObserver === "undefined"
+        ? null
+        : new IntersectionObserver(([entry]) => {
+            const next = entry?.isIntersecting ?? false;
+            if (visible === next) return;
+            visible = next;
+            reconcile();
+          });
+
     observer?.observe(hero);
     desktop.addEventListener("change", reconcile);
     reducedMotion.addEventListener("change", reconcile);
     document.addEventListener("visibilitychange", reconcile);
     reconcile();
+
     return () => {
       active = false;
       generation += 1;
@@ -367,12 +470,30 @@ export default function AioHeroScene() {
   return (
     <div ref={hostRef} className="aio-hero-scene" aria-hidden="true">
       <div className="aio-hero-static">
-        <span className="aio-scene-sticker aio-scene-document aio-scene-document-purple"><i /><i /><i /></span>
-        <span className="aio-scene-sticker aio-scene-document aio-scene-document-sky"><i /><i /><i /></span>
-        <span className="aio-scene-sticker aio-scene-query aio-scene-query-pink"><i /><i /></span>
-        <span className="aio-scene-sticker aio-scene-query aio-scene-query-teal"><i /><i /></span>
+        <span className="aio-scene-sticker aio-scene-document aio-scene-document-purple">
+          <div className="sticker-header" />
+          <i />
+          <i />
+          <i />
+        </span>
+        <span className="aio-scene-sticker aio-scene-document aio-scene-document-sky">
+          <div className="sticker-header" />
+          <i />
+          <i />
+          <i />
+        </span>
+        <span className="aio-scene-sticker aio-scene-query aio-scene-query-pink">
+          <i />
+          <i />
+        </span>
+        <span className="aio-scene-sticker aio-scene-query aio-scene-query-teal">
+          <i />
+          <i />
+        </span>
+        <span className="aio-scene-badge-orange">AIO MATCH</span>
         <span className="aio-scene-star aio-scene-star-one">✦</span>
         <span className="aio-scene-star aio-scene-star-two">✦</span>
+        <span className="aio-scene-star aio-scene-star-three">✦</span>
       </div>
     </div>
   );
