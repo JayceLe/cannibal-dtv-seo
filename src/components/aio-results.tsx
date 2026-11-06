@@ -127,7 +127,6 @@ export default function AioResults({ result }: { result: AioResult }) {
                     >
                       {aioVerdict(row.verdict)}
                     </span>
-                    {row.evidence_label && <small className="aio-evidence-label">{row.evidence_label}</small>}
                   </td>
                   <td className="aio-numeric">
                     <strong>{aioScore(row.your_score)}</strong>
@@ -144,8 +143,7 @@ export default function AioResults({ result }: { result: AioResult }) {
                         <ChevronDown size={14} aria-hidden="true" /> Xem
                       </summary>
                       <div className="aio-row-detail">
-                        <p><strong>Đối chiếu nội dung:</strong> {row.evidence_label || "Chưa đối chiếu"}</p>
-                        <p>{row.reason || row.verdict}</p>
+                        {row.reason && ["Đối thủ trả lời rõ hơn", "Trang bạn trả lời rõ hơn", "Dữ kiện hoặc điều kiện khác nhau"].includes(row.evidence_label || "") && <p>{row.reason}</p>}
                         <p>
                           <strong>Đối thủ: </strong>
                           {row.best_rival || "—"}
@@ -212,7 +210,7 @@ export default function AioResults({ result }: { result: AioResult }) {
                 {aioVerdict(selected.verdict)}
               </span>
             </div>
-            {selected.reason && (
+            {selected.reason && ["Đối thủ trả lời rõ hơn", "Trang bạn trả lời rõ hơn", "Dữ kiện hoặc điều kiện khác nhau"].includes(selected.evidence_label || "") && (
               <p className="aio-evidence-note">
                 <strong>{selected.evidence_label || "Đối chiếu nội dung"}:</strong> {selected.reason}
               </p>
