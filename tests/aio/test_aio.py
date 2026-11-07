@@ -326,6 +326,30 @@ class NotebookParity(unittest.TestCase):
 
 
 class StagedWorkflow(unittest.TestCase):
+    def test_same_keyword_starts_fresh_generation_each_time(self):
+        store = MemoryStore()
+        keys = {'gemini': 'test-key', 'serp': 'test-serp'}
+        first = runtime.start(store, CONFIG, keys)
+        second = runtime.start(store, CONFIG, keys)
+        calls = []
+        factory = runtime.engine
+        def fake_engine(config, credentials):
+            ns = factory(config)
+            def generate(keyword, count):
+                calls.append((keyword, count))
+                return [f'{keyword} · lượt {len(calls)}']
+            ns.update(generate_fanout=generate, fetch_serp=lambda *_: {'organic': [], 'aio_citations': []})
+            ns['embed_batch'] = lambda texts, **_: [np.array([1., 0.], dtype='float32') for _ in texts]
+            return ns
+        with patch.object(runtime, 'engine', side_effect=fake_engine):
+            runtime.step(store, first['id'], keys)
+            runtime.step(store, second['id'], keys)
+        self.assertNotEqual(first['id'], second['id'])
+        self.assertEqual(len(calls), 2)
+        self.assertNotEqual(store.artifact(first['id'], 'fanout')['queries'],
+                            store.artifact(second['id'], 'fanout')['queries'])
+        self.assertEqual(store.cached, {})
+
     def test_pause_resume_matches_replay_and_never_saves_keys(self):
         store = MemoryStore()
         keys = {'gemini': 'not-a-real-gemini-key', 'serp': 'not-a-real-serp-key'}

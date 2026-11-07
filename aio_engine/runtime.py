@@ -36,11 +36,11 @@ class RequestBudget:
     def check(self, reserve=0):
         if self.deadline - time.monotonic() <= reserve:
             self.exhausted = True
-            raise StepDeadline('Đã lưu bước đang dở do giới hạn thời gian. Chọn Tiếp tục audit để chạy phần còn lại.')
+            raise StepDeadline('Đã lưu bước đang dở do giới hạn thời gian. Audit sẽ tự tiếp tục ở lượt xử lý kế tiếp.')
 
     def sleep(self, seconds):
         if seconds > 300:
-            raise RuntimeError(f'Gemini đã hết quota, cần chờ khoảng {seconds / 3600:.1f} giờ. Tiến độ đã lưu; hãy tiếp tục khi quota được cấp lại hoặc dùng API key còn quota.')
+            raise RuntimeError(f'Gemini đã hết quota, cần chờ khoảng {seconds / 3600:.1f} giờ. Hãy chạy audit mới khi quota được cấp lại hoặc dùng API key còn quota.')
         self.check(seconds + 65)
         time.sleep(seconds)
 
@@ -256,7 +256,7 @@ def page_chunks(ns, store, state):
                 store.artifact(job, f'content-{i}', item)
     item = content[index]
     if ns.get('_budget') and ns['_budget'].exhausted:
-        raise StepDeadline('Đã lưu nội dung tải xong. Chọn Tiếp tục audit để chạy tiếp.')
+        raise StepDeadline('Đã lưu nội dung tải xong. Audit sẽ tự tiếp tục ở lượt xử lý kế tiếp.')
     if 'error' in item:
         if index == 0:
             raise RuntimeError('Không đọc được trang mục tiêu. Dừng audit để tránh điểm giả.')
