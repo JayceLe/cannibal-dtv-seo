@@ -1,31 +1,31 @@
-// Shared chart colors follow the SEO editorial ledger palette.
+// Shared chart colors follow Airtable's editorial design system.
 export const uiColors = {
-  background: '#f2efe8',
-  surface: '#fffdf8',
-  elevated: '#ece8df',
-  line: '#d7d3c9',
-  text: '#202922',
-  muted: '#4a584e',
-  soft: '#68766c',
+  background: '#ffffff',
+  surface: '#f8fafc',
+  elevated: '#f1f5f9',
+  line: '#e2e8f0',
+  text: '#181d26',
+  muted: '#64748b',
+  soft: '#94a3b8',
   focus: '#ffffff',
-  query: '#245b78',
-  impression: '#755d40',
+  query: '#1b61c9',
+  impression: '#6366f1',
 } as const;
 
 export const semanticColors = {
-  safe: '#176448',
-  medium: '#986022',
-  danger: '#a23d36',
-  review: '#626d63',
-  accent: '#173e31',
+  safe: '#15803d',
+  medium: '#b45309',
+  danger: '#b91c1c',
+  review: '#64748b',
+  accent: '#181d26',
 } as const;
 
-// Rank bands remain distinct on both warm paper and chart backgrounds.
+// Rank bands are categorical, using Airtable's signature surfaces and link palette.
 export const rankingColors = {
-  top3: '#245b78',
-  top5: '#176448',
-  top10: '#a66a25',
-  top20: '#a23d36',
-  top50: '#715f87',
-  top100: '#68766c',
+  top3: '#1b61c9',   // Airtable Link Blue
+  top5: '#059669',   // Airtable Mint / Emerald
+  top10: '#d97706',  // Airtable Mustard / Amber
+  top20: '#dc2626',  // Airtable Coral Red
+  top50: '#6366f1',  // Airtable Royal Indigo
+  top100: '#64748b', // Slate Gray
 } as const;

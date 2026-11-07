@@ -2,6 +2,10 @@
 
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { gsap } from "gsap";
+import "@fontsource/inter/400.css";
+import "@fontsource/inter/500.css";
+import "@fontsource/inter/600.css";
+import "@fontsource/inter/700.css";
 import {
   ArrowRight,
   Check,
@@ -10,8 +14,12 @@ import {
   KeyRound,
   Pause,
   RotateCcw,
+  ScanSearch,
   Settings2,
-  LoaderCircle,
+  Sparkles,
+  Layers,
+  FileSearch,
+  Target,
 } from "lucide-react";
 import {
   aioDefaults,
@@ -25,6 +33,8 @@ import SelectMenu from "./select-menu";
 import { completeAioRun } from "@/lib/aio-runner";
 import AioResults from "./aio-results";
 import AioRankTracker from "./aio-rank-tracker";
+import AioHeroScene from "./aio-hero-scene";
+import AioProgressScene from "./aio-progress-scene";
 import "../app/aio.css";
 import "../app/aio-rank-lookup.css";
 
@@ -97,6 +107,7 @@ const generationModels = [
 export default function AioWorkspace() {
   const motionRoot = useRef<HTMLDivElement>(null);
   const progressFill = useRef<HTMLSpanElement>(null);
+  const waitingRef = useRef<HTMLDivElement>(null);
   const progressSectionRef = useRef<HTMLElement>(null);
 
   const [customModel, setCustomModel] = useState(false);
@@ -170,6 +181,20 @@ export default function AioWorkspace() {
       tween?.kill();
     };
   }, [progress]);
+
+  // Entrance for waiting cards when busy starts
+  useEffect(() => {
+    if (busy && waitingRef.current) {
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (!reducedMotion) {
+        gsap.fromTo(
+          waitingRef.current.querySelectorAll(".aio-skeleton-card"),
+          { opacity: 0, y: 12 },
+          { opacity: 1, y: 0, duration: 0.45, stagger: 0.08, ease: "power2.out" },
+        );
+      }
+    }
+  }, [busy]);
 
   useEffect(() => {
     alive.current = true;
@@ -291,15 +316,21 @@ export default function AioWorkspace() {
   return (
     <div className="aio-workspace" ref={motionRoot}>
       <header className="aio-page-head">
+        <AioHeroScene />
         <div className="aio-hero-inner">
           <div className="aio-hero-copy">
+            <span className="aio-hero-kicker">
+              <ScanSearch size={16} aria-hidden="true" />
+              AIO / CONTENT AUDIT
+            </span>
             <h1>Audit nội dung AIO</h1>
-            <p>Sinh query, đối chiếu từng đoạn nội dung và xác định việc cần làm.</p>
+            <p>Từ query fan-out đến bằng chứng nội dung và hành động ưu tiên.</p>
           </div>
           <div
             className="aio-hero-status"
             data-state={result ? "done" : busy ? "busy" : "ready"}
           >
+            <span className="aio-status-dot" aria-hidden="true" />
             {result
               ? "Đã hoàn tất"
               : busy
@@ -319,6 +350,7 @@ export default function AioWorkspace() {
         >
           <div className="aio-panel-head">
             <div>
+              <span className="aio-eyebrow">01 / Thiết lập</span>
               <h2 id="aio-input-title">Nội dung cần audit</h2>
             </div>
             <span className="aio-count">
@@ -387,7 +419,7 @@ export default function AioWorkspace() {
                   >
                     {busy ? (
                       <>
-                        <LoaderCircle size={16} className="aio-spin-icon" aria-hidden="true" />
+                        <Sparkles size={16} className="aio-spin-icon" aria-hidden="true" />
                         Đang chạy audit…
                       </>
                     ) : run ? (
@@ -546,6 +578,7 @@ export default function AioWorkspace() {
         >
           <div className="aio-panel-head">
             <div>
+              <span className="aio-eyebrow">02 / Tiến trình</span>
               <h2 id="aio-progress-title">
                 {result
                   ? "Audit đã hoàn tất"
@@ -575,6 +608,23 @@ export default function AioWorkspace() {
                   <span className="aio-count-number">{run.progress}%</span>
                 </div>
               ) : null}
+            </div>
+          </div>
+
+          {/* 3D Holographic AI Neural Engine Visualizer */}
+          <div className="aio-neural-visualizer-container">
+            <AioProgressScene phase={currentPhase} busy={busy} />
+            <div className="aio-neural-overlay-badge">
+              <span className="aio-neural-dot" />
+              <span>
+                {currentPhase === 0
+                  ? "Stage 01: Semantic Query Fan-out & Clustering"
+                  : currentPhase === 1
+                    ? `Stage 02: Crawling & Extracting Pages (${run?.page_index || 0}/${run?.urls?.length || 0})`
+                    : currentPhase === 2
+                      ? "Stage 03: Vector Embedding & Similarity Scoring"
+                      : "AIO Engine: Analysis Harmonized"}
+              </span>
             </div>
           </div>
 
@@ -618,7 +668,11 @@ export default function AioWorkspace() {
                       {/* Live micro-visualizer for active stage */}
                       {isCurrent && (
                         <div className="aio-stage-live-meter">
-                          {index === 0 && <span>Đang xử lý: {run.config.keyword}</span>}
+                          {index === 0 && (
+                            <div className="aio-live-queries-chips">
+                              <span>{run.config.keyword}</span>
+                            </div>
+                          )}
                           {index === 1 && (
                             <div className="aio-live-crawl-bar">
                               <span className="aio-crawl-dot" />
@@ -630,7 +684,7 @@ export default function AioWorkspace() {
                           {index === 2 && (
                             <div className="aio-live-vector-bar">
                               <span className="aio-vector-pulse" />
-                              <span className="aio-vector-text">Đang đối chiếu điểm nội dung</span>
+                              <span className="aio-vector-text">Cosine distance: calculating…</span>
                             </div>
                           )}
                         </div>
@@ -670,7 +724,7 @@ export default function AioWorkspace() {
 
               {/* Waiting state animated skeleton preview cards */}
               {busy && (
-                <div className="aio-waiting-area" aria-live="polite">
+                <div className="aio-waiting-area" ref={waitingRef} aria-live="polite">
                   <div className="aio-live-scanner">
                     <div className="aio-scanner-pulse">
                       <span className="aio-pulse-ring" />
@@ -682,7 +736,7 @@ export default function AioWorkspace() {
                           {currentPhase === 0
                             ? "Đang sinh query fan-out và gom cụm door…"
                             : currentPhase === 1
-                              ? `Đang đọc nội dung bài viết và đối thủ (${run?.page_index || 0}/${run?.urls?.length || 0})…`
+                              ? `Đang đọc nội dung bài viết và đối thủ (${run.page_index || 0}/${run.urls?.length || 0})…`
                               : "Đang tính toán vector embeddings và đối chiếu điểm số…"}
                         </strong>
                         <span className="aio-scanner-tag">
@@ -699,15 +753,67 @@ export default function AioWorkspace() {
                     </div>
                   </div>
 
+                  <div className="aio-skeleton-grid" aria-label="Đang chuẩn bị kết quả door">
+                    <div className="aio-skeleton-card">
+                      <div className="aio-skeleton-head">
+                        <span className="aio-shimmer aio-skel-title" />
+                        <span className="aio-shimmer aio-skel-badge" />
+                      </div>
+                      <div className="aio-skeleton-body">
+                        <span className="aio-shimmer aio-skel-line w-85" />
+                        <span className="aio-shimmer aio-skel-line w-65" />
+                        <div className="aio-skel-score-row">
+                          <span className="aio-shimmer aio-skel-box" />
+                          <span className="aio-shimmer aio-skel-box" />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="aio-skeleton-card">
+                      <div className="aio-skeleton-head">
+                        <span className="aio-shimmer aio-skel-title" />
+                        <span className="aio-shimmer aio-skel-badge" />
+                      </div>
+                      <div className="aio-skeleton-body">
+                        <span className="aio-shimmer aio-skel-line w-90" />
+                        <span className="aio-shimmer aio-skel-line w-70" />
+                        <div className="aio-skel-score-row">
+                          <span className="aio-shimmer aio-skel-box" />
+                          <span className="aio-shimmer aio-skel-box" />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="aio-skeleton-card">
+                      <div className="aio-skeleton-head">
+                        <span className="aio-shimmer aio-skel-title" />
+                        <span className="aio-shimmer aio-skel-badge" />
+                      </div>
+                      <div className="aio-skeleton-body">
+                        <span className="aio-shimmer aio-skel-line w-80" />
+                        <span className="aio-shimmer aio-skel-line w-60" />
+                        <div className="aio-skel-score-row">
+                          <span className="aio-shimmer aio-skel-box" />
+                          <span className="aio-shimmer aio-skel-box" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
             </>
           ) : (
-            <ol className="aio-ready-flow" aria-label="Ba bước audit">
+            /* Idle Ready Flow */
+            <div className="aio-ready-flow" aria-label="Ba bước audit">
               {stages.map((stage, index) => (
-                <li key={stage} className={`aio-ready-card aio-ready-card-${index + 1}`}>
+                <div key={stage} className={`aio-ready-card aio-ready-card-${index + 1}`}>
                   <div className="aio-ready-card-top">
                     <span className="aio-ready-num">{String(index + 1).padStart(2, "0")}</span>
+                    {index === 0 ? (
+                      <Layers size={18} className="aio-ready-icon" />
+                    ) : index === 1 ? (
+                      <FileSearch size={18} className="aio-ready-icon" />
+                    ) : (
+                      <Target size={18} className="aio-ready-icon" />
+                    )}
                   </div>
                   <strong>{stage}</strong>
                   <p>
@@ -717,9 +823,9 @@ export default function AioWorkspace() {
                         ? "Bóc tách từng đoạn văn bản so sánh từ bài của bạn và đối thủ."
                         : "Đo độ lệch vector embedding, xếp hạng và xác định khoảng trống nội dung."}
                   </p>
-                </li>
+                </div>
               ))}
-            </ol>
+            </div>
           )}
 
           {error || run?.error ? (
@@ -743,7 +849,9 @@ export default function AioWorkspace() {
       {result ? (
         <div className="aio-output" key={result.id}>
           <AioResults result={result} />
-          <div className="aio-next-step"><span>Từ kết quả đến hành động</span></div>
+          <div className="aio-next-step">
+            <span>03 / Chuyển kết quả thành hành động</span>
+          </div>
           <AioRankTracker result={result} />
         </div>
       ) : null}

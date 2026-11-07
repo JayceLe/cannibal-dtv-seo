@@ -1,46 +1,34 @@
 :root {
   color-scheme: light;
-  --bg: #f2efe8;
-  --surface: #fffdf8;
-  --surface-up: #ece8df;
-  --surface-active: #dfd9cc;
-  --input: #fffdf8;
-  --border: #d3cfc4;
-  --border-strong: #8f988c;
-  --line: #d7d3c9;
-  --text: #202922;
-  --muted: #4a584e;
-  --soft: #68766c;
-  --accent: #173e31;
-  --accent-hover: #225442;
-  --accent-active: #102e25;
-  --accent-contrast: #fffdf8;
-  --copper: #995c31;
-  --header-deep: #102f26;
-  --header-muted: #e8e5dc;
-  --header-rule: #8eae9d;
-  --row-hover: #eee9df;
-  --row-alternate: #f7f4ed;
-  --highlight-neutral-bg: #dfe8df;
-  --highlight-high-bg: #f0dbd5;
-  --highlight-low-bg: #d8e9dc;
-  --highlight-impression-bg: #e9e1d1;
-  --highlight-impression-border: #cfc3a8;
-  --query-bg: #dfe9e2;
-  --impression-bg: #e6e5d9;
-  --focus: #1d6550;
-  --query: #245b78;
-  --impression: #755d40;
-  --safe: #176448;
-  --medium: #986022;
-  --danger: #a23d36;
-  --review: #626d63;
-  --safe-bg: #e4efe5;
-  --medium-bg: #f7edda;
-  --danger-bg: #f5e7e4;
-  --safe-border: #b2d2bd;
-  --medium-border: #e3cba0;
-  --danger-border: #dfb8b1;
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-up: #f1f5f9;
+  --surface-active: #e2e8f0;
+  --input: #ffffff;
+  --border: #e2e8f0;
+  --border-strong: #94a3b8;
+  --line: #e2e8f0;
+  --text: #181d26;
+  --muted: #475569;
+  --soft: #64748b;
+  --accent: #181d26;
+  --accent-hover: #2d3748;
+  --accent-active: #0d1218;
+  --query-bg: #eff6ff;
+  --impression-bg: #f5f3ff;
+  --focus: #1b61c9;
+  --query: #1b61c9;
+  --impression: #6366f1;
+  --safe: #047857;
+  --medium: #b45309;
+  --danger: #b91c1c;
+  --review: #64748b;
+  --safe-bg: #ecfdf5;
+  --medium-bg: #fffbeb;
+  --danger-bg: #fef2f2;
+  --safe-border: #a7f3d0;
+  --medium-border: #fde68a;
+  --danger-border: #fecaca;
   --radius-xs: 4px;
   --radius-sm: 6px;
   --radius-md: 10px;
@@ -48,7 +36,7 @@
   --radius-xl: 14px;
   --radius-full: 9999px;
   --radius-card: var(--radius-lg);
-  --radius-panel: var(--radius-lg);
+  --radius-panel: var(--radius-xl);
   --radius-control: 8px;
   --radius-input: var(--radius-sm);
   --radius-menu: var(--radius-md);
@@ -118,8 +106,8 @@ a {
   text-decoration: none;
 }
 ::selection {
-  background: var(--safe-border);
-  color: var(--text);
+  background: #e0e7ff;
+  color: #181d26;
 }
 input,
 textarea {
@@ -146,8 +134,7 @@ select {
 input:focus,
 select:focus {
   border-color: var(--focus);
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgb(27 97 201 / 0.15);
 }
 input::placeholder {
   color: var(--soft);

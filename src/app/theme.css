@@ -1,7 +1,8 @@
-/* Hallmark · SEO editorial ledger · dashboard surfaces · shared tokens in globals.css. */
+/* Airtable Editorial Design System: Calm whitespace, dark ink type, signature card surfaces.
+   Typography, spacing, layout and motion remain in globals.css. */
 ::selection {
-  background: var(--safe-border);
-  color: var(--text);
+  background: #e0e7ff;
+  color: #181d26;
 }
 button:focus-visible,
 a:focus-visible {
@@ -11,8 +12,7 @@ input:focus,
 select:focus,
 .search-field:focus-within {
   border-color: var(--focus);
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgb(27 97 201 / 0.15);
 }
 input,
 select,
@@ -278,13 +278,13 @@ select,
   color: #333840;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+  transition: all 0.18s ease;
 }
 .category-list b {
   background: #f1f5f9;
   color: #475569;
   border-radius: var(--radius-pill);
-  transition: background 0.18s ease, color 0.18s ease;
+  transition: all 0.18s ease;
 }
 .category-list button:hover:not(.active) {
   background: color-mix(
@@ -387,7 +387,7 @@ select,
   border: 1px solid var(--border);
   background: #f8fafc;
   color: var(--muted);
-  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+  transition: all 0.18s ease;
   cursor: pointer;
 }
 .level-chip > b {
@@ -937,7 +937,7 @@ th,
   height: 100%;
   border-radius: var(--radius-pill);
   background: #64748b;
-  transition: none;
+  transition: width 0.25s ease;
 }
 .leader-url .url-share-track i,
 .period-url-row.leader-url .url-share-track i,
@@ -1095,7 +1095,7 @@ th,
   color: #1e3a8a;
 }
 .evidence-verdict > svg {
-  color: var(--query);
+  color: #2563eb;
   flex-shrink: 0;
 }
 .evidence-verdict.safe {
@@ -1774,123 +1774,4 @@ button[data-metric-surface][data-metric-pressed] {
     width: 190px;
     justify-self: center;
   }
-}
-
-/* Hallmark redesign: a ruled SEO editorial ledger, shared by every report. */
-html { overflow-x: clip; }
-body { background: var(--bg); }
-::selection { background: var(--safe-border); color: var(--text); }
-input, textarea { caret-color: var(--accent); }
-button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 3px;
-}
-.app-header {
-  background: var(--header-deep);
-  border-color: var(--accent);
-  box-shadow: none;
-}
-.app-header .brand, .app-header .brand small { color: var(--accent-contrast); }
-.brand-mark {
-  border: 1px solid var(--accent-contrast);
-  background: var(--accent-contrast);
-  color: var(--header-deep);
-  border-radius: var(--radius-sm);
-}
-.app-header .main-navigation {
-  background: var(--accent);
-  border-color: var(--border-strong);
-  border-radius: var(--radius-sm);
-}
-.app-header .main-navigation button {
-  color: var(--accent-contrast);
-  border-radius: var(--radius-xs);
-}
-.app-header .main-navigation button:hover {
-  background: var(--accent-hover);
-  color: var(--accent-contrast);
-}
-.app-header .main-navigation button[aria-selected="true"] {
-  background: var(--accent-contrast);
-  color: var(--accent);
-  box-shadow: none;
-}
-.app-header .main-navigation button[aria-selected="true"]:hover {
-  background: var(--accent-contrast);
-  color: var(--accent-active);
-}
-.app-header :is(.btn, .icon-button, .picker-trigger, .select-menu-trigger) {
-  color: var(--accent-contrast);
-  border-color: var(--border-strong);
-  background: transparent;
-}
-.app-header :is(.btn, .icon-button, .picker-trigger, .select-menu-trigger):hover {
-  color: var(--accent-contrast);
-  background: var(--accent-hover);
-  border-color: var(--accent-contrast);
-}
-.app-header .btn.primary {
-  color: var(--header-deep);
-  background: var(--accent-contrast);
-  border-color: var(--accent-contrast);
-}
-.app-header .btn.primary:hover {
-  color: var(--header-deep);
-  background: var(--surface-up);
-}
-.app-header .btn:focus-visible, .app-header button:focus-visible, .app-header a:focus-visible {
-  outline-color: var(--accent-contrast);
-}
-.btn.primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--accent-contrast);
-  border-radius: var(--radius-control);
-  box-shadow: none;
-}
-.btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
-.btn.primary:active { background: var(--accent-active); border-color: var(--accent-active); }
-.btn.secondary, .btn { background: var(--surface); border-color: var(--border); color: var(--text); }
-.btn.secondary:hover { background: var(--surface-up); border-color: var(--border-strong); }
-.icon-button:hover { background: var(--surface-up); color: var(--accent); }
-.panel, .ratio-metric, .distribution-card, .comparison-report-card, .evidence-metric {
-  background: var(--surface);
-  border-color: var(--border);
-  box-shadow: none;
-}
-.section-title { border-bottom: 1px solid var(--line); padding-bottom: 16px; }
-.section-title :is(h1, h2) { color: var(--text); letter-spacing: -0.025em; }
-.highlight-card {
-  --tone: var(--query);
-  --edge: var(--border);
-  --card-bg: var(--highlight-neutral-bg);
-  box-shadow: none;
-  border-color: var(--edge);
-  border-radius: var(--radius-md);
-}
-.highlight-card.overview-high { --tone: var(--danger); --edge: var(--danger-border); --card-bg: var(--highlight-high-bg); }
-.highlight-card.overview-low { --tone: var(--safe); --edge: var(--safe-border); --card-bg: var(--highlight-low-bg); }
-.highlight-card.overview-impression { --tone: var(--impression); --edge: var(--highlight-impression-border); --card-bg: var(--highlight-impression-bg); }
-.highlight-label, .highlight-main { color: var(--text); }
-.highlight-footer { color: var(--tone); }
-.highlight-card:hover, [data-hover-surface]:hover { box-shadow: none; }
-.ratio-metric, .ratio-metric.impression {
-  --ratio-track: var(--surface-active);
-  --hover-base: var(--surface-up);
-  background: var(--surface);
-  box-shadow: none;
-}
-.ratio-label { color: var(--text); }
-.text-link, .aio-url { color: var(--query); }
-.category-sidebar { background: var(--surface); border-color: var(--border); }
-.category-list button:hover { background: var(--surface-up); color: var(--text); }
-.query-tabs > button.active, .level-chip.active { background: var(--accent); border-color: var(--accent); color: var(--accent-contrast); }
-.table-scroll, .rank-table-scroll { border-color: var(--line); }
-table thead { background: var(--surface-up); color: var(--text); }
-table :is(th, td) { border-color: var(--line); font-variant-numeric: tabular-nums; }
-table tbody tr:hover { background: var(--row-hover); }
-.badge, .report-count, .period-eligible { border-radius: var(--radius-sm); }
-@media (max-width: 760px) {
-  .app-header { background: var(--header-deep); }
-  .app-header .main-navigation { min-width: 0; }
 }
