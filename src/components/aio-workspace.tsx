@@ -848,12 +848,16 @@ export default function AioWorkspace() {
                     <div className="aio-ready-diagram aio-diagram-crawler">
                       <div className="aio-mini-crawl-row">
                         <span className="aio-crawl-lbl your-lbl">Trang bạn</span>
-                        <div className="aio-crawl-track" aria-hidden="true" />
+                        <div className="aio-crawl-track" aria-hidden="true">
+                          <div style={{ width: "65%" }} />
+                        </div>
                         <span className="aio-crawl-val">Chờ đọc</span>
                       </div>
                       <div className="aio-mini-crawl-row">
                         <span className="aio-crawl-lbl rival-lbl">Đối thủ</span>
-                        <div className="aio-crawl-track" aria-hidden="true" />
+                        <div className="aio-crawl-track" aria-hidden="true">
+                          <div style={{ width: "85%" }} />
+                        </div>
                         <span className="aio-crawl-val">Chờ đọc</span>
                       </div>
                     </div>
@@ -864,7 +868,10 @@ export default function AioWorkspace() {
                         <span className="aio-v-tag">Điểm ngữ nghĩa</span>
                         <strong>—</strong>
                       </div>
-                      <div className="aio-mini-vector-line" aria-hidden="true" />
+                      <div className="aio-mini-vector-line" aria-hidden="true">
+                        <span className="aio-v-dot v-you" style={{ left: "45%" }} />
+                        <span className="aio-v-dot v-rival" style={{ left: "80%" }} />
+                      </div>
                       <div className="aio-mini-gap-note">
                         <span>Gap: —</span>
                         <em>Chờ đoạn đối chiếu</em>
