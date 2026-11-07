@@ -58,15 +58,15 @@ export default function AioProgressScene({ phase, busy }: AioProgressSceneProps)
       camera = new THREE.PerspectiveCamera(48, host.clientWidth / host.clientHeight, 0.1, 1000);
       camera.position.set(0, 0, 85);
 
-      // Lights
-      const ambient = new THREE.AmbientLight(0xffffff, 0.85);
+      // Lights (Cohere palette)
+      const ambient = new THREE.AmbientLight(0xffffff, 0.9);
       scene.add(ambient);
 
-      const dirLight = new THREE.DirectionalLight(0x62aef0, 1.8);
+      const dirLight = new THREE.DirectionalLight(0x1863dc, 2.0); // Action Blue
       dirLight.position.set(50, 60, 50);
       scene.add(dirLight);
 
-      const secondaryLight = new THREE.DirectionalLight(0xd6b6f6, 1.4);
+      const secondaryLight = new THREE.DirectionalLight(0xff7759, 1.6); // Coral
       secondaryLight.position.set(-50, -40, 40);
       scene.add(secondaryLight);
 
@@ -78,9 +78,9 @@ export default function AioProgressScene({ phase, busy }: AioProgressSceneProps)
       const nucleusGeo = new THREE.IcosahedronGeometry(12, 1);
       geometries.add(nucleusGeo);
       const nucleusMat = new THREE.MeshStandardMaterial({
-        color: 0x0075de,
-        roughness: 0.25,
-        metalness: 0.4,
+        color: 0x1863dc,
+        roughness: 0.2,
+        metalness: 0.5,
         wireframe: true,
       });
       materials.add(nucleusMat);
@@ -93,19 +93,19 @@ export default function AioProgressScene({ phase, busy }: AioProgressSceneProps)
       const innerMat = new THREE.MeshBasicMaterial({
         color: 0xffffff,
         transparent: true,
-        opacity: 0.85,
+        opacity: 0.9,
       });
       materials.add(innerMat);
       const innerGlow = new THREE.Mesh(innerGeo, innerMat);
       coreGroup.add(innerGlow);
 
-      // 2. Orbital Rings (3 Stages)
+      // 2. Orbital Rings in Cohere Colors (Stage 1: Blue, Stage 2: Coral, Stage 3: Deep Green)
       const ringGeos = [
-        new THREE.TorusGeometry(22, 0.5, 12, 64),
-        new THREE.TorusGeometry(32, 0.5, 12, 64),
-        new THREE.TorusGeometry(40, 0.5, 12, 64),
+        new THREE.TorusGeometry(22, 0.55, 12, 64),
+        new THREE.TorusGeometry(32, 0.55, 12, 64),
+        new THREE.TorusGeometry(40, 0.55, 12, 64),
       ];
-      const ringColors = [0x62aef0, 0xd6b6f6, 0x1aae39];
+      const ringColors = [0x1863dc, 0xff7759, 0x00a884];
       const rings: ThreeTypes.Mesh[] = [];
 
       ringGeos.forEach((geo, i) => {
@@ -113,10 +113,10 @@ export default function AioProgressScene({ phase, busy }: AioProgressSceneProps)
         const mat = new THREE.MeshStandardMaterial({
           color: ringColors[i],
           emissive: ringColors[i],
-          emissiveIntensity: 0.35,
-          roughness: 0.3,
+          emissiveIntensity: 0.45,
+          roughness: 0.25,
           transparent: true,
-          opacity: 0.75,
+          opacity: 0.8,
         });
         materials.add(mat);
         const ring = new THREE.Mesh(geo, mat);
@@ -126,11 +126,18 @@ export default function AioProgressScene({ phase, busy }: AioProgressSceneProps)
         rings.push(ring);
       });
 
-      // 3. Floating Node Satellites
-      const nodeGeo = new THREE.SphereGeometry(2.2, 12, 12);
+      // 3. Floating Node Satellites in Cohere Palette
+      const nodeGeo = new THREE.SphereGeometry(2.3, 12, 12);
       geometries.add(nodeGeo);
       const nodeColors = [
-        0x62aef0, 0xff64c8, 0xd6b6f6, 0x2a9d99, 0x1aae39, 0xdd5b00, 0x0075de, 0x391c57,
+        0x1863dc, // Action Blue
+        0xff7759, // Coral
+        0x003c33, // Deep Green
+        0xffad9b, // Soft Coral
+        0x4c6ee6, // Focus Blue
+        0x9b60aa, // Focus Violet
+        0xeeece7, // Soft Stone
+        0x071829, // Dark Navy
       ];
       const nodes: { mesh: ThreeTypes.Mesh; radius: number; speed: number; angle: number; yOffset: number }[] = [];
 
@@ -144,7 +151,7 @@ export default function AioProgressScene({ phase, busy }: AioProgressSceneProps)
         materials.add(mat);
         const mesh = new THREE.Mesh(nodeGeo, mat);
         const radius = 18 + (i % 3) * 11;
-        const speed = (0.4 + (i % 4) * 0.15) * (i % 2 === 0 ? 1 : -1);
+        const speed = (0.42 + (i % 4) * 0.16) * (i % 2 === 0 ? 1 : -1);
         const angle = (i * Math.PI * 2) / 14;
         const yOffset = (i % 5 - 2) * 4;
         coreGroup.add(mesh);
@@ -157,9 +164,9 @@ export default function AioProgressScene({ phase, busy }: AioProgressSceneProps)
       lineGeo.setAttribute("position", new THREE.BufferAttribute(linePositions, 3));
       geometries.add(lineGeo);
       const lineMat = new THREE.LineBasicMaterial({
-        color: 0x8f9dd6,
+        color: 0x60a5fa,
         transparent: true,
-        opacity: 0.35,
+        opacity: 0.38,
       });
       materials.add(lineMat);
       const latticeLines = new THREE.LineSegments(lineGeo, lineMat);
@@ -177,10 +184,10 @@ export default function AioProgressScene({ phase, busy }: AioProgressSceneProps)
       starGeo.setAttribute("position", new THREE.BufferAttribute(starPos, 3));
       geometries.add(starGeo);
       const starMat = new THREE.PointsMaterial({
-        color: 0x62aef0,
+        color: 0xffad9b,
         size: 2.2,
         transparent: true,
-        opacity: 0.55,
+        opacity: 0.6,
       });
       materials.add(starMat);
       const stars = new THREE.Points(starGeo, starMat);
@@ -231,19 +238,18 @@ export default function AioProgressScene({ phase, busy }: AioProgressSceneProps)
         lastTime = sec;
 
         if (coreGroup && renderer && scene && camera) {
-          // Dynamic phase-dependent speed & colors
           const currentP = phaseRef.current;
           const speedMultiplier = busy ? 1.8 : 0.8;
 
-          nucleus.rotation.x += dt * 0.4 * speedMultiplier;
-          nucleus.rotation.y += dt * 0.6 * speedMultiplier;
+          nucleus.rotation.x += dt * 0.45 * speedMultiplier;
+          nucleus.rotation.y += dt * 0.65 * speedMultiplier;
 
           // Pulse inner glow
-          innerGlow.scale.setScalar(1 + Math.sin(sec * 3.5) * 0.12);
+          innerGlow.scale.setScalar(1 + Math.sin(sec * 3.5) * 0.14);
 
           // Rotate rings
           rings.forEach((r, idx) => {
-            r.rotation.z += dt * (0.3 + idx * 0.15) * speedMultiplier * (idx % 2 === 0 ? 1 : -1);
+            r.rotation.z += dt * (0.35 + idx * 0.16) * speedMultiplier * (idx % 2 === 0 ? 1 : -1);
           });
 
           // Orbit nodes and update lattice lines
@@ -257,7 +263,6 @@ export default function AioProgressScene({ phase, busy }: AioProgressSceneProps)
             const y = n.yOffset + Math.sin(sec * 2 + idx) * 3;
             n.mesh.position.set(x, y, z);
 
-            // Update line from center to node
             const pIdx = idx * 6;
             posArray[pIdx] = 0;
             posArray[pIdx + 1] = 0;
@@ -268,22 +273,26 @@ export default function AioProgressScene({ phase, busy }: AioProgressSceneProps)
           });
           posAttr.needsUpdate = true;
 
-          // Highlight color shifts based on stage
+          // Stage color shifts in Cohere palette
           if (currentP === 0) {
-            dirLight.color.setHex(0x62aef0); // Sky
-            nucleusMat.color.setHex(0x0075de);
+            dirLight.color.setHex(0x1863dc); // Action Blue
+            secondaryLight.color.setHex(0xff7759); // Coral
+            nucleusMat.color.setHex(0x1863dc);
           } else if (currentP === 1) {
-            dirLight.color.setHex(0xd6b6f6); // Purple
-            nucleusMat.color.setHex(0x391c57);
+            dirLight.color.setHex(0xff7759); // Coral
+            secondaryLight.color.setHex(0xffad9b); // Soft Coral
+            nucleusMat.color.setHex(0xff7759);
           } else if (currentP === 2) {
-            dirLight.color.setHex(0x1aae39); // Green
-            nucleusMat.color.setHex(0x2a9d99);
+            dirLight.color.setHex(0x00a884); // Enterprise Green
+            secondaryLight.color.setHex(0x1863dc); // Action Blue
+            nucleusMat.color.setHex(0x003c33);
           } else {
-            dirLight.color.setHex(0x0075de); // Notion Blue
-            nucleusMat.color.setHex(0x1aae39);
+            dirLight.color.setHex(0x1863dc); // Action Blue
+            secondaryLight.color.setHex(0x00a884); // Green
+            nucleusMat.color.setHex(0x071829); // Dark Navy
           }
 
-          // Apply pointer parallax
+          // Pointer parallax
           coreGroup.rotation.y = motion.x;
           coreGroup.rotation.x = motion.y;
 

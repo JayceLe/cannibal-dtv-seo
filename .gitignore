@@ -12,6 +12,9 @@ supabase/.temp/
 
 .ux-baseline/
 
+.agent/
+.agents/
+
 public/__ux-fixture/
 
 __pycache__/

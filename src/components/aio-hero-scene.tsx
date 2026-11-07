@@ -16,7 +16,7 @@ type Sticker = {
   phase: number;
 };
 
-/** A refined Notion-style 3D sticker constellation scene with physics-inspired float and parallax. */
+/** Cohere-inspired 3D tactile media constellation scene with physics-based float and parallax. */
 function createScene(
   host: HTMLElement,
   hero: HTMLElement,
@@ -50,12 +50,12 @@ function createScene(
   const constellation = new THREE.Group();
   scene.add(constellation);
 
-  scene.add(new THREE.AmbientLight(0xffffff, 0.9));
-  const mainLight = new THREE.DirectionalLight(0xffffff, 0.7);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.95));
+  const mainLight = new THREE.DirectionalLight(0xffffff, 0.85);
   mainLight.position.set(-150, 220, 320);
   scene.add(mainLight);
 
-  const fillLight = new THREE.DirectionalLight(0xb5c6ff, 0.35);
+  const fillLight = new THREE.DirectionalLight(0xffad9b, 0.45); // Soft coral specular fill
   fillLight.position.set(180, -100, 200);
   scene.add(fillLight);
 
@@ -73,17 +73,18 @@ function createScene(
     return value;
   };
 
+  // Cohere Palette Materials
   const white = material(0xffffff);
-  const paper = material(0xf8f7ff);
-  const darkInk = material(0x213183);
-  const softSky = material(0x62aef0);
-  const softPurple = material(0xd6b6f6);
-  const softPink = material(0xff64c8);
-  const softTeal = material(0x2a9d99);
-  const softGreen = material(0x1aae39);
-  const softOrange = material(0xdd5b00);
-  const softShadow = material(0x07143a, 0.16);
-  const starMaterial = new THREE.MeshBasicMaterial({ color: 0xffd5ee, side: THREE.DoubleSide });
+  const stone = material(0xeeece7);
+  const darkNavy = material(0x071829);
+  const deepGreen = material(0x003c33);
+  const actionBlue = material(0x1863dc);
+  const coral = material(0xff7759);
+  const softCoral = material(0xffad9b);
+  const paleGreen = material(0xedfce9);
+  const paleBlue = material(0xf1f5ff);
+  const softShadow = material(0x00121d, 0.22);
+  const starMaterial = new THREE.MeshBasicMaterial({ color: 0xffad9b, side: THREE.DoubleSide });
   materials.add(starMaterial);
 
   const unitPlane = new THREE.PlaneGeometry(1, 1);
@@ -157,14 +158,14 @@ function createScene(
   ) => {
     const group = new THREE.Group();
     addBacking(group, 156, 114, fill, 15);
-    addPlane(group, style === "answer" ? darkInk : white, -41, 30, 52, 7);
-    addPlane(group, style === "answer" ? paper : white, -2, 10, 130, 5);
-    addPlane(group, style === "answer" ? paper : white, -16, -4, 102, 5);
-    addPlane(group, style === "answer" ? paper : white, -27, -18, 80, 5);
+    addPlane(group, style === "answer" ? darkNavy : white, -41, 30, 52, 7);
+    addPlane(group, style === "answer" ? paleGreen : white, -2, 10, 130, 5);
+    addPlane(group, style === "answer" ? paleGreen : white, -16, -4, 102, 5);
+    addPlane(group, style === "answer" ? paleGreen : white, -27, -18, 80, 5);
     if (style === "source") {
-      addPlane(group, darkInk, -44, -36, 46, 5);
+      addPlane(group, actionBlue, -44, -36, 46, 5);
     } else {
-      const dot = new THREE.Mesh(new THREE.CircleGeometry(9, 20), softGreen);
+      const dot = new THREE.Mesh(new THREE.CircleGeometry(9, 20), paleGreen);
       geometries.add(dot.geometry);
       dot.position.set(52, -34, 7);
       group.add(dot);
@@ -210,11 +211,12 @@ function createScene(
     stickers.push({ group, baseX: x, baseY: y, scale, tilt, phase });
   };
 
-  addDocument(softPurple, -0.29, 0.21, 0.88, -0.12, 0.2, "source");
-  addDocument(softSky, 0.24, 0.03, 1, 0.10, 1.8, "answer");
-  addQuery(softPink, -0.20, -0.27, 0.94, 0.07, 3.1);
-  addQuery(softTeal, 0.31, 0.31, 0.72, -0.08, 4.2);
-  addTag(softOrange, 0.18, -0.32, 0.82, 0.05, 5.0);
+  // Cohere signature composition: Coral + Blue + Deep Green + Stone
+  addDocument(coral, -0.29, 0.21, 0.88, -0.12, 0.2, "source");
+  addDocument(actionBlue, 0.24, 0.03, 1, 0.10, 1.8, "answer");
+  addQuery(deepGreen, -0.20, -0.27, 0.94, 0.07, 3.1);
+  addQuery(darkNavy, 0.31, 0.31, 0.72, -0.08, 4.2);
+  addTag(stone, 0.18, -0.32, 0.82, 0.05, 5.0);
 
   // Star shapes
   const starShape = new THREE.Shape();
@@ -252,9 +254,9 @@ function createScene(
   const lineGeometry = new THREE.BufferGeometry().setFromPoints(linePoints);
   geometries.add(lineGeometry);
   const lineMat = new THREE.LineBasicMaterial({
-    color: 0x8f9dd6,
+    color: 0x60a5fa,
     transparent: true,
-    opacity: 0.18,
+    opacity: 0.22,
   });
   materials.add(lineMat);
   const constellationLines = new THREE.Line(lineGeometry, lineMat);
@@ -470,27 +472,27 @@ export default function AioHeroScene() {
   return (
     <div ref={hostRef} className="aio-hero-scene" aria-hidden="true">
       <div className="aio-hero-static">
-        <span className="aio-scene-sticker aio-scene-document aio-scene-document-purple">
+        <span className="aio-scene-sticker aio-scene-document aio-scene-document-coral">
           <div className="sticker-header" />
           <i />
           <i />
           <i />
         </span>
-        <span className="aio-scene-sticker aio-scene-document aio-scene-document-sky">
+        <span className="aio-scene-sticker aio-scene-document aio-scene-document-blue">
           <div className="sticker-header" />
           <i />
           <i />
           <i />
         </span>
-        <span className="aio-scene-sticker aio-scene-query aio-scene-query-pink">
+        <span className="aio-scene-sticker aio-scene-query aio-scene-query-green">
           <i />
           <i />
         </span>
-        <span className="aio-scene-sticker aio-scene-query aio-scene-query-teal">
+        <span className="aio-scene-sticker aio-scene-query aio-scene-query-navy">
           <i />
           <i />
         </span>
-        <span className="aio-scene-badge-orange">AIO MATCH</span>
+        <span className="aio-scene-badge-stone">COHERE AIO</span>
         <span className="aio-scene-star aio-scene-star-one">✦</span>
         <span className="aio-scene-star aio-scene-star-two">✦</span>
         <span className="aio-scene-star aio-scene-star-three">✦</span>

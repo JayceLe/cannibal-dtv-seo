@@ -1,45 +1,70 @@
 /* ==========================================================================
-   Notion Design System - Scoped to AIO / Content Audit Workspace
+   Cohere Enterprise AI Design System - Scoped to AIO Workspace
    ========================================================================== */
 
 main[data-motion-view="aio"] {
   width: 100%;
   max-width: none;
   padding: 0;
-  background: #f6f5f4;
+  background: #ffffff;
 }
 
 .app-header.header-aio .main-navigation {
-  background: #f6f5f4;
-  border-color: #e6e6e6;
+  background: #eeece7;
+  border-color: #d9d9dd;
 }
 
 .app-header.header-aio .main-navigation button[aria-selected="true"] {
-  color: #0075de;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  color: #1863dc;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .aio-workspace {
-  /* Notion Signature Palette */
-  --aio-canvas: #f6f5f4;        /* Warm paper-soft off-white canvas */
-  --aio-surface: #ffffff;       /* Pure white card surface */
-  --aio-ink: #171716;           /* Near-black ink type (~95% alpha) */
-  --aio-charcoal: #31302e;      /* Warm charcoal secondary type */
-  --aio-muted: #615d59;         /* Muted tertiary type */
-  --aio-faint: #817b75;         /* Faint caption and placeholder */
-  --aio-blue: #0075de;          /* Single structural accent - Notion Blue */
-  --aio-blue-active: #005bab;   /* Pressed state */
-  --aio-line: #e6e6e6;          /* Hairline 1px border */
-  --aio-input-line: #d7d5d2;    /* Input hairline border */
+  /* Cohere Enterprise AI Design System Palette */
+  --cohere-black: #000000;
+  --cohere-primary: #17171c;
+  --cohere-green: #003c33;
+  --cohere-navy: #071829;
+  --cohere-blue: #1863dc;
+  --cohere-coral: #ff7759;
+  --cohere-soft-coral: #ffad9b;
+  --cohere-white: #ffffff;
+  --cohere-stone: #eeece7;
+  --cohere-pale-green: #edfce9;
+  --cohere-pale-blue: #f1f5ff;
+  --cohere-card-border: #f2f2f2;
+  --cohere-ink: #212121;
+  --cohere-muted-slate: #93939f;
+  --cohere-slate: #75758a;
+  --cohere-hairline: #d9d9dd;
+  --cohere-border-light: #e5e7eb;
+  --cohere-focus-blue: #4c6ee6;
+  --cohere-form-focus: #9b60aa;
+  --cohere-error: #b30000;
 
-  /* Notion Sticker Palette (Decorations & Badges) */
-  --aio-sticker-sky: #62aef0;
-  --aio-sticker-purple: #d6b6f6;
-  --aio-sticker-pink: #ff64c8;
-  --aio-sticker-orange: #dd5b00;
-  --aio-sticker-teal: #2a9d99;
-  --aio-sticker-green: #1aae39;
-  --aio-sticker-coral: #df2060;
+  /* Scoped AIO Workspace Semantic Tokens */
+  --aio-canvas: var(--cohere-white);
+  --aio-surface: var(--cohere-white);
+  --aio-ink: var(--cohere-ink);
+  --aio-charcoal: var(--cohere-primary);
+  --aio-muted: var(--cohere-slate);
+  --aio-faint: var(--cohere-muted-slate);
+  --aio-blue: var(--cohere-blue);
+  --aio-blue-active: #104db0;
+  --aio-line: var(--cohere-border-light);
+  --aio-input-line: var(--cohere-hairline);
+
+  /* Multi-Color Semantic Accents (Distinct blocks & cards) */
+  --aio-accent-green: var(--cohere-green);
+  --aio-accent-navy: var(--cohere-navy);
+  --aio-accent-coral: var(--cohere-coral);
+  --aio-accent-soft-coral: var(--cohere-soft-coral);
+  --aio-accent-blue: var(--cohere-blue);
+  --aio-wash-blue: var(--cohere-pale-blue);
+  --aio-wash-coral: #fff2ef;
+  --aio-wash-green: var(--cohere-pale-green);
+  --aio-wash-stone: var(--cohere-stone);
 
   display: grid;
   gap: 36px;
@@ -78,15 +103,16 @@ main[data-motion-view="aio"] {
 }
 
 /* --------------------------------------------------------------------------
-   Hero "Night" Band (Single dark island in daylight document)
+   Hero "Night" Band (Cohere Deep Enterprise Green & Dark Navy)
    -------------------------------------------------------------------------- */
 .aio-page-head {
   position: relative;
   isolation: isolate;
   overflow: hidden;
   min-height: 290px;
-  background: #213183;
+  background: linear-gradient(135deg, #003c33 0%, #071829 100%);
   color: #ffffff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .aio-page-head::before {
@@ -94,7 +120,7 @@ main[data-motion-view="aio"] {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: radial-gradient(ellipse at 78% 45%, rgba(98, 174, 240, 0.14) 0%, rgba(214, 182, 246, 0.06) 40%, transparent 65%);
+  background: radial-gradient(ellipse at 75% 45%, rgba(24, 99, 220, 0.22) 0%, rgba(255, 119, 89, 0.12) 42%, transparent 70%);
   pointer-events: none;
 }
 
@@ -140,7 +166,7 @@ main[data-motion-view="aio"] {
 }
 
 .aio-page-head p {
-  color: rgba(255, 255, 255, 0.86);
+  color: rgba(255, 255, 255, 0.88);
   font-size: 16px;
   line-height: 1.6;
   max-width: 560px;
@@ -153,9 +179,9 @@ main[data-motion-view="aio"] {
   flex-shrink: 0;
   min-height: 36px;
   padding: 6px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.24);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(7, 24, 41, 0.65);
   backdrop-filter: blur(8px);
   color: #ffffff;
   font-size: 12px;
@@ -166,18 +192,18 @@ main[data-motion-view="aio"] {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #62aef0;
-  box-shadow: 0 0 0 3px rgba(98, 174, 240, 0.25);
+  background: #1863dc;
+  box-shadow: 0 0 0 3px rgba(24, 99, 220, 0.35);
 }
 
 .aio-hero-status[data-state="done"] .aio-status-dot {
-  background: #1aae39;
-  box-shadow: 0 0 0 3px rgba(26, 174, 57, 0.25);
+  background: #00a884;
+  box-shadow: 0 0 0 3px rgba(0, 168, 132, 0.35);
 }
 
 .aio-hero-status[data-state="busy"] .aio-status-dot {
-  background: #ff64c8;
-  box-shadow: 0 0 0 3px rgba(255, 100, 200, 0.25);
+  background: #ff7759;
+  box-shadow: 0 0 0 3px rgba(255, 119, 89, 0.35);
   animation: aio-pulse-badge 1.6s ease-in-out infinite;
 }
 
@@ -456,9 +482,7 @@ main[data-motion-view="aio"] {
   min-height: 42px;
 }
 
-/* --------------------------------------------------------------------------
-   Notion Buttons & Marketing CTA (Pill-shaped primary)
-   -------------------------------------------------------------------------- */
+/* Cohere Utility and Action Buttons (Pill-shaped primary) */
 .aio-form-actions {
   display: flex;
   flex-wrap: wrap;
@@ -477,23 +501,24 @@ main[data-motion-view="aio"] {
   font-weight: 600;
   cursor: pointer;
   border: 1px solid transparent;
-  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.12s ease, box-shadow 0.18s ease;
 }
 
-/* Marketing Primary CTA - Fully Pill Shaped */
+/* Primary Action CTA - Cohere Near-Black Primary Pill */
 .aio-workspace .btn.primary {
-  background: var(--aio-blue);
-  border-color: var(--aio-blue);
+  background: var(--cohere-primary);
+  border-color: var(--cohere-primary);
   color: #ffffff;
   border-radius: 9999px;
   padding-inline: 26px;
-  box-shadow: 0 1px 3px rgba(0, 117, 222, 0.2), 0 4px 12px rgba(0, 117, 222, 0.15);
+  box-shadow: 0 2px 6px rgba(23, 23, 28, 0.22), 0 4px 14px rgba(23, 23, 28, 0.12);
 }
 
 .aio-workspace .btn.primary:hover:not(:disabled) {
-  background: var(--aio-blue-active);
-  border-color: var(--aio-blue-active);
-  box-shadow: 0 2px 6px rgba(0, 117, 222, 0.25), 0 6px 16px rgba(0, 117, 222, 0.2);
+  background: var(--cohere-blue);
+  border-color: var(--cohere-blue);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(24, 99, 220, 0.35), 0 8px 24px rgba(24, 99, 220, 0.2);
 }
 
 .aio-workspace .btn.primary:active:not(:disabled) {
@@ -502,18 +527,18 @@ main[data-motion-view="aio"] {
 
 /* Utility Secondary Button - 8px Rounded */
 .aio-workspace .btn.secondary {
-  background: #ffffff;
-  border-color: var(--aio-line);
-  color: var(--aio-charcoal);
+  background: var(--cohere-white);
+  border-color: var(--cohere-border-light);
+  color: var(--cohere-primary);
   border-radius: 8px;
   padding-inline: 16px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 .aio-workspace .btn.secondary:hover:not(:disabled) {
-  background: var(--aio-canvas);
-  border-color: #d7d5d2;
-  color: var(--aio-ink);
+  background: var(--cohere-stone);
+  border-color: var(--cohere-hairline);
+  color: var(--cohere-ink);
 }
 
 .aio-workspace .btn.secondary:active:not(:disabled) {
@@ -536,7 +561,7 @@ main[data-motion-view="aio"] {
 }
 
 /* --------------------------------------------------------------------------
-   Section 02: Dedicated Progress Panel & 3D Neural Scene
+   Section 02: Dedicated Progress Panel & 3D Neural Scene (Cohere Enterprise)
    -------------------------------------------------------------------------- */
 .aio-progress-unified-panel {
   scroll-margin-top: 32px;
@@ -554,9 +579,9 @@ main[data-motion-view="aio"] {
   align-items: center;
   padding: 6px 16px;
   border-radius: 9999px;
-  background: #f0f7ff;
-  border: 1px solid rgba(0, 117, 222, 0.25);
-  color: var(--aio-blue);
+  background: var(--cohere-pale-blue);
+  border: 1px solid rgba(24, 99, 220, 0.28);
+  color: var(--cohere-blue);
   font-weight: 700;
   font-size: 15px;
   letter-spacing: -0.02em;
@@ -566,16 +591,16 @@ main[data-motion-view="aio"] {
   font-variant-numeric: tabular-nums;
 }
 
-/* 3D Neural Scene Container */
+/* 3D Neural Scene Container - Deep Enterprise Green to Dark Navy */
 .aio-neural-visualizer-container {
   position: relative;
   width: 100%;
   height: 200px;
-  border-radius: 10px;
+  border-radius: 12px;
   overflow: hidden;
-  background: radial-gradient(ellipse at 50% 50%, #172347 0%, #0c1224 100%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(7, 20, 58, 0.1);
+  background: radial-gradient(ellipse at 50% 50%, #003c33 0%, #071829 100%);
+  border: 1px solid rgba(0, 168, 132, 0.3);
+  box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 60, 51, 0.18);
   margin-bottom: 22px;
 }
 
@@ -597,10 +622,10 @@ main[data-motion-view="aio"] {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 5px 12px;
+  padding: 6px 14px;
   border-radius: 9999px;
-  background: rgba(0, 0, 0, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(7, 24, 41, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   backdrop-filter: blur(8px);
   color: #ffffff;
   font-size: 12px;
@@ -613,21 +638,21 @@ main[data-motion-view="aio"] {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #62aef0;
-  box-shadow: 0 0 0 3px rgba(98, 174, 240, 0.35);
+  background: #ff7759;
+  box-shadow: 0 0 0 3px rgba(255, 119, 89, 0.35);
   animation: aio-pulse-badge 1.8s ease-in-out infinite;
 }
 
 /* --------------------------------------------------------------------------
-   Rich 3-Stage HUD Cards
+   Rich 3-Stage HUD Cards (Cohere Multi-Color Distinct Block Distribution)
    -------------------------------------------------------------------------- */
 .aio-stages {
   list-style: none;
   padding: 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  margin: 0 0 20px;
+  gap: 16px;
+  margin: 0 0 22px;
 }
 
 .aio-stage-card {
@@ -635,22 +660,86 @@ main[data-motion-view="aio"] {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 18px 18px;
-  border: 1px solid var(--aio-line);
-  border-radius: 10px;
+  padding: 20px 20px;
+  border: 1px solid var(--cohere-border-light);
+  border-radius: 12px;
   background: #ffffff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-  transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
 }
 
-.aio-stage-card[data-state="current"] {
-  border-color: var(--aio-blue);
-  background: #f8fbff;
-  box-shadow: 0 0 0 1px var(--aio-blue), 0 4px 16px rgba(0, 117, 222, 0.08);
+/* Stage 1: Action Blue (#1863dc) & Pale Blue Wash (#f1f5ff) */
+.aio-stage-card-1[data-state="current"] {
+  border-color: #1863dc;
+  background: linear-gradient(180deg, #f1f5ff 0%, #ffffff 85%);
+  box-shadow: 0 0 0 1px #1863dc, 0 10px 28px -6px rgba(24, 99, 220, 0.22);
+  transform: translateY(-2px);
 }
 
+.aio-stage-card-1[data-state="current"] .aio-stage-number {
+  background: #1863dc;
+  border-color: #1863dc;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(24, 99, 220, 0.35);
+}
+
+.aio-stage-card-1[data-state="current"] .aio-stage-status-pill {
+  background: #1863dc;
+  color: #ffffff;
+  border-color: #1863dc;
+  box-shadow: 0 0 12px rgba(24, 99, 220, 0.35);
+  animation: aio-pulse-badge 1.8s ease-in-out infinite;
+}
+
+/* Stage 2: Coral (#ff7759) & Pale Coral Wash (#fff2ef) */
+.aio-stage-card-2[data-state="current"] {
+  border-color: #ff7759;
+  background: linear-gradient(180deg, #fff2ef 0%, #ffffff 85%);
+  box-shadow: 0 0 0 1px #ff7759, 0 10px 28px -6px rgba(255, 119, 89, 0.24);
+  transform: translateY(-2px);
+}
+
+.aio-stage-card-2[data-state="current"] .aio-stage-number {
+  background: #ff7759;
+  border-color: #ff7759;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(255, 119, 89, 0.35);
+}
+
+.aio-stage-card-2[data-state="current"] .aio-stage-status-pill {
+  background: #ff7759;
+  color: #ffffff;
+  border-color: #ff7759;
+  box-shadow: 0 0 12px rgba(255, 119, 89, 0.35);
+  animation: aio-pulse-badge 1.8s ease-in-out infinite;
+}
+
+/* Stage 3: Deep Enterprise Green (#003c33) & Pale Green Wash (#edfce9) */
+.aio-stage-card-3[data-state="current"] {
+  border-color: #003c33;
+  background: linear-gradient(180deg, #edfce9 0%, #ffffff 85%);
+  box-shadow: 0 0 0 1px #003c33, 0 10px 28px -6px rgba(0, 60, 51, 0.24);
+  transform: translateY(-2px);
+}
+
+.aio-stage-card-3[data-state="current"] .aio-stage-number {
+  background: #003c33;
+  border-color: #003c33;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 60, 51, 0.35);
+}
+
+.aio-stage-card-3[data-state="current"] .aio-stage-status-pill {
+  background: #003c33;
+  color: #ffffff;
+  border-color: #003c33;
+  box-shadow: 0 0 12px rgba(0, 60, 51, 0.35);
+  animation: aio-pulse-badge 1.8s ease-in-out infinite;
+}
+
+/* Done Stage Cards */
 .aio-stage-card[data-state="done"] {
-  border-color: #c9ebd0;
+  border-color: rgba(0, 60, 51, 0.22);
   background: #f8fdf9;
 }
 
@@ -663,50 +752,39 @@ main[data-motion-view="aio"] {
 .aio-stage-number {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   flex-shrink: 0;
-  border-radius: 7px;
+  border-radius: 8px;
   font-size: 13px;
   font-weight: 700;
-  color: var(--aio-muted);
-  background: var(--aio-canvas);
-  border: 1px solid var(--aio-line);
-}
-
-.aio-stage-card[data-state="current"] .aio-stage-number {
-  background: #e8f3fd;
-  border-color: var(--aio-blue);
-  color: var(--aio-blue);
+  color: var(--cohere-slate);
+  background: var(--cohere-stone);
+  border: 1px solid var(--cohere-hairline);
+  transition: all 0.2s ease;
 }
 
 .aio-stage-card[data-state="done"] .aio-stage-number {
-  background: #eaf8ed;
-  color: #1aae39;
-  border-color: #b9e9c2;
+  background: #edfce9;
+  color: #003c33;
+  border-color: rgba(0, 60, 51, 0.3);
 }
 
 .aio-stage-status-pill {
   font-size: 11px;
   font-weight: 700;
-  padding: 3px 10px;
+  padding: 4px 11px;
   border-radius: 9999px;
-  background: var(--aio-canvas);
-  color: var(--aio-muted);
-  border: 1px solid var(--aio-line);
-}
-
-.aio-stage-card[data-state="current"] .aio-stage-status-pill {
-  background: #e8f3fd;
-  color: var(--aio-blue);
-  border-color: rgba(0, 117, 222, 0.3);
-  animation: aio-pulse-badge 1.8s ease-in-out infinite;
+  background: var(--cohere-stone);
+  color: var(--cohere-slate);
+  border: 1px solid var(--cohere-hairline);
+  transition: all 0.2s ease;
 }
 
 .aio-stage-card[data-state="done"] .aio-stage-status-pill {
-  background: #eaf8ed;
-  color: #1aae39;
-  border-color: rgba(26, 174, 57, 0.3);
+  background: #edfce9;
+  color: #003c33;
+  border-color: rgba(0, 60, 51, 0.25);
 }
 
 .aio-stage-info {
@@ -716,21 +794,21 @@ main[data-motion-view="aio"] {
 }
 
 .aio-stage-info strong {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
-  color: var(--aio-ink);
+  color: var(--cohere-ink);
 }
 
 .aio-stage-info span {
-  color: var(--aio-muted);
-  font-size: 12px;
+  color: var(--cohere-slate);
+  font-size: 12.5px;
   line-height: 1.5;
 }
 
 /* Micro-visualizers inside active stage card */
 .aio-stage-live-meter {
   padding-top: 10px;
-  border-top: 1px dashed rgba(0, 117, 222, 0.25);
+  border-top: 1px dashed rgba(0, 0, 0, 0.12);
   margin-top: 4px;
 }
 
@@ -743,11 +821,11 @@ main[data-motion-view="aio"] {
 .aio-live-queries-chips span {
   font-size: 11px;
   font-weight: 600;
-  padding: 3px 8px;
+  padding: 3px 9px;
   border-radius: 4px;
-  background: #e8f3fd;
-  color: var(--aio-blue);
-  border: 1px solid rgba(0, 117, 222, 0.2);
+  background: #f1f5ff;
+  color: #1863dc;
+  border: 1px solid rgba(24, 99, 220, 0.3);
   animation: aio-tag-pop 0.4s ease-out;
 }
 
@@ -763,7 +841,7 @@ main[data-motion-view="aio"] {
   gap: 8px;
   font-size: 11.5px;
   font-weight: 600;
-  color: var(--aio-charcoal);
+  color: var(--cohere-primary);
 }
 
 .aio-crawl-dot,
@@ -771,16 +849,18 @@ main[data-motion-view="aio"] {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--aio-blue);
+  background: #ff7759;
+  box-shadow: 0 0 0 3px rgba(255, 119, 89, 0.3);
   animation: aio-pulse-ring-anim 1.5s infinite;
 }
 
 .aio-vector-pulse {
-  background: #1aae39;
+  background: #00a884;
+  box-shadow: 0 0 0 3px rgba(0, 168, 132, 0.35);
 }
 
 /* --------------------------------------------------------------------------
-   Ready Flow Roadmap Cards (When Idle / Before Running)
+   Ready Flow Roadmap Cards (When Idle / Before Running - Distinct Colors)
    -------------------------------------------------------------------------- */
 .aio-ready-flow {
   display: grid;
@@ -793,18 +873,12 @@ main[data-motion-view="aio"] {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 22px 20px;
-  border: 1px solid var(--aio-line);
-  border-radius: 10px;
+  padding: 24px 22px;
+  border: 1px solid var(--cohere-border-light);
+  border-radius: 12px;
   background: #ffffff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.aio-ready-card:hover {
-  transform: translateY(-2px);
-  border-color: #d7d5d2;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
 }
 
 .aio-ready-card-top {
@@ -814,41 +888,61 @@ main[data-motion-view="aio"] {
 }
 
 .aio-ready-num {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 800;
   letter-spacing: 0.04em;
   font-variant-numeric: tabular-nums;
   display: inline-block;
 }
 
-.aio-ready-card-1 .aio-ready-num { color: var(--aio-sticker-sky); }
-.aio-ready-card-2 .aio-ready-num { color: var(--aio-sticker-purple); }
-.aio-ready-card-3 .aio-ready-num { color: var(--aio-sticker-green); }
+/* Card 1: Action Blue */
+.aio-ready-card-1 .aio-ready-num { color: #1863dc; }
+.aio-ready-card-1:hover {
+  transform: translateY(-3px);
+  border-color: #1863dc;
+  box-shadow: 0 10px 28px -6px rgba(24, 99, 220, 0.2);
+}
+
+/* Card 2: Coral */
+.aio-ready-card-2 .aio-ready-num { color: #ff7759; }
+.aio-ready-card-2:hover {
+  transform: translateY(-3px);
+  border-color: #ff7759;
+  box-shadow: 0 10px 28px -6px rgba(255, 119, 89, 0.22);
+}
+
+/* Card 3: Deep Enterprise Green */
+.aio-ready-card-3 .aio-ready-num { color: #003c33; }
+.aio-ready-card-3:hover {
+  transform: translateY(-3px);
+  border-color: #003c33;
+  box-shadow: 0 10px 28px -6px rgba(0, 60, 51, 0.22);
+}
 
 .aio-ready-icon {
-  color: var(--aio-muted);
-  opacity: 0.7;
+  color: var(--cohere-slate);
+  opacity: 0.75;
 }
 
 .aio-ready-card strong {
-  font-size: 15px;
+  font-size: 15.5px;
   font-weight: 700;
-  color: var(--aio-ink);
+  color: var(--cohere-ink);
   line-height: 1.35;
 }
 
 .aio-ready-card p {
-  font-size: 12.5px;
-  color: var(--aio-muted);
+  font-size: 13px;
+  color: var(--cohere-slate);
   line-height: 1.6;
 }
 
-/* Progress track */
+/* High-Precision Progress track */
 .aio-progress-track {
   height: 6px;
   overflow: hidden;
   border-radius: 9999px;
-  background: #eeece9;
+  background: var(--cohere-stone);
   margin-top: 8px;
 }
 
@@ -858,12 +952,12 @@ main[data-motion-view="aio"] {
   width: 100%;
   transform-origin: left;
   transform: scaleX(0);
-  background: var(--aio-blue);
+  background: linear-gradient(90deg, #1863dc 0%, #ff7759 55%, #00a884 100%);
   border-radius: 9999px;
 }
 
 .aio-progress-caption {
-  color: var(--aio-muted);
+  color: var(--cohere-slate);
   font-size: 13px;
   padding-top: 12px;
   min-height: 30px;
@@ -871,7 +965,7 @@ main[data-motion-view="aio"] {
 }
 
 /* --------------------------------------------------------------------------
-   Waiting State Visualizer & Notion Shimmer Skeletons ("Thẻ hiệu ứng chờ")
+   Waiting State Visualizer & Multi-Color Skeleton Shimmer Cards
    -------------------------------------------------------------------------- */
 .aio-waiting-area {
   display: flex;
@@ -884,10 +978,11 @@ main[data-motion-view="aio"] {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 14px 18px;
-  border-radius: 10px;
-  background: #fbfaf9;
-  border: 1px solid var(--aio-line);
+  padding: 16px 20px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid var(--cohere-border-light);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
 }
 
 .aio-scanner-pulse {
@@ -901,14 +996,14 @@ main[data-motion-view="aio"] {
   position: absolute;
   inset: 4px;
   border-radius: 50%;
-  background: var(--aio-blue);
+  background: #1863dc;
 }
 
 .aio-pulse-ring {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: rgba(0, 117, 222, 0.35);
+  background: rgba(24, 99, 220, 0.35);
   animation: aio-pulse-ring-anim 1.8s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
 }
 
@@ -933,9 +1028,9 @@ main[data-motion-view="aio"] {
 }
 
 .aio-scanner-title strong {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
-  color: var(--aio-ink);
+  color: var(--cohere-ink);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -944,10 +1039,10 @@ main[data-motion-view="aio"] {
 .aio-scanner-tag {
   font-size: 11px;
   font-weight: 700;
-  padding: 2px 8px;
+  padding: 3px 9px;
   border-radius: 9999px;
-  background: rgba(0, 117, 222, 0.1);
-  color: var(--aio-blue);
+  background: rgba(24, 99, 220, 0.12);
+  color: #1863dc;
   flex-shrink: 0;
 }
 
@@ -955,7 +1050,7 @@ main[data-motion-view="aio"] {
   position: relative;
   height: 3px;
   border-radius: 9999px;
-  background: #edece9;
+  background: var(--cohere-stone);
   overflow: hidden;
   width: 100%;
 }
@@ -965,7 +1060,7 @@ main[data-motion-view="aio"] {
   inset: 0;
   width: 35%;
   border-radius: 9999px;
-  background: linear-gradient(90deg, transparent, var(--aio-blue), transparent);
+  background: linear-gradient(90deg, transparent, #1863dc 45%, #ff7759 85%, transparent);
   animation: aio-beam-scan 1.6s ease-in-out infinite;
 }
 
@@ -974,9 +1069,9 @@ main[data-motion-view="aio"] {
   100% { transform: translateX(350%); }
 }
 
-/* Notion Warm Paper Shimmer */
+/* Multi-Color Cohere Shimmer Skeleton Cards */
 .aio-shimmer {
-  background: linear-gradient(90deg, #f0efed 25%, #e3e2df 37%, #f0efed 63%);
+  background: linear-gradient(90deg, #eeece7 25%, #e1dfda 37%, #eeece7 63%);
   background-size: 200% 100%;
   animation: aio-shimmer-anim 1.8s ease-in-out infinite;
   border-radius: 4px;
@@ -991,18 +1086,79 @@ main[data-motion-view="aio"] {
 .aio-skeleton-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+  gap: 16px;
 }
 
 .aio-skeleton-card {
-  border: 1px solid var(--aio-line);
-  border-radius: 10px;
-  padding: 16px;
+  border: 1px solid var(--cohere-border-light);
+  border-radius: 12px;
+  padding: 18px;
   background: #ffffff;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease;
+}
+
+/* Skeleton Card 1: Action Blue (#1863dc) tint & shimmer */
+.aio-skeleton-card:nth-child(1),
+.aio-skeleton-card.aio-skeleton-card-1 {
+  border-color: rgba(24, 99, 220, 0.24);
+  border-top: 3px solid #1863dc;
+  background: linear-gradient(180deg, #f1f5ff 0%, #ffffff 65%);
+  box-shadow: 0 4px 16px rgba(24, 99, 220, 0.06);
+}
+
+.aio-skeleton-card:nth-child(1) .aio-shimmer,
+.aio-skeleton-card.aio-skeleton-card-1 .aio-shimmer {
+  background: linear-gradient(90deg, #e3eeff 25%, #cfe3ff 37%, #e3eeff 63%);
+  background-size: 200% 100%;
+}
+
+.aio-skeleton-card:nth-child(1) .aio-skel-badge,
+.aio-skeleton-card.aio-skeleton-card-1 .aio-skel-badge {
+  background: rgba(24, 99, 220, 0.15);
+}
+
+/* Skeleton Card 2: Coral (#ff7759) tint & shimmer */
+.aio-skeleton-card:nth-child(2),
+.aio-skeleton-card.aio-skeleton-card-2 {
+  border-color: rgba(255, 119, 89, 0.26);
+  border-top: 3px solid #ff7759;
+  background: linear-gradient(180deg, #fff2ef 0%, #ffffff 65%);
+  box-shadow: 0 4px 16px rgba(255, 119, 89, 0.06);
+}
+
+.aio-skeleton-card:nth-child(2) .aio-shimmer,
+.aio-skeleton-card.aio-skeleton-card-2 .aio-shimmer {
+  background: linear-gradient(90deg, #ffe5de 25%, #ffd2c7 37%, #ffe5de 63%);
+  background-size: 200% 100%;
+}
+
+.aio-skeleton-card:nth-child(2) .aio-skel-badge,
+.aio-skeleton-card.aio-skeleton-card-2 .aio-skel-badge {
+  background: rgba(255, 119, 89, 0.18);
+}
+
+/* Skeleton Card 3: Deep Enterprise Green (#003c33) tint & shimmer */
+.aio-skeleton-card:nth-child(3),
+.aio-skeleton-card.aio-skeleton-card-3 {
+  border-color: rgba(0, 60, 51, 0.24);
+  border-top: 3px solid #003c33;
+  background: linear-gradient(180deg, #edfce9 0%, #ffffff 65%);
+  box-shadow: 0 4px 16px rgba(0, 60, 51, 0.06);
+}
+
+.aio-skeleton-card:nth-child(3) .aio-shimmer,
+.aio-skeleton-card.aio-skeleton-card-3 .aio-shimmer {
+  background: linear-gradient(90deg, #e0f8db 25%, #c8f3be 37%, #e0f8db 63%);
+  background-size: 200% 100%;
+}
+
+.aio-skeleton-card:nth-child(3) .aio-skel-badge,
+.aio-skeleton-card.aio-skeleton-card-3 .aio-skel-badge {
+  background: rgba(0, 60, 51, 0.15);
 }
 
 .aio-skeleton-head {
@@ -1079,54 +1235,142 @@ main[data-motion-view="aio"] {
   background: var(--aio-line);
 }
 
-/* Result KPI Summary Tiles */
+/* Result KPI Summary Tiles (Cohere Multi-Color Wash & Distinct Blocks) */
 .aio-result-summary {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 12px;
+  gap: 14px;
   margin-bottom: 24px;
   font-size: 13px;
-  color: var(--aio-muted);
+  color: var(--cohere-slate);
 }
 
 .aio-result-summary > span {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  min-height: 86px;
-  padding: 16px;
-  border: 1px solid var(--aio-line);
-  border-radius: 10px;
-  background: #ffffff;
+  gap: 8px;
+  min-height: 94px;
+  padding: 18px;
+  border-radius: 12px;
   line-height: 1.35;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-.aio-result-summary > span::before {
+.aio-result-summary > span strong {
+  font-size: 30px;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+/* Tile 1: Fan-out queries (Cohere Action Blue & Pale Blue Wash) */
+.aio-result-summary > span:nth-child(1) {
+  background: #f1f5ff;
+  border: 1px solid rgba(24, 99, 220, 0.22);
+  color: #17171c;
+}
+.aio-result-summary > span:nth-child(1)::before {
   content: "";
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--aio-sticker-sky);
-  margin-bottom: 2px;
+  background: #1863dc;
+  box-shadow: 0 0 0 3px rgba(24, 99, 220, 0.2);
+}
+.aio-result-summary > span:nth-child(1) strong { color: #071829; }
+.aio-result-summary > span:nth-child(1):hover {
+  transform: translateY(-2px);
+  border-color: #1863dc;
+  box-shadow: 0 8px 24px -4px rgba(24, 99, 220, 0.2);
 }
 
-.aio-result-summary > span:nth-child(2)::before { background: var(--aio-sticker-coral); }
-.aio-result-summary > span:nth-child(3)::before { background: var(--aio-sticker-orange); }
-.aio-result-summary > span:nth-child(4)::before { background: var(--aio-sticker-green); }
-.aio-result-summary > span:nth-child(5)::before { background: var(--aio-sticker-purple); }
+/* Tile 2: Gap điểm (Cohere Coral & Warm Pale Coral Wash) */
+.aio-result-summary > span:nth-child(2) {
+  background: #fff2ef;
+  border: 1px solid rgba(255, 119, 89, 0.28);
+  color: #17171c;
+}
+.aio-result-summary > span:nth-child(2)::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff7759;
+  box-shadow: 0 0 0 3px rgba(255, 119, 89, 0.25);
+}
+.aio-result-summary > span:nth-child(2) strong { color: #b30000; }
+.aio-result-summary > span:nth-child(2):hover {
+  transform: translateY(-2px);
+  border-color: #ff7759;
+  box-shadow: 0 8px 24px -4px rgba(255, 119, 89, 0.2);
+}
 
-.aio-result-summary strong {
-  font-size: 28px;
-  line-height: 1.1;
-  letter-spacing: -0.04em;
-  font-variant-numeric: tabular-nums;
-  color: var(--aio-ink);
-  font-weight: 700;
+/* Tile 3: Ngang nhau (Cohere Soft Stone) */
+.aio-result-summary > span:nth-child(3) {
+  background: #eeece7;
+  border: 1px solid rgba(117, 117, 138, 0.28);
+  color: #17171c;
+}
+.aio-result-summary > span:nth-child(3)::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #75758a;
+  box-shadow: 0 0 0 3px rgba(117, 117, 138, 0.2);
+}
+.aio-result-summary > span:nth-child(3) strong { color: #212121; }
+.aio-result-summary > span:nth-child(3):hover {
+  transform: translateY(-2px);
+  border-color: #75758a;
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.1);
+}
+
+/* Tile 4: Dẫn đầu (Cohere Deep Enterprise Green & Pale Green Wash) */
+.aio-result-summary > span:nth-child(4) {
+  background: #edfce9;
+  border: 1px solid rgba(0, 60, 51, 0.22);
+  color: #003c33;
+}
+.aio-result-summary > span:nth-child(4)::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #003c33;
+  box-shadow: 0 0 0 3px rgba(0, 168, 132, 0.25);
+}
+.aio-result-summary > span:nth-child(4) strong { color: #003c33; }
+.aio-result-summary > span:nth-child(4):hover {
+  transform: translateY(-2px);
+  border-color: #003c33;
+  box-shadow: 0 8px 24px -4px rgba(0, 60, 51, 0.2);
+}
+
+/* Tile 5: Chưa đủ căn cứ (Cohere Form Focus Violet wash) */
+.aio-result-summary > span:nth-child(5) {
+  background: #f5f2f9;
+  border: 1px solid rgba(155, 96, 170, 0.25);
+  color: #17171c;
+}
+.aio-result-summary > span:nth-child(5)::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #9b60aa;
+  box-shadow: 0 0 0 3px rgba(155, 96, 170, 0.2);
+}
+.aio-result-summary > span:nth-child(5) strong { color: #17171c; }
+.aio-result-summary > span:nth-child(5):hover {
+  transform: translateY(-2px);
+  border-color: #9b60aa;
+  box-shadow: 0 8px 24px -4px rgba(155, 96, 170, 0.2);
 }
 
 /* --------------------------------------------------------------------------
-   Notion Database Table (Audit Table)
+   Cohere Database Table (Audit Table)
    -------------------------------------------------------------------------- */
 .aio-table-scroll {
   overflow: auto;
@@ -1161,8 +1405,8 @@ main[data-motion-view="aio"] {
   font-size: 11.5px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--aio-muted);
-  background: var(--aio-canvas);
+  color: var(--cohere-slate);
+  background: var(--cohere-stone);
   white-space: nowrap;
 }
 
@@ -1182,17 +1426,17 @@ main[data-motion-view="aio"] {
 
 .aio-audit-table thead th:first-child { z-index: 3; }
 .aio-audit-table tbody th:first-child { background: #ffffff; }
-.aio-audit-table tbody tr:nth-child(even) th:first-child { background: #fbfaf9; }
+.aio-audit-table tbody tr:nth-child(even) th:first-child { background: #fafaf9; }
 
 .aio-audit-table tbody tr[data-selected="true"] th:first-child {
-  background: #f0f7ff;
+  background: #f1f5ff;
   box-shadow: inset 3px 0 var(--aio-blue), 1px 0 var(--aio-line);
 }
 
-.aio-table tbody tr:nth-child(even) { background: #fbfaf9; }
-.aio-table tbody tr:focus-within { background: #f0f7ff; }
-.aio-table tbody tr:focus-within th:first-child { background: #f0f7ff; }
-.aio-audit-table tbody tr[data-selected="true"] { background: #f0f7ff; }
+.aio-table tbody tr:nth-child(even) { background: #fafaf9; }
+.aio-table tbody tr:focus-within { background: #f1f5ff; }
+.aio-table tbody tr:focus-within th:first-child { background: #f1f5ff; }
+.aio-audit-table tbody tr[data-selected="true"] { background: #f1f5ff; }
 
 .aio-table :is(th, td) + :is(th, td) { border-left: 1px solid var(--aio-line); }
 .aio-results .aio-table-scroll { max-height: min(66vh, 640px); }
@@ -1257,56 +1501,56 @@ main[data-motion-view="aio"] {
   text-underline-offset: 3px;
 }
 
-/* Notion Verdict Badges */
+/* Cohere Verdict Badges */
 .aio-badge {
   display: inline-flex;
   align-items: center;
-  padding: 3px 9px;
+  padding: 3px 10px;
   border-radius: 9999px;
   font-size: 11.5px;
   font-weight: 600;
   white-space: nowrap;
-  background: var(--aio-canvas);
-  color: var(--aio-muted);
-  border: 1px solid var(--aio-line);
+  background: var(--cohere-stone);
+  color: var(--cohere-slate);
+  border: 1px solid var(--cohere-hairline);
 }
 
 .aio-tone-safe {
-  color: #1aae39;
+  color: #003c33;
 }
 .aio-tone-danger {
-  color: #df2060;
+  color: #b30000;
 }
 .aio-tone-medium {
-  color: #dd5b00;
+  color: #75758a;
 }
 
 .aio-badge.aio-tone-safe,
 .aio-action-1 {
-  background: #eaf8ed;
-  color: #1aae39;
-  border-color: rgba(26, 174, 57, 0.25);
+  background: #edfce9;
+  color: #003c33;
+  border-color: rgba(0, 60, 51, 0.25);
 }
 
 .aio-badge.aio-tone-danger,
 .aio-action-2,
 .aio-action-4 {
-  background: #fdeef3;
-  color: #df2060;
-  border-color: rgba(223, 32, 96, 0.25);
+  background: #fff2ef;
+  color: #b30000;
+  border-color: rgba(179, 0, 0, 0.22);
 }
 
 .aio-badge.aio-tone-medium,
 .aio-action-3 {
-  background: #fff4ec;
-  color: #dd5b00;
-  border-color: rgba(221, 91, 0, 0.25);
+  background: #eeece7;
+  color: #75758a;
+  border-color: rgba(117, 117, 138, 0.3);
 }
 
 .aio-action-5 {
-  background: #e8f3fd;
-  color: #0075de;
-  border-color: rgba(0, 117, 222, 0.25);
+  background: #f1f5ff;
+  color: #1863dc;
+  border-color: rgba(24, 99, 220, 0.25);
 }
 
 .aio-table details summary {
@@ -1413,9 +1657,17 @@ main[data-motion-view="aio"] {
 }
 
 .aio-passage-own {
-  border-color: var(--aio-line);
+  border-color: var(--cohere-border-light);
   background: #ffffff;
-  border-left: 3px solid var(--aio-blue);
+  border-left: 3px solid #1863dc;
+  box-shadow: 0 4px 16px rgba(24, 99, 220, 0.05);
+}
+
+.aio-rivals .aio-passage {
+  border-color: var(--cohere-border-light);
+  background: #ffffff;
+  border-left: 3px solid #ff7759;
+  box-shadow: 0 4px 16px rgba(255, 119, 89, 0.05);
 }
 
 .aio-passage-head {
@@ -1612,19 +1864,48 @@ main[data-motion-view="aio"] {
 .aio-rank-summary {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 18px;
+  gap: 14px;
+  margin-bottom: 20px;
 }
 
 .aio-rank-summary > div {
   display: grid;
-  gap: 5px;
-  min-height: 86px;
-  padding: 16px;
-  border: 1px solid var(--aio-line);
-  border-radius: 10px;
-  background: #ffffff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  gap: 6px;
+  min-height: 88px;
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.aio-rank-summary > div:nth-child(1) {
+  background: #f1f5ff;
+  border: 1px solid rgba(24, 99, 220, 0.22);
+}
+.aio-rank-summary > div:nth-child(1) strong { color: #071829; }
+.aio-rank-summary > div:nth-child(1):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -4px rgba(24, 99, 220, 0.2);
+}
+
+.aio-rank-summary > div:nth-child(2) {
+  background: #edfce9;
+  border: 1px solid rgba(0, 60, 51, 0.22);
+}
+.aio-rank-summary > div:nth-child(2) strong { color: #003c33; }
+.aio-rank-summary > div:nth-child(2):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -4px rgba(0, 60, 51, 0.2);
+}
+
+.aio-rank-summary > div:nth-child(3) {
+  background: #eeece7;
+  border: 1px solid rgba(117, 117, 138, 0.28);
+}
+.aio-rank-summary > div:nth-child(3) strong { color: #212121; }
+.aio-rank-summary > div:nth-child(3):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.1);
 }
 
 .aio-rank-summary span {

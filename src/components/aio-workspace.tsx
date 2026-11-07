@@ -754,7 +754,7 @@ export default function AioWorkspace() {
                   </div>
 
                   <div className="aio-skeleton-grid" aria-label="Đang chuẩn bị kết quả door">
-                    <div className="aio-skeleton-card">
+                    <div className="aio-skeleton-card aio-skeleton-card-1">
                       <div className="aio-skeleton-head">
                         <span className="aio-shimmer aio-skel-title" />
                         <span className="aio-shimmer aio-skel-badge" />
@@ -768,7 +768,7 @@ export default function AioWorkspace() {
                         </div>
                       </div>
                     </div>
-                    <div className="aio-skeleton-card">
+                    <div className="aio-skeleton-card aio-skeleton-card-2">
                       <div className="aio-skeleton-head">
                         <span className="aio-shimmer aio-skel-title" />
                         <span className="aio-shimmer aio-skel-badge" />
@@ -782,7 +782,7 @@ export default function AioWorkspace() {
                         </div>
                       </div>
                     </div>
-                    <div className="aio-skeleton-card">
+                    <div className="aio-skeleton-card aio-skeleton-card-3">
                       <div className="aio-skeleton-head">
                         <span className="aio-shimmer aio-skel-title" />
                         <span className="aio-shimmer aio-skel-badge" />

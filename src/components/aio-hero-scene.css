@@ -2,12 +2,12 @@
   position: absolute;
   inset: 0 0 0 auto;
   z-index: 0;
-  width: min(50%, 720px);
+  width: min(52%, 760px);
   height: 100%;
   overflow: hidden;
   pointer-events: none;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 18%);
-  mask-image: linear-gradient(90deg, transparent 0%, #000 18%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 16%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 16%);
 }
 
 .aio-page-head > :not(.aio-hero-scene) {
@@ -32,29 +32,29 @@
   opacity: 0;
 }
 
-/* Notion-style sticker aesthetics for static fallback */
+/* Cohere-inspired tactile media cards and sticker aesthetics for static fallback */
 .aio-scene-sticker {
   position: absolute;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 10px 25px -4px rgba(7, 20, 58, 0.45), 0 4px 10px rgba(0, 0, 0, 0.15);
-  border: 1.5px solid rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(4px);
+  box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.45), 0 4px 12px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(6px);
   will-change: transform;
 }
 
 .aio-scene-document {
-  width: 160px;
-  height: 118px;
-  border-radius: 14px;
+  width: 164px;
+  height: 122px;
+  border-radius: 16px;
   padding: 16px 14px;
   gap: 8px;
 }
 
 .aio-scene-document .sticker-header {
   height: 8px;
-  width: 50%;
-  border-radius: 999px;
+  width: 48%;
+  border-radius: 9999px;
   background: rgba(255, 255, 255, 0.95);
   margin-bottom: 4px;
 }
@@ -63,35 +63,40 @@
 .aio-scene-query i {
   display: block;
   height: 5px;
-  border-radius: 999px;
+  border-radius: 9999px;
   background: rgba(255, 255, 255, 0.85);
 }
 
-.aio-scene-document i:nth-of-type(1) { width: 92%; }
-.aio-scene-document i:nth-of-type(2) { width: 75%; }
-.aio-scene-document i:nth-of-type(3) { width: 55%; }
+.aio-scene-document i:nth-of-type(1) { width: 90%; }
+.aio-scene-document i:nth-of-type(2) { width: 72%; }
+.aio-scene-document i:nth-of-type(3) { width: 54%; }
 
-.aio-scene-document-purple {
-  top: 12%;
-  left: 12%;
-  background: #d6b6f6;
-  transform: rotate(-7deg) scale(0.92);
+/* Coral Blog / Taxonomy Card (Cohere #ff7759) */
+.aio-scene-document-coral {
+  top: 10%;
+  left: 10%;
+  background: linear-gradient(135deg, #ff7759 0%, #e05e42 100%);
+  transform: rotate(-6deg) scale(0.92);
   animation: aio-float-1 5.5s ease-in-out infinite;
+  border-color: rgba(255, 173, 155, 0.45);
 }
 
-.aio-scene-document-sky {
-  top: 34%;
-  left: 52%;
-  background: #62aef0;
+/* Action Blue Research Card (Cohere #1863dc) */
+.aio-scene-document-blue {
+  top: 32%;
+  left: 50%;
+  background: linear-gradient(135deg, #1863dc 0%, #104db0 100%);
   transform: rotate(6deg);
   animation: aio-float-2 6.2s ease-in-out infinite;
+  border-color: rgba(147, 197, 253, 0.4);
 }
 
+/* Deep Green Product Capsule (Cohere #003c33) */
 .aio-scene-query {
-  width: 168px;
-  height: 46px;
-  border-radius: 999px;
-  padding: 11px 16px 11px 42px;
+  width: 172px;
+  height: 48px;
+  border-radius: 9999px;
+  padding: 12px 18px 12px 44px;
   position: relative;
   justify-content: center;
   gap: 4px;
@@ -100,8 +105,8 @@
 .aio-scene-query::before {
   content: "";
   position: absolute;
-  top: 15px;
-  left: 16px;
+  top: 16px;
+  left: 17px;
   width: 13px;
   height: 13px;
   border: 2px solid #fff;
@@ -111,8 +116,8 @@
 .aio-scene-query::after {
   content: "";
   position: absolute;
-  top: 28px;
-  left: 28px;
+  top: 29px;
+  left: 29px;
   width: 9px;
   height: 2.5px;
   border-radius: 2px;
@@ -124,65 +129,70 @@
 .aio-scene-query i:nth-of-type(1) { width: 85%; height: 5px; }
 .aio-scene-query i:nth-of-type(2) { width: 50%; height: 4px; }
 
-.aio-scene-query-pink {
-  left: 10%;
+.aio-scene-query-green {
+  left: 8%;
   bottom: 12%;
-  background: #ff64c8;
+  background: linear-gradient(135deg, #003c33 0%, #00241e 100%);
+  border-color: rgba(0, 168, 132, 0.45);
   transform: rotate(4deg) scale(0.95);
   animation: aio-float-2 5.8s ease-in-out infinite 0.5s;
 }
 
-.aio-scene-query-teal {
-  top: 10%;
-  right: 8%;
-  background: #2a9d99;
-  transform: rotate(-5deg) scale(0.76);
+.aio-scene-query-navy {
+  top: 8%;
+  right: 6%;
+  background: linear-gradient(135deg, #071829 0%, #0d2238 100%);
+  border-color: rgba(98, 174, 240, 0.35);
+  transform: rotate(-5deg) scale(0.78);
   animation: aio-float-1 6.5s ease-in-out infinite 1s;
 }
 
-.aio-scene-badge-orange {
+.aio-scene-badge-stone {
   position: absolute;
-  right: 14%;
-  bottom: 15%;
-  background: #dd5b00;
-  color: #fff;
+  right: 12%;
+  bottom: 14%;
+  background: #eeece7;
+  color: #17171c;
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  padding: 6px 12px;
-  border-radius: 999px;
-  transform: rotate(3deg) scale(0.88);
-  box-shadow: 0 8px 20px -2px rgba(7, 20, 58, 0.4);
+  letter-spacing: 0.08em;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  transform: rotate(3deg) scale(0.9);
+  box-shadow: 0 10px 24px -2px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   animation: aio-float-1 5s ease-in-out infinite 0.8s;
 }
 
 .aio-scene-star {
   position: absolute;
-  color: #ffd5ee;
+  color: #ffad9b;
   font-size: 26px;
   line-height: 1;
-  text-shadow: 0 0 16px rgba(255, 213, 238, 0.75), 0 0 32px rgba(255, 213, 238, 0.4);
+  text-shadow: 0 0 18px rgba(255, 173, 155, 0.8), 0 0 36px rgba(255, 119, 89, 0.5);
   user-select: none;
 }
 
 .aio-scene-star-one {
-  top: 8%;
-  left: 5%;
+  top: 6%;
+  left: 4%;
+  color: #ff7759;
   animation: aio-twinkle 3.2s ease-in-out infinite;
 }
 
 .aio-scene-star-two {
-  right: 8%;
-  bottom: 10%;
+  right: 6%;
+  bottom: 8%;
+  color: #60a5fa;
   animation: aio-twinkle 4s ease-in-out infinite 1s;
 }
 
 .aio-scene-star-three {
-  top: 48%;
-  right: 32%;
+  top: 46%;
+  right: 30%;
   font-size: 18px;
-  color: #c5d8ff;
-  text-shadow: 0 0 14px rgba(197, 216, 255, 0.8);
+  color: #edfce9;
+  text-shadow: 0 0 14px rgba(237, 252, 233, 0.85);
   animation: aio-twinkle 3.6s ease-in-out infinite 1.8s;
 }
 
@@ -206,12 +216,12 @@
 
 @keyframes aio-twinkle {
   0%, 100% {
-    opacity: 0.85;
+    opacity: 0.88;
     transform: scale(1);
   }
   50% {
-    opacity: 0.4;
-    transform: scale(0.82);
+    opacity: 0.35;
+    transform: scale(0.8);
   }
 }
 
