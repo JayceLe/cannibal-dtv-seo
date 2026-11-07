@@ -104,6 +104,8 @@ test("AIO opens empty, invalidates old output on edits and starts fresh for ever
     assert.equal(input('input[type="url"]').value, "");
     assert.equal(calls.length, 0, "Mount never loads an old audit");
     assert.doesNotMatch(host.textContent!, /thay pin|dienthoaivui|94\.2%|2\.450|0,892|Thiếu bảng giá/i);
+    assert.match(host.querySelector(".aio-neural-telemetry-badge")!.textContent!, /CHƯA CHẠY/);
+    assert.doesNotMatch(host.textContent!, /768D|CRAWLER · ACTIVE/);
 
     await fill(keyword, "thay pin iPhone");
     await fill('input[type="url"]', "https://workspace.example/article");
@@ -112,6 +114,7 @@ test("AIO opens empty, invalidates old output on edits and starts fresh for ever
     await submit();
     assert.match(host.querySelector(".aio-output")?.textContent || "", /Nội dung lượt 1: thay pin iPhone/,
       host.querySelector(".error-message")?.textContent || JSON.stringify(calls));
+    assert.match(host.querySelector(".aio-neural-telemetry-badge")!.textContent!, /HOÀN TẤT/);
     await submit();
     assert.match(host.querySelector(".aio-output")?.textContent || "", /Nội dung lượt 2: thay pin iPhone/);
 
@@ -119,6 +122,7 @@ test("AIO opens empty, invalidates old output on edits and starts fresh for ever
     assert.equal(host.querySelector(".aio-output"), null, "Editing removes old passages and rank inputs");
     assert.doesNotMatch(host.textContent!, /thay pin/i);
     assert.equal(host.querySelector("#aio-progress-title")?.textContent, "Sẵn sàng bắt đầu");
+    assert.match(host.querySelector(".aio-neural-telemetry-badge")!.textContent!, /CHƯA CHẠY/);
     await submit();
     assert.match(host.querySelector(".aio-output")?.textContent || "", /phần mềm quản lý nhân sự/);
     assert.doesNotMatch(host.textContent!, /thay pin/i);

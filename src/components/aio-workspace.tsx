@@ -616,18 +616,22 @@ export default function AioWorkspace() {
             <div className="aio-neural-overlay-badge">
               <span className="aio-neural-dot" />
               <span>
-                {currentPhase === 0
-                  ? "Stage 01: Semantic Query Fan-out & Clustering"
+                {!run
+                  ? "Chờ bắt đầu audit"
+                  : currentPhase === 0
+                  ? "Bước 01: Sinh query & gom door"
                   : currentPhase === 1
-                    ? `Stage 02: Crawling & Extracting Pages (${run?.page_index || 0}/${run?.urls?.length || 0})`
+                    ? `Bước 02: Đọc nội dung (${run.page_index || 0}/${run.urls?.length || 0})`
                     : currentPhase === 2
-                      ? "Stage 03: Vector Embedding & Similarity Scoring"
-                      : "AIO Engine: Analysis Harmonized"}
+                      ? "Bước 03: Đối chiếu & chấm điểm"
+                      : "Audit đã hoàn tất"}
               </span>
             </div>
             <div className="aio-neural-telemetry-badge">
-              <span className="aio-telemetry-pill">VECTOR 768D</span>
-              <span className="aio-telemetry-pill">SERP CRAWLER · ACTIVE</span>
+              <span className="aio-telemetry-pill">AUDIT HIỆN TẠI</span>
+              <span className="aio-telemetry-pill">
+                {busy ? "ĐANG XỬ LÝ" : result ? "HOÀN TẤT" : run ? "ĐÃ DỪNG" : "CHƯA CHẠY"}
+              </span>
             </div>
             <div className="aio-neural-grid-lines" aria-hidden="true" />
           </div>
@@ -655,7 +659,7 @@ export default function AioWorkspace() {
                           )}
                         </span>
                         <span className="aio-stage-status-pill">
-                          {isDone ? "Hoàn thành" : isCurrent ? "Đang chạy" : "Chờ xử lý"}
+                          {isDone ? "Hoàn thành" : isCurrent ? (busy ? "Đang chạy" : "Đã dừng") : "Chờ xử lý"}
                         </span>
                       </div>
                       <div className="aio-stage-info">
@@ -670,7 +674,7 @@ export default function AioWorkspace() {
                       </div>
 
                       {/* Live micro-visualizer for active stage */}
-                      {isCurrent && (
+                      {isCurrent && busy && (
                         <div className="aio-stage-live-meter">
                           {index === 0 && (
                             <div className="aio-live-queries-chips">
@@ -688,7 +692,7 @@ export default function AioWorkspace() {
                           {index === 2 && (
                             <div className="aio-live-vector-bar">
                               <span className="aio-vector-pulse" />
-                              <span className="aio-vector-text">Cosine distance: calculating…</span>
+                              <span className="aio-vector-text">Đang tính độ tương đồng…</span>
                             </div>
                           )}
                         </div>
