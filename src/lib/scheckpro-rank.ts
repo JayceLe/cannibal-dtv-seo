@@ -39,7 +39,12 @@ export function detectSCheckPro(signal?: AbortSignal): Promise<boolean> {
     document.addEventListener("TestScheckProSuccess", onFound, { once: true });
     signal?.addEventListener("abort", onAbort, { once: true });
     timer = setTimeout(() => finish(false), 1_500);
-    document.dispatchEvent(new CustomEvent("TestScheckPro"));
+    const EventCtor = (document.defaultView && (document.defaultView as unknown as { CustomEvent?: typeof CustomEvent }).CustomEvent) || CustomEvent;
+    try {
+      document.dispatchEvent(new EventCtor("TestScheckPro"));
+    } catch {
+      // ignore
+    }
   });
 }
 
@@ -72,9 +77,14 @@ function requestGoogleHtml(url: string, signal?: AbortSignal): Promise<string> {
       cleanup();
       reject(new Error("SCheckPro chưa trả kết quả. Kiểm tra tab xác minh Google rồi thử lại."));
     }, requestTimeout);
-    document.dispatchEvent(new CustomEvent("RequestLink", {
-      detail: { url, captcha: false, mid: `aio-rank-${Date.now()}` },
-    }));
+    const EventCtor = (document.defaultView && (document.defaultView as unknown as { CustomEvent?: typeof CustomEvent }).CustomEvent) || CustomEvent;
+    try {
+      document.dispatchEvent(new EventCtor("RequestLink", {
+        detail: { url, captcha: false, mid: `aio-rank-${Date.now()}` },
+      }));
+    } catch {
+      // ignore
+    }
   });
 }
 

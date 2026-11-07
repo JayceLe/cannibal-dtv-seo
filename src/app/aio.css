@@ -270,7 +270,7 @@ main[data-motion-view="aio"] {
    -------------------------------------------------------------------------- */
 .aio-setup-unified-panel {
   width: 100%;
-  border-top: 4px solid var(--cohere-blue);
+  border: 1.5px solid var(--cohere-border-light);
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 4px 20px -4px rgba(24, 99, 220, 0.08), 0 2px 6px rgba(0, 0, 0, 0.02);
@@ -378,23 +378,22 @@ main[data-motion-view="aio"] {
   opacity: 1;
 }
 
-/* API Credentials Container - Soft Stone with Coral Security Accent */
+/* API Credentials Container - Warm Stone & Clean Unified Border */
 .aio-credentials {
   padding: 20px;
-  border: 1.5px solid var(--cohere-border-light);
-  border-left: 4px solid #ff7759;
+  border: 1.5px solid #fed7aa;
   border-radius: 10px;
-  background: #fbf9f7;
+  background: #fffaf8;
   display: grid;
   gap: 14px;
-  box-shadow: 0 2px 8px rgba(255, 119, 89, 0.05);
+  box-shadow: 0 2px 10px rgba(255, 119, 89, 0.06);
 }
 
 .aio-section-label {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #ff7759;
+  color: #ea580c;
 }
 
 .aio-section-label h3 {
@@ -468,13 +467,12 @@ main[data-motion-view="aio"] {
   background: var(--cohere-stone);
 }
 
-/* Settings Card - Dark Navy Accent & Crisp Controls */
+/* Settings Card - Clean Unified Border & Crisp Controls */
 .aio-settings {
   padding: 24px;
-  border: 1.5px solid var(--cohere-border-light);
-  border-top: 4px solid var(--cohere-navy);
+  border: 1.5px solid #cbd5e1;
   border-radius: 12px;
-  background: #fafaf9;
+  background: #f8fafc;
   min-width: 0;
   box-shadow: 0 2px 8px rgba(7, 24, 41, 0.04);
 }
@@ -1397,8 +1395,7 @@ main[data-motion-view="aio"] {
 /* Skeleton Card 1: Action Blue (#1863dc) tint & shimmer */
 .aio-skeleton-card:nth-child(1),
 .aio-skeleton-card.aio-skeleton-card-1 {
-  border-color: rgba(24, 99, 220, 0.24);
-  border-top: 3px solid #1863dc;
+  border: 1.5px solid #bfdbfe;
   background: linear-gradient(180deg, #f1f5ff 0%, #ffffff 65%);
   box-shadow: 0 4px 16px rgba(24, 99, 220, 0.06);
 }
@@ -1417,8 +1414,7 @@ main[data-motion-view="aio"] {
 /* Skeleton Card 2: Coral (#ff7759) tint & shimmer */
 .aio-skeleton-card:nth-child(2),
 .aio-skeleton-card.aio-skeleton-card-2 {
-  border-color: rgba(255, 119, 89, 0.26);
-  border-top: 3px solid #ff7759;
+  border: 1.5px solid #fed7aa;
   background: linear-gradient(180deg, #fff2ef 0%, #ffffff 65%);
   box-shadow: 0 4px 16px rgba(255, 119, 89, 0.06);
 }
@@ -1437,8 +1433,7 @@ main[data-motion-view="aio"] {
 /* Skeleton Card 3: Deep Enterprise Green (#003c33) tint & shimmer */
 .aio-skeleton-card:nth-child(3),
 .aio-skeleton-card.aio-skeleton-card-3 {
-  border-color: rgba(0, 60, 51, 0.24);
-  border-top: 3px solid #003c33;
+  border: 1.5px solid #bbf7d0;
   background: linear-gradient(180deg, #edfce9 0%, #ffffff 65%);
   box-shadow: 0 4px 16px rgba(0, 60, 51, 0.06);
 }
@@ -1528,13 +1523,13 @@ main[data-motion-view="aio"] {
   background: var(--aio-line);
 }
 
-/* Result KPI Summary Tiles (Cohere Multi-Color Wash & Distinct Blocks) */
+/* Result KPI Summary Tiles (Vivid Color Wash & High Contrast) */
 .aio-result-summary {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 14px;
   margin-bottom: 24px;
-  font-size: 13px;
+  font-size: 13.5px;
   color: var(--cohere-slate);
 }
 
@@ -1550,18 +1545,19 @@ main[data-motion-view="aio"] {
 }
 
 .aio-result-summary > span strong {
-  font-size: 30px;
+  font-size: 32px;
   line-height: 1.05;
   letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
-  font-weight: 700;
+  font-weight: 800;
 }
 
-/* Tile 1: Fan-out queries (Cohere Action Blue & Pale Blue Wash) */
+/* Tile 1: Fan-out queries (Action Blue & Bright Pale Blue Wash) */
 .aio-result-summary > span:nth-child(1) {
-  background: #f1f5ff;
-  border: 1px solid rgba(24, 99, 220, 0.22);
-  color: #17171c;
+  background: #ebf3ff;
+  border: 1.5px solid #93c5fd;
+  color: #1e40af;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.08);
 }
 .aio-result-summary > span:nth-child(1)::before {
   content: "";
@@ -1569,97 +1565,101 @@ main[data-motion-view="aio"] {
   height: 8px;
   border-radius: 50%;
   background: #1863dc;
-  box-shadow: 0 0 0 3px rgba(24, 99, 220, 0.2);
+  box-shadow: 0 0 0 3px rgba(24, 99, 220, 0.25);
 }
-.aio-result-summary > span:nth-child(1) strong { color: #071829; }
+.aio-result-summary > span:nth-child(1) strong { color: #1863dc; }
 .aio-result-summary > span:nth-child(1):hover {
   transform: translateY(-2px);
   border-color: #1863dc;
   box-shadow: 0 8px 24px -4px rgba(24, 99, 220, 0.2);
 }
 
-/* Tile 2: Gap điểm (Cohere Coral & Warm Pale Coral Wash) */
+/* Tile 2: Gap điểm (Vivid Coral & Bright Pale Red Wash) */
 .aio-result-summary > span:nth-child(2) {
-  background: #fff2ef;
-  border: 1px solid rgba(255, 119, 89, 0.28);
-  color: #17171c;
+  background: #fef2f2;
+  border: 1.5px solid #fca5a5;
+  color: #991b1b;
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.08);
 }
 .aio-result-summary > span:nth-child(2)::before {
   content: "";
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #ff7759;
-  box-shadow: 0 0 0 3px rgba(255, 119, 89, 0.25);
+  background: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.25);
 }
-.aio-result-summary > span:nth-child(2) strong { color: #b30000; }
+.aio-result-summary > span:nth-child(2) strong { color: #b91c1c; }
 .aio-result-summary > span:nth-child(2):hover {
   transform: translateY(-2px);
-  border-color: #ff7759;
-  box-shadow: 0 8px 24px -4px rgba(255, 119, 89, 0.2);
+  border-color: #dc2626;
+  box-shadow: 0 8px 24px -4px rgba(220, 38, 38, 0.2);
 }
 
-/* Tile 3: Ngang nhau (Cohere Soft Stone) */
+/* Tile 3: Ngang nhau (Clean Bright Neutral Wash) */
 .aio-result-summary > span:nth-child(3) {
-  background: #eeece7;
-  border: 1px solid rgba(117, 117, 138, 0.28);
-  color: #17171c;
+  background: #f1f5f9;
+  border: 1.5px solid #cbd5e1;
+  color: #334155;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
 }
 .aio-result-summary > span:nth-child(3)::before {
   content: "";
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #75758a;
-  box-shadow: 0 0 0 3px rgba(117, 117, 138, 0.2);
+  background: #64748b;
+  box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.2);
 }
-.aio-result-summary > span:nth-child(3) strong { color: #212121; }
+.aio-result-summary > span:nth-child(3) strong { color: #0f172a; }
 .aio-result-summary > span:nth-child(3):hover {
   transform: translateY(-2px);
-  border-color: #75758a;
+  border-color: #64748b;
   box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.1);
 }
 
-/* Tile 4: Dẫn đầu (Cohere Deep Enterprise Green & Pale Green Wash) */
+/* Tile 4: Dẫn đầu (Vivid Deep Enterprise Green & Bright Pale Green Wash) */
 .aio-result-summary > span:nth-child(4) {
-  background: #edfce9;
-  border: 1px solid rgba(0, 60, 51, 0.22);
-  color: #003c33;
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+  color: #166534;
+  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.08);
 }
 .aio-result-summary > span:nth-child(4)::before {
   content: "";
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #003c33;
-  box-shadow: 0 0 0 3px rgba(0, 168, 132, 0.25);
+  background: #15803d;
+  box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.25);
 }
-.aio-result-summary > span:nth-child(4) strong { color: #003c33; }
+.aio-result-summary > span:nth-child(4) strong { color: #15803d; }
 .aio-result-summary > span:nth-child(4):hover {
   transform: translateY(-2px);
-  border-color: #003c33;
-  box-shadow: 0 8px 24px -4px rgba(0, 60, 51, 0.2);
+  border-color: #15803d;
+  box-shadow: 0 8px 24px -4px rgba(21, 128, 61, 0.2);
 }
 
-/* Tile 5: Chưa đủ căn cứ (Cohere Form Focus Violet wash) */
+/* Tile 5: Chưa đủ căn cứ (Vivid Bright Violet Wash) */
 .aio-result-summary > span:nth-child(5) {
-  background: #f5f2f9;
-  border: 1px solid rgba(155, 96, 170, 0.25);
-  color: #17171c;
+  background: #f5f3ff;
+  border: 1.5px solid #c4b5fd;
+  color: #5b21b6;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.08);
 }
 .aio-result-summary > span:nth-child(5)::before {
   content: "";
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #9b60aa;
-  box-shadow: 0 0 0 3px rgba(155, 96, 170, 0.2);
+  background: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.25);
 }
-.aio-result-summary > span:nth-child(5) strong { color: #17171c; }
+.aio-result-summary > span:nth-child(5) strong { color: #6d28d9; }
 .aio-result-summary > span:nth-child(5):hover {
   transform: translateY(-2px);
-  border-color: #9b60aa;
-  box-shadow: 0 8px 24px -4px rgba(155, 96, 170, 0.2);
+  border-color: #7c3aed;
+  box-shadow: 0 8px 24px -4px rgba(124, 58, 237, 0.2);
 }
 
 /* --------------------------------------------------------------------------
@@ -1795,62 +1795,64 @@ main[data-motion-view="aio"] {
   background: #fafaf9;
 }
 
-/* Body Cell Column Washes & Numerical Highlights */
-/* Col 3: Điểm của bạn (Pale Blue Wash) */
+/* Body Cell Column Washes & Numerical Highlights (Vivid Color & High Contrast) */
+/* Col 3: Điểm của bạn (Vivid Bright Blue Wash) */
 .aio-audit-table tbody td:nth-child(3) {
-  background: #f4f8ff;
-  border-left: 1.5px solid #bfdbfe;
-  border-right: 1.5px solid #bfdbfe;
+  background: #ebf3ff;
+  border-left: 1.5px solid #93c5fd;
+  border-right: 1.5px solid #93c5fd;
 }
 
 .aio-audit-table tbody td:nth-child(3) strong {
   color: #1863dc;
-  font-size: 14.5px;
-  font-weight: 800;
+  font-size: 15px;
+  font-weight: 850;
 }
 
 .aio-audit-table tbody tr:nth-child(even) td:nth-child(3) {
-  background: #eef5ff;
+  background: #e0edff;
 }
 
-/* Col 4: Đối thủ tốt nhất (Pale Coral Wash) */
+/* Col 4: Đối thủ tốt nhất (Vivid Bright Red/Coral Wash) */
 .aio-audit-table tbody td:nth-child(4) {
-  background: #fff6f3;
-  border-left: 1.5px solid #fed7aa;
-  border-right: 1.5px solid #fed7aa;
-  color: #c2410c;
-  font-weight: 700;
-}
-
-.aio-audit-table tbody tr:nth-child(even) td:nth-child(4) {
-  background: #feede8;
-}
-
-/* Col 5: Gap theo điểm (Amber Wash) */
-.aio-audit-table tbody td:nth-child(5) {
-  background: #fffdf0;
-  border-left: 1.5px solid #fde68a;
-  border-right: 1.5px solid #fde68a;
-  color: #b45309;
-  font-weight: 700;
-}
-
-.aio-audit-table tbody tr:nth-child(even) td:nth-child(5) {
-  background: #fef9e2;
-}
-
-/* Col 6: Xếp trong nhóm (Pale Green Wash) */
-.aio-audit-table tbody td:nth-child(6) {
-  background: #f2fbf4;
-  border-left: 1.5px solid #bbf7d0;
-  border-right: 1.5px solid #bbf7d0;
-  color: #003c33;
-  font-weight: 800;
+  background: #fef2f2;
+  border-left: 1.5px solid #fca5a5;
+  border-right: 1.5px solid #fca5a5;
+  color: #b91c1c;
+  font-weight: 750;
   font-size: 14px;
 }
 
+.aio-audit-table tbody tr:nth-child(even) td:nth-child(4) {
+  background: #fee2e2;
+}
+
+/* Col 5: Gap theo điểm (Vivid Bright Amber Wash) */
+.aio-audit-table tbody td:nth-child(5) {
+  background: #fefce8;
+  border-left: 1.5px solid #fde047;
+  border-right: 1.5px solid #fde047;
+  color: #b45309;
+  font-weight: 750;
+  font-size: 14px;
+}
+
+.aio-audit-table tbody tr:nth-child(even) td:nth-child(5) {
+  background: #fef9c3;
+}
+
+/* Col 6: Xếp trong nhóm (Vivid Bright Green Wash) */
+.aio-audit-table tbody td:nth-child(6) {
+  background: #f0fdf4;
+  border-left: 1.5px solid #86efac;
+  border-right: 1.5px solid #86efac;
+  color: #15803d;
+  font-weight: 850;
+  font-size: 14.5px;
+}
+
 .aio-audit-table tbody tr:nth-child(even) td:nth-child(6) {
-  background: #e8f8eb;
+  background: #dcfce7;
 }
 
 /* Col 7: Spread */
@@ -1879,8 +1881,8 @@ main[data-motion-view="aio"] {
 
 .aio-audit-table tbody tr[data-selected="true"] th:first-child {
   background: #e8f1ff;
-  border-left: 4px solid #1863dc;
-  box-shadow: inset 4px 0 0 #1863dc, 2px 0 6px rgba(24, 99, 220, 0.1);
+  border-right: 1.5px solid #cbd5e1;
+  box-shadow: 2px 0 8px rgba(24, 99, 220, 0.12);
 }
 
 .aio-audit-table tbody tr[data-selected="true"] td {
@@ -2038,7 +2040,7 @@ main[data-motion-view="aio"] {
 }
 
 .aio-passages-panel {
-  border-top: 4px solid var(--cohere-blue);
+  border: 1.5px solid var(--cohere-border-light);
   border-radius: 12px;
   background: #ffffff;
   box-shadow: 0 4px 20px -4px rgba(24, 99, 220, 0.08), 0 2px 6px rgba(0, 0, 0, 0.02);
@@ -2085,7 +2087,6 @@ main[data-motion-view="aio"] {
   margin: 0 0 20px;
   padding: 14px 18px;
   border: 1.5px solid #bfdbfe;
-  border-left: 4px solid #1863dc;
   border-radius: 8px;
   background: #f0f7ff;
   color: #1e293b;
@@ -2119,7 +2120,6 @@ main[data-motion-view="aio"] {
 /* Your Page Passage Card (Pale Blue Wash + Action Blue Accent) */
 .aio-passage-own {
   border: 1.5px solid #bfdbfe;
-  border-top: 4px solid #1863dc;
   background: #f8fbff;
   box-shadow: 0 4px 18px rgba(24, 99, 220, 0.08);
 }
@@ -2161,7 +2161,6 @@ main[data-motion-view="aio"] {
 /* Rivals Passage Card (Warm Coral Wash + Coral Accent) */
 .aio-rivals .aio-passage {
   border: 1.5px solid #fed7aa;
-  border-top: 4px solid #ff7759;
   background: #fff9f7;
   box-shadow: 0 4px 18px rgba(255, 119, 89, 0.08);
 }

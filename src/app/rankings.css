@@ -64,11 +64,11 @@
   gap: 14px;
 }
 .rank-band {
-  background: #f8fafc;
-  border: 1px solid var(--border);
+  background: #ffffff;
+  border: 1.5px solid var(--border);
   padding: 16px;
   border-radius: var(--radius-card);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   transition:
     background 0.24s,
     border-color 0.24s,
@@ -76,15 +76,15 @@
     transform 0.24s;
 }
 .rank-band:hover {
-  background: #ffffff;
+  background: #f8fafc;
   border-color: var(--border-strong);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
   transform: translateY(-2px);
 }
 .rank-band > span {
   font-size: 15px;
-  color: var(--muted);
-  font-weight: 600;
+  color: #334155;
+  font-weight: 700;
 }
 .rank-band > div {
   display: flex;
@@ -93,21 +93,24 @@
   margin: 10px 0;
 }
 .rank-band strong {
-  font-size: 27px;
-  color: var(--text);
+  font-size: 28px;
+  font-weight: 800;
+  color: #0f172a;
 }
 .rank-band p {
   display: flex;
   flex-wrap: wrap;
   gap: 6px 14px;
-  font-size: 12px;
+  font-size: 12.5px;
   margin: 0;
 }
 .rank-positive {
-  color: var(--safe) !important;
+  color: #15803d !important;
+  font-weight: 700;
 }
 .rank-negative {
-  color: var(--danger) !important;
+  color: #b91c1c !important;
+  font-weight: 700;
 }
 .rank-card-title {
   display: flex;

@@ -31,6 +31,7 @@ export default function AioProgressScene({ phase, busy }: AioProgressSceneProps)
 
     const geometries = new Set<ThreeTypes.BufferGeometry>();
     const materials = new Set<ThreeTypes.Material>();
+    const textures = new Set<ThreeTypes.Texture>();
 
     void import("three").then((THREE: ThreeModule) => {
       if (disposed || !host) return;
@@ -55,137 +56,412 @@ export default function AioProgressScene({ phase, busy }: AioProgressSceneProps)
       renderer.outputColorSpace = THREE.SRGBColorSpace;
 
       scene = new THREE.Scene();
-      camera = new THREE.PerspectiveCamera(48, host.clientWidth / host.clientHeight, 0.1, 1000);
-      camera.position.set(0, 0, 85);
+      camera = new THREE.PerspectiveCamera(46, host.clientWidth / host.clientHeight, 0.1, 1000);
+      camera.position.set(0, 0, 92);
 
-      // Lights (Cohere palette)
-      const ambient = new THREE.AmbientLight(0xffffff, 0.9);
+      // Ambient & Directional Lights
+      const ambient = new THREE.AmbientLight(0xffffff, 1.2);
       scene.add(ambient);
 
-      const dirLight = new THREE.DirectionalLight(0x1863dc, 2.0); // Action Blue
-      dirLight.position.set(50, 60, 50);
+      const dirLight = new THREE.DirectionalLight(0x60a5fa, 2.2);
+      dirLight.position.set(40, 50, 60);
       scene.add(dirLight);
 
-      const secondaryLight = new THREE.DirectionalLight(0xff7759, 1.6); // Coral
-      secondaryLight.position.set(-50, -40, 40);
+      const secondaryLight = new THREE.DirectionalLight(0xff7759, 1.8);
+      secondaryLight.position.set(-50, -30, 40);
       scene.add(secondaryLight);
 
-      // Core System Group
-      const coreGroup = new THREE.Group();
-      scene.add(coreGroup);
+      // Root Group for 3D Citations Network
+      const rootGroup = new THREE.Group();
+      scene.add(rootGroup);
 
-      // 1. Central Icosahedron Nucleus (Semantic Anchor)
-      const nucleusGeo = new THREE.IcosahedronGeometry(12, 1);
-      geometries.add(nucleusGeo);
-      const nucleusMat = new THREE.MeshStandardMaterial({
+      // Helper: Draw Rounded Rectangle on Canvas 2D
+      const drawRoundRect = (
+        ctx: CanvasRenderingContext2D,
+        x: number,
+        y: number,
+        w: number,
+        h: number,
+        r: number,
+      ) => {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + w, y, x + w, y + h, r);
+        ctx.arcTo(x + w, y + h, x, y + h, r);
+        ctx.arcTo(x, y + h, x, y, r);
+        ctx.arcTo(x, y, x + w, y, r);
+        ctx.closePath();
+      };
+
+      // -----------------------------------------------------------------------
+      // Texture 1: Central Google AI Overview Synthesis Card (Trích dẫn AIO)
+      // -----------------------------------------------------------------------
+      const createAioSummaryTexture = (curPhase: number): ThreeTypes.CanvasTexture => {
+        const cv = document.createElement("canvas");
+        cv.width = 512;
+        cv.height = 300;
+        const ctx = cv.getContext("2d")!;
+
+        // Background Glass/Card
+        const bgGrad = ctx.createLinearGradient(0, 0, 512, 300);
+        bgGrad.addColorStop(0, "#081325");
+        bgGrad.addColorStop(1, "#0a223f");
+        drawRoundRect(ctx, 4, 4, 504, 292, 20);
+        ctx.fillStyle = bgGrad;
+        ctx.fill();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "rgba(96, 165, 250, 0.4)";
+        ctx.stroke();
+
+        // Top Banner / Header
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 22px system-ui, -apple-system, sans-serif";
+        ctx.fillText("✦ Đối chiếu nội dung", 28, 44);
+
+        // Status pill
+        drawRoundRect(ctx, 330, 22, 150, 30, 15);
+        ctx.fillStyle = curPhase === 3 ? "rgba(16, 185, 129, 0.25)" : "rgba(37, 99, 235, 0.35)";
+        ctx.fill();
+        ctx.strokeStyle = curPhase === 3 ? "#10b981" : "#60a5fa";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.fillStyle = curPhase === 3 ? "#34d399" : "#93c5fd";
+        ctx.font = "bold 13px system-ui, sans-serif";
+        ctx.fillText(curPhase === 3 ? "✔ HOÀN TẤT" : "● ĐANG XỬ LÝ", 345, 42);
+
+        // Subtitle line
+        ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+        ctx.font = "14px system-ui, sans-serif";
+        ctx.fillText("Từ khóa → đoạn nội dung → so sánh", 28, 76);
+
+        // Passage Snippets with Inline Citation Chips [1], [2], [3]
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 17px system-ui, sans-serif";
+        ctx.fillText("Mở rộng query theo chủ đề đang audit", 28, 118);
+
+        // Inline Citation Badge [1]
+        drawRoundRect(ctx, 452, 102, 32, 22, 6);
+        ctx.fillStyle = "#1863dc";
+        ctx.fill();
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 13px system-ui, sans-serif";
+        ctx.fillText("[1]", 460, 118);
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 17px system-ui, sans-serif";
+        ctx.fillText("Tìm đoạn trả lời đúng ý định tìm kiếm", 28, 152);
+
+        // Inline Citation Badge [2]
+        drawRoundRect(ctx, 420, 136, 32, 22, 6);
+        ctx.fillStyle = "#ff7759";
+        ctx.fill();
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 13px system-ui, sans-serif";
+        ctx.fillText("[2]", 428, 152);
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 17px system-ui, sans-serif";
+        ctx.fillText("Tính điểm và đối chiếu bằng chứng", 28, 186);
+
+        // Inline Citation Badge [3]
+        drawRoundRect(ctx, 442, 170, 32, 22, 6);
+        ctx.fillStyle = "#00a884";
+        ctx.fill();
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 13px system-ui, sans-serif";
+        ctx.fillText("[3]", 450, 186);
+
+        // Bottom Citation Sources Bar
+        ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
+        drawRoundRect(ctx, 20, 224, 472, 54, 12);
+        ctx.fill();
+        ctx.fillStyle = "#93c5fd";
+        ctx.font = "bold 13px system-ui, sans-serif";
+        ctx.fillText("Kết quả hiện khi audit hoàn tất", 36, 256);
+
+        const tex = new THREE.CanvasTexture(cv);
+        tex.colorSpace = THREE.SRGBColorSpace;
+        textures.add(tex);
+        return tex;
+      };
+
+      // -----------------------------------------------------------------------
+      // Texture 2: Citation Source Document Snippet (Trích dẫn URL)
+      // -----------------------------------------------------------------------
+      const createCitationSourceTexture = (
+        badgeNum: string,
+        domain: string,
+        badgeLabel: string,
+        badgeColor: string,
+        lineText: string,
+        scoreText: string,
+      ): ThreeTypes.CanvasTexture => {
+        const cv = document.createElement("canvas");
+        cv.width = 384;
+        cv.height = 220;
+        const ctx = cv.getContext("2d")!;
+
+        // Background
+        drawRoundRect(ctx, 4, 4, 376, 212, 16);
+        ctx.fillStyle = "#0a192f";
+        ctx.fill();
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = badgeColor;
+        ctx.stroke();
+
+        // Top Header
+        drawRoundRect(ctx, 16, 16, 34, 26, 6);
+        ctx.fillStyle = badgeColor;
+        ctx.fill();
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 15px system-ui, sans-serif";
+        ctx.fillText(badgeNum, 24, 34);
+
+        // Domain Name
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 17px system-ui, sans-serif";
+        ctx.fillText(domain, 60, 35);
+
+        // Badge Pill
+        drawRoundRect(ctx, 230, 16, 134, 26, 13);
+        ctx.fillStyle = "rgba(255, 255, 255, 0.12)";
+        ctx.fill();
+        ctx.strokeStyle = badgeColor;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.fillStyle = badgeColor;
+        ctx.font = "bold 11px system-ui, sans-serif";
+        ctx.fillText(badgeLabel, 242, 33);
+
+        // Divider
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(16, 56);
+        ctx.lineTo(368, 56);
+        ctx.stroke();
+
+        // Snippet Passage Text
+        ctx.fillStyle = "rgba(255, 255, 255, 0.88)";
+        ctx.font = "14px system-ui, sans-serif";
+        ctx.fillText(lineText, 18, 90);
+        ctx.fillText("Đọc nội dung của lần audit hiện tại", 18, 114);
+
+        // Score row
+        drawRoundRect(ctx, 16, 148, 352, 48, 8);
+        ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
+        ctx.fill();
+        ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+        ctx.font = "12px system-ui, sans-serif";
+        ctx.fillText("ĐỘ TƯƠNG ĐỒNG COSINE", 28, 178);
+
+        ctx.fillStyle = badgeColor;
+        ctx.font = "bold 18px system-ui, sans-serif";
+        ctx.fillText(scoreText, 275, 179);
+
+        const tex = new THREE.CanvasTexture(cv);
+        tex.colorSpace = THREE.SRGBColorSpace;
+        textures.add(tex);
+        return tex;
+      };
+
+      // -----------------------------------------------------------------------
+      // Texture 3: Search Query Fan-out Tag Pill
+      // -----------------------------------------------------------------------
+      const createQueryTagTexture = (query: string): ThreeTypes.CanvasTexture => {
+        const cv = document.createElement("canvas");
+        cv.width = 256;
+        cv.height = 80;
+        const ctx = cv.getContext("2d")!;
+
+        drawRoundRect(ctx, 4, 4, 248, 72, 36);
+        ctx.fillStyle = "#0c213d";
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "#38bdf8";
+        ctx.stroke();
+
+        ctx.fillStyle = "#38bdf8";
+        ctx.font = "bold 24px system-ui, sans-serif";
+        ctx.fillText("⌕", 24, 46);
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 17px system-ui, sans-serif";
+        ctx.fillText(query, 52, 46);
+
+        const tex = new THREE.CanvasTexture(cv);
+        tex.colorSpace = THREE.SRGBColorSpace;
+        textures.add(tex);
+        return tex;
+      };
+
+      // -----------------------------------------------------------------------
+      // 1. Central AIO Synthesis Plane
+      // -----------------------------------------------------------------------
+      const summaryGeo = new THREE.PlaneGeometry(36, 21);
+      geometries.add(summaryGeo);
+      const summaryTex = createAioSummaryTexture(phaseRef.current);
+      const summaryMat = new THREE.MeshBasicMaterial({
+        map: summaryTex,
+        transparent: true,
+        side: THREE.DoubleSide,
+      });
+      materials.add(summaryMat);
+      const summaryMesh = new THREE.Mesh(summaryGeo, summaryMat);
+      summaryMesh.position.set(0, 1.5, 0);
+      rootGroup.add(summaryMesh);
+
+      // Glowing Halo around Summary Card
+      const haloGeo = new THREE.PlaneGeometry(38, 23);
+      geometries.add(haloGeo);
+      const haloMat = new THREE.MeshBasicMaterial({
         color: 0x1863dc,
-        roughness: 0.2,
-        metalness: 0.5,
+        transparent: true,
+        opacity: 0.28,
         wireframe: true,
       });
-      materials.add(nucleusMat);
-      const nucleus = new THREE.Mesh(nucleusGeo, nucleusMat);
-      coreGroup.add(nucleus);
+      materials.add(haloMat);
+      const haloMesh = new THREE.Mesh(haloGeo, haloMat);
+      haloMesh.position.set(0, 1.5, -0.5);
+      rootGroup.add(haloMesh);
 
-      // Inner glowing core
-      const innerGeo = new THREE.SphereGeometry(7, 16, 16);
-      geometries.add(innerGeo);
-      const innerMat = new THREE.MeshBasicMaterial({
-        color: 0xffffff,
-        transparent: true,
-        opacity: 0.9,
+      // -----------------------------------------------------------------------
+      // 2. Three Citation Source Cards (Trích dẫn [1], [2], [3])
+      // -----------------------------------------------------------------------
+      const citationCards: {
+        mesh: ThreeTypes.Mesh;
+        targetPos: ThreeTypes.Vector3;
+        floatSpeed: number;
+        floatOffset: number;
+        baseRot: { x: number; y: number; z: number };
+      }[] = [];
+
+      const cardGeo = new THREE.PlaneGeometry(22, 12.6);
+      geometries.add(cardGeo);
+
+      // Citation Card [1]: Trang của bạn (Action Blue #1863dc)
+      const c1Tex = createCitationSourceTexture(
+        "[1]",
+        "Trang mục tiêu",
+        "TRANG BẠN",
+        "#1863dc",
+        "Tìm đoạn trả lời từng query",
+        "—",
+      );
+      const c1Mat = new THREE.MeshBasicMaterial({ map: c1Tex, transparent: true, side: THREE.DoubleSide });
+      materials.add(c1Mat);
+      const c1Mesh = new THREE.Mesh(cardGeo, c1Mat);
+      c1Mesh.position.set(-36, 12, 10);
+      rootGroup.add(c1Mesh);
+      citationCards.push({
+        mesh: c1Mesh,
+        targetPos: new THREE.Vector3(-36, 12, 10),
+        floatSpeed: 1.4,
+        floatOffset: 0,
+        baseRot: { x: 0.05, y: 0.28, z: -0.04 },
       });
-      materials.add(innerMat);
-      const innerGlow = new THREE.Mesh(innerGeo, innerMat);
-      coreGroup.add(innerGlow);
 
-      // 2. Orbital Rings in Cohere Colors (Stage 1: Blue, Stage 2: Coral, Stage 3: Deep Green)
-      const ringGeos = [
-        new THREE.TorusGeometry(22, 0.55, 12, 64),
-        new THREE.TorusGeometry(32, 0.55, 12, 64),
-        new THREE.TorusGeometry(40, 0.55, 12, 64),
-      ];
-      const ringColors = [0x1863dc, 0xff7759, 0x00a884];
-      const rings: ThreeTypes.Mesh[] = [];
+      // Citation Card [2]: Đối thủ #1 (Coral #ff7759)
+      const c2Tex = createCitationSourceTexture(
+        "[2]",
+        "Nguồn đối chiếu",
+        "NỘI DUNG",
+        "#ff7759",
+        "Đọc nội dung từ URL đối thủ",
+        "—",
+      );
+      const c2Mat = new THREE.MeshBasicMaterial({ map: c2Tex, transparent: true, side: THREE.DoubleSide });
+      materials.add(c2Mat);
+      const c2Mesh = new THREE.Mesh(cardGeo, c2Mat);
+      c2Mesh.position.set(36, 10, 8);
+      rootGroup.add(c2Mesh);
+      citationCards.push({
+        mesh: c2Mesh,
+        targetPos: new THREE.Vector3(36, 10, 8),
+        floatSpeed: 1.6,
+        floatOffset: 1.8,
+        baseRot: { x: 0.06, y: -0.26, z: 0.03 },
+      });
 
-      ringGeos.forEach((geo, i) => {
-        geometries.add(geo);
-        const mat = new THREE.MeshStandardMaterial({
-          color: ringColors[i],
-          emissive: ringColors[i],
-          emissiveIntensity: 0.45,
-          roughness: 0.25,
+      // Citation Card [3]: Đối thủ #2 (Enterprise Green #00a884)
+      const c3Tex = createCitationSourceTexture(
+        "[3]",
+        "Nguồn đối chiếu",
+        "BẰNG CHỨNG",
+        "#00a884",
+        "So sánh các đoạn cùng ý định",
+        "—",
+      );
+      const c3Mat = new THREE.MeshBasicMaterial({ map: c3Tex, transparent: true, side: THREE.DoubleSide });
+      materials.add(c3Mat);
+      const c3Mesh = new THREE.Mesh(cardGeo, c3Mat);
+      c3Mesh.position.set(-32, -14, 6);
+      rootGroup.add(c3Mesh);
+      citationCards.push({
+        mesh: c3Mesh,
+        targetPos: new THREE.Vector3(-32, -14, 6),
+        floatSpeed: 1.3,
+        floatOffset: 3.2,
+        baseRot: { x: -0.05, y: 0.24, z: -0.02 },
+      });
+
+      // -----------------------------------------------------------------------
+      // 3. Search Query Tag Pills Floating in 3D
+      // -----------------------------------------------------------------------
+      const queryGeo = new THREE.PlaneGeometry(16, 5);
+      geometries.add(queryGeo);
+
+      const q1Tex = createQueryTagTexture("Query mục tiêu");
+      const q1Mat = new THREE.MeshBasicMaterial({ map: q1Tex, transparent: true, side: THREE.DoubleSide });
+      materials.add(q1Mat);
+      const q1Mesh = new THREE.Mesh(queryGeo, q1Mat);
+      q1Mesh.position.set(32, -15, 12);
+      q1Mesh.rotation.set(-0.06, -0.22, 0.02);
+      rootGroup.add(q1Mesh);
+
+      // -----------------------------------------------------------------------
+      // 4. Citation Beams / Ray Traces (Trích dẫn nối thẻ nguồn vào AIO Overview)
+      // -----------------------------------------------------------------------
+      const beamMaterials: ThreeTypes.LineBasicMaterial[] = [];
+      const beamLines: ThreeTypes.Line[] = [];
+      const beamColors = [0x60a5fa, 0xff7759, 0x34d399];
+
+      citationCards.forEach((c, idx) => {
+        const lineGeo = new THREE.BufferGeometry();
+        const pts = new Float32Array(6); // 2 vertices: from card to summary card
+        lineGeo.setAttribute("position", new THREE.BufferAttribute(pts, 3));
+        geometries.add(lineGeo);
+
+        const bMat = new THREE.LineBasicMaterial({
+          color: beamColors[idx % beamColors.length],
           transparent: true,
-          opacity: 0.8,
+          opacity: 0.55,
+          linewidth: 2,
         });
-        materials.add(mat);
-        const ring = new THREE.Mesh(geo, mat);
-        ring.rotation.x = (Math.PI / 3) * (i + 1);
-        ring.rotation.y = (Math.PI / 5) * i;
-        coreGroup.add(ring);
-        rings.push(ring);
+        materials.add(bMat);
+        beamMaterials.push(bMat);
+
+        const line = new THREE.Line(lineGeo, bMat);
+        rootGroup.add(line);
+        beamLines.push(line);
       });
 
-      // 3. Floating Node Satellites in Cohere Palette
-      const nodeGeo = new THREE.SphereGeometry(2.3, 12, 12);
-      geometries.add(nodeGeo);
-      const nodeColors = [
-        0x1863dc, // Action Blue
-        0xff7759, // Coral
-        0x003c33, // Deep Green
-        0xffad9b, // Soft Coral
-        0x4c6ee6, // Focus Blue
-        0x9b60aa, // Focus Violet
-        0xeeece7, // Soft Stone
-        0x071829, // Dark Navy
-      ];
-      const nodes: { mesh: ThreeTypes.Mesh; radius: number; speed: number; angle: number; yOffset: number }[] = [];
-
-      for (let i = 0; i < 14; i++) {
-        const mat = new THREE.MeshStandardMaterial({
-          color: nodeColors[i % nodeColors.length],
-          emissive: nodeColors[i % nodeColors.length],
-          emissiveIntensity: 0.5,
-          roughness: 0.2,
-        });
-        materials.add(mat);
-        const mesh = new THREE.Mesh(nodeGeo, mat);
-        const radius = 18 + (i % 3) * 11;
-        const speed = (0.42 + (i % 4) * 0.16) * (i % 2 === 0 ? 1 : -1);
-        const angle = (i * Math.PI * 2) / 14;
-        const yOffset = (i % 5 - 2) * 4;
-        coreGroup.add(mesh);
-        nodes.push({ mesh, radius, speed, angle, yOffset });
-      }
-
-      // 4. Connecting Vector Lines (Dynamic Laser Lattice)
-      const linePositions = new Float32Array(nodes.length * 2 * 3);
-      const lineGeo = new THREE.BufferGeometry();
-      lineGeo.setAttribute("position", new THREE.BufferAttribute(linePositions, 3));
-      geometries.add(lineGeo);
-      const lineMat = new THREE.LineBasicMaterial({
-        color: 0x60a5fa,
-        transparent: true,
-        opacity: 0.38,
-      });
-      materials.add(lineMat);
-      const latticeLines = new THREE.LineSegments(lineGeo, lineMat);
-      coreGroup.add(latticeLines);
-
-      // 5. Ambient Starfield / Dust Particles
-      const starCount = 60;
+      // -----------------------------------------------------------------------
+      // 5. Starfield / SEO Keyword Dust Particles
+      // -----------------------------------------------------------------------
+      const starCount = 50;
       const starGeo = new THREE.BufferGeometry();
       const starPos = new Float32Array(starCount * 3);
       for (let i = 0; i < starCount * 3; i += 3) {
         starPos[i] = (Math.random() - 0.5) * 160;
-        starPos[i + 1] = (Math.random() - 0.5) * 120;
-        starPos[i + 2] = (Math.random() - 0.5) * 80;
+        starPos[i + 1] = (Math.random() - 0.5) * 110;
+        starPos[i + 2] = (Math.random() - 0.5) * 60;
       }
       starGeo.setAttribute("position", new THREE.BufferAttribute(starPos, 3));
       geometries.add(starGeo);
       const starMat = new THREE.PointsMaterial({
-        color: 0xffad9b,
-        size: 2.2,
+        color: 0x93c5fd,
+        size: 1.8,
         transparent: true,
         opacity: 0.6,
       });
@@ -217,8 +493,8 @@ export default function AioProgressScene({ phase, busy }: AioProgressSceneProps)
         const bounds = host.getBoundingClientRect();
         const nx = (e.clientX - bounds.left) / bounds.width - 0.5;
         const ny = (e.clientY - bounds.top) / bounds.height - 0.5;
-        toX(nx * 0.45);
-        toY(ny * -0.35);
+        toX(nx * 0.35);
+        toY(ny * -0.25);
       };
 
       const onPointerLeave = () => {
@@ -237,64 +513,55 @@ export default function AioProgressScene({ phase, busy }: AioProgressSceneProps)
         const dt = sec - lastTime;
         lastTime = sec;
 
-        if (coreGroup && renderer && scene && camera) {
-          const currentP = phaseRef.current;
-          const speedMultiplier = busy ? 1.8 : 0.8;
+        if (rootGroup && renderer && scene && camera) {
+          const speedMult = busy ? 1.6 : 0.8;
 
-          nucleus.rotation.x += dt * 0.45 * speedMultiplier;
-          nucleus.rotation.y += dt * 0.65 * speedMultiplier;
+          // Gentle hover on Central AIO Summary Card
+          summaryMesh.position.y = 1.5 + Math.sin(sec * 1.5) * 0.8;
+          haloMesh.position.y = summaryMesh.position.y;
+          haloMesh.scale.setScalar(1 + Math.sin(sec * 2.5) * 0.04);
 
-          // Pulse inner glow
-          innerGlow.scale.setScalar(1 + Math.sin(sec * 3.5) * 0.14);
+          // Animate Floating Citation Source Cards
+          citationCards.forEach((c, idx) => {
+            const floatY = Math.sin(sec * c.floatSpeed + c.floatOffset) * 1.6;
+            const floatZ = Math.cos(sec * c.floatSpeed * 0.8 + c.floatOffset) * 1.2;
+            c.mesh.position.y = c.targetPos.y + floatY;
+            c.mesh.position.z = c.targetPos.z + floatZ;
 
-          // Rotate rings
-          rings.forEach((r, idx) => {
-            r.rotation.z += dt * (0.35 + idx * 0.16) * speedMultiplier * (idx % 2 === 0 ? 1 : -1);
+            c.mesh.rotation.x = c.baseRot.x + Math.sin(sec + idx) * 0.04;
+            c.mesh.rotation.y = c.baseRot.y + Math.cos(sec * 0.8 + idx) * 0.04;
+
+            // Update Citation Beam Positions (Connecting Citation Source to Center)
+            const line = beamLines[idx];
+            if (line) {
+              const posAttr = line.geometry.getAttribute("position") as ThreeTypes.BufferAttribute;
+              const arr = posAttr.array as Float32Array;
+
+              // Card anchor
+              arr[0] = c.mesh.position.x;
+              arr[1] = c.mesh.position.y;
+              arr[2] = c.mesh.position.z;
+
+              // Target anchor on central summary card
+              arr[3] = (idx - 1) * 8;
+              arr[4] = summaryMesh.position.y;
+              arr[5] = 0;
+
+              posAttr.needsUpdate = true;
+            }
+
+            // Beam pulse opacity
+            if (beamMaterials[idx]) {
+              beamMaterials[idx].opacity = 0.35 + Math.sin(sec * 4 * speedMult + idx) * 0.25;
+            }
           });
 
-          // Orbit nodes and update lattice lines
-          const posAttr = lineGeo.getAttribute("position") as ThreeTypes.BufferAttribute;
-          const posArray = posAttr.array as Float32Array;
+          // Query Tag Pill subtle float
+          q1Mesh.position.y = -15 + Math.sin(sec * 1.8) * 1.2;
 
-          nodes.forEach((n, idx) => {
-            const curAngle = n.angle + sec * n.speed * speedMultiplier;
-            const x = Math.cos(curAngle) * n.radius;
-            const z = Math.sin(curAngle) * n.radius;
-            const y = n.yOffset + Math.sin(sec * 2 + idx) * 3;
-            n.mesh.position.set(x, y, z);
-
-            const pIdx = idx * 6;
-            posArray[pIdx] = 0;
-            posArray[pIdx + 1] = 0;
-            posArray[pIdx + 2] = 0;
-            posArray[pIdx + 3] = x;
-            posArray[pIdx + 4] = y;
-            posArray[pIdx + 5] = z;
-          });
-          posAttr.needsUpdate = true;
-
-          // Stage color shifts in Cohere palette
-          if (currentP === 0) {
-            dirLight.color.setHex(0x1863dc); // Action Blue
-            secondaryLight.color.setHex(0xff7759); // Coral
-            nucleusMat.color.setHex(0x1863dc);
-          } else if (currentP === 1) {
-            dirLight.color.setHex(0xff7759); // Coral
-            secondaryLight.color.setHex(0xffad9b); // Soft Coral
-            nucleusMat.color.setHex(0xff7759);
-          } else if (currentP === 2) {
-            dirLight.color.setHex(0x00a884); // Enterprise Green
-            secondaryLight.color.setHex(0x1863dc); // Action Blue
-            nucleusMat.color.setHex(0x003c33);
-          } else {
-            dirLight.color.setHex(0x1863dc); // Action Blue
-            secondaryLight.color.setHex(0x00a884); // Green
-            nucleusMat.color.setHex(0x071829); // Dark Navy
-          }
-
-          // Pointer parallax
-          coreGroup.rotation.y = motion.x;
-          coreGroup.rotation.x = motion.y;
+          // Subtle Parallax Tilt
+          rootGroup.rotation.y = motion.x;
+          rootGroup.rotation.x = motion.y;
 
           renderer.render(scene, camera);
         }
@@ -314,6 +581,7 @@ export default function AioProgressScene({ phase, busy }: AioProgressSceneProps)
         host.removeEventListener("pointerleave", onPointerLeave);
         geometries.forEach((g) => g.dispose());
         materials.forEach((m) => m.dispose());
+        textures.forEach((t) => t.dispose());
         renderer?.dispose();
         renderer?.forceContextLoss();
         canvas.remove();
@@ -332,6 +600,7 @@ export default function AioProgressScene({ phase, busy }: AioProgressSceneProps)
       if (animId !== null) cancelAnimationFrame(animId);
       geometries.forEach((g) => g.dispose());
       materials.forEach((m) => m.dispose());
+      textures.forEach((t) => t.dispose());
       renderer?.dispose();
     };
   }, [busy]);
