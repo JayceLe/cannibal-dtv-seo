@@ -1,5 +1,4 @@
-/* Airtable Editorial Design System: Calm whitespace, dark ink type, signature card surfaces.
-   Typography, spacing, layout and motion remain in globals.css. */
+/* Hallmark · SEO editorial ledger · dashboard surfaces · shared tokens in globals.css. */
 ::selection {
   background: var(--safe-border);
   color: var(--text);
@@ -1096,7 +1095,7 @@ th,
   color: #1e3a8a;
 }
 .evidence-verdict > svg {
-  color: #2563eb;
+  color: var(--query);
   flex-shrink: 0;
 }
 .evidence-verdict.safe {
@@ -1864,14 +1863,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .highlight-card {
   --tone: var(--query);
   --edge: var(--border);
-  --card-bg: #dfe8df;
+  --card-bg: var(--highlight-neutral-bg);
   box-shadow: none;
   border-color: var(--edge);
   border-radius: var(--radius-md);
 }
-.highlight-card.overview-high { --tone: var(--danger); --edge: var(--danger-border); --card-bg: #f0dbd5; }
-.highlight-card.overview-low { --tone: var(--safe); --edge: var(--safe-border); --card-bg: #d8e9dc; }
-.highlight-card.overview-impression { --tone: var(--impression); --edge: #cfc3a8; --card-bg: #e9e1d1; }
+.highlight-card.overview-high { --tone: var(--danger); --edge: var(--danger-border); --card-bg: var(--highlight-high-bg); }
+.highlight-card.overview-low { --tone: var(--safe); --edge: var(--safe-border); --card-bg: var(--highlight-low-bg); }
+.highlight-card.overview-impression { --tone: var(--impression); --edge: var(--highlight-impression-border); --card-bg: var(--highlight-impression-bg); }
 .highlight-label, .highlight-main { color: var(--text); }
 .highlight-footer { color: var(--tone); }
 .highlight-card:hover, [data-hover-surface]:hover { box-shadow: none; }

@@ -17,7 +17,15 @@
   --accent-contrast: #fffdf8;
   --copper: #995c31;
   --header-deep: #102f26;
+  --header-muted: #e8e5dc;
+  --header-rule: #8eae9d;
   --row-hover: #eee9df;
+  --row-alternate: #f7f4ed;
+  --highlight-neutral-bg: #dfe8df;
+  --highlight-high-bg: #f0dbd5;
+  --highlight-low-bg: #d8e9dc;
+  --highlight-impression-bg: #e9e1d1;
+  --highlight-impression-border: #cfc3a8;
   --query-bg: #dfe9e2;
   --impression-bg: #e6e5d9;
   --focus: #1d6550;
