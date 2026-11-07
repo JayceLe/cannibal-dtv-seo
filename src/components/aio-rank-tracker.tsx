@@ -182,7 +182,7 @@ export default function AioRankTracker({ result }: { result: AioResult }) {
         <label className="aio-rank-domain">
           <span>Domain tracking</span>
           <input type="text" inputMode="url" autoComplete="off" spellCheck={false}
-            placeholder="dienthoaivui.com.vn hoặc URL của site" value={domain} disabled={!!busy}
+            placeholder="example.com hoặc URL của site" value={domain} disabled={!!busy}
             onChange={(event) => {
               setRows((current) => current.map((row) => lookupResults[row.door]?.rank != null
                 ? { ...row, rank: "", ranking_url: "" } : row));

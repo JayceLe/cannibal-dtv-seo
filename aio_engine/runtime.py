@@ -91,7 +91,7 @@ def engine(config, credentials=None):
               SERP_API_KEY=credentials.get('serp', ''),
               MANUAL_AIO_CITATIONS=[ns['clean'](x) for x in re.split(r'[\n,]+', config['manual_aio']) if ns['clean'](x)])
     ns['FANOUT_PROMPT'] += "\nEvery query must stay on the user's specific subject. Cover only facets that genuinely apply; do not invent product facts, prices, or named alternatives."
-    ns['FANOUT_PROMPT'] += "\nMake every query self-contained with the specific subject/model. Preserve different intents (price, warranty, duration, risks, compatibility); do not replace them with generic topic questions."
+    ns['FANOUT_PROMPT'] += "\nMake every query self-contained with the user's subject and any explicit entity or model. Derive distinct intents from that subject, without forcing facets from an unrelated industry."
     ns['cluster_doors'] = lambda queries, vectors, threshold: evidence.cluster_doors(queries, vectors, threshold, ns['cosine'])
     if credentials.get('gemini'):
         actual = genai.Client(api_key=credentials['gemini'], http_options={'timeout': 60000})

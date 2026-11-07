@@ -1,5 +1,14 @@
 # Tích hợp AIO Content Audit
 
+## Cách ly dữ liệu theo lần chạy — 07/11/2026
+
+- Mỗi lần bấm chạy luôn tạo ID mới, sinh fan-out từ keyword hiện tại, lấy SERP và đọc lại URL. Chạy cùng keyword cũng không lấy kết quả của lần trước. Hai lượt sinh query có thể giống nhau về nội dung; điều đó không có nghĩa là dùng cache.
+- Header, trạng thái chờ và canvas 3D chỉ mô tả quy trình. Không cài sẵn keyword, domain, query nhánh, đoạn trích, giá, thứ hạng hay điểm gap mẫu. Những số liệu này chỉ được hiển thị từ phản hồi audit thực tế.
+- Đổi keyword, URL hoặc cấu hình sẽ xóa kết quả, tiến trình và bảng rank đang hiển thị. Mở lại tab bắt đầu với form trống; không phục hồi từ localStorage/sessionStorage.
+- Python tạo namespace riêng cho mỗi request. Checkpoint thuộc cặp tài khoản + ID audit; chỉ dùng để nối các bước của chính audit đó, không tra cứu theo keyword. Không xóa checkpoint giữa chừng vì phần tính điểm và rank cần dữ liệu của cùng lần chạy.
+- Bộ lọc ý định dùng chung (giá, dữ liệu, bảo hành, thời gian), chỉ bật theo query đầu vào. Không có bộ lọc riêng cho keyword mẫu. Cosine, centering, công thức gap/verdict và quy tắc hành động theo rank được giữ nguyên.
+- Regression chạy xen kẽ bốn chủ đề (sửa chữa, phần mềm, du lịch, cây cảnh), kiểm tra lại cùng keyword với nội dung nguồn đã đổi, và đối chiếu các hàm gốc với notebook. Dữ liệu kiểm thử chỉ ở `tests/`, không được import vào runtime.
+
 ## Tối ưu xử lý 06/11/2026
 
 - Vẫn dùng một lần Gemini để sinh fan-out và embedding cho query/đoạn cần so sánh; SERP chỉ gọi cho từ khóa gốc. Mỗi audit sinh fan-out riêng, không đọc/ghi cache dùng lại giữa các audit.
@@ -17,12 +26,12 @@ Tab **AIO** đưa `aio_dtv.ipynb` vào Cannibal Query bằng giao diện React. 
 ## Phạm vi và cách sử dụng
 
 1. Mở workspace bằng mật khẩu đang dùng, chọn tab AIO.
-2. Nhập từ khóa mục tiêu và URL. Dán Gemini API key và SERP API key, hoặc nhập từng key từ file TXT/JSON (`api_key` hoặc `key`). DataForSEO dùng chuỗi `login:password` như notebook.
-3. Cấu hình mặc định giữ nguyên notebook: 15 query, 10 đối thủ, ngưỡng gom door 0,85, thị trường VN/vi, chunk 1.800 ký tự và overlap 200. Model sinh query/embedding, thị trường, citation bổ sung và provider đều có thể chỉnh.
+2. Nhập từ khóa mục tiêu và URL. Dán Gemini API key và SERP API key. DataForSEO dùng chuỗi `login:password` như notebook.
+3. Mặc định: 15 query, 10 đối thủ, ngưỡng gom door 0,85, thị trường VN/vi. Chọn model sinh query/embedding, provider và nhập URL đối thủ; bộ tách đoạn web dùng cửa sổ khoảng 420 ký tự.
 4. Chạy audit; xem điểm, gap, thứ tự trong field, spread, verdict, nhãn xác thực nội dung, biến thể đã gom và các đoạn đối chiếu. Đối thủ có điểm cao hơn được hiển thị tối đa 3 (mặc định 2).
 5. Điền rank Google và URL cho từng door, hoặc tải mẫu XLSX rồi import lại. Giữ đủ door; ô không có rank phải để trống cả rank và URL. Xuất bảng đang nhập và xem hàng đợi hành động.
 
-API key chỉ nằm trong bộ nhớ tab và request HTTPS gửi đến backend, không nằm trong checkpoint, log đã lưu, localStorage hoặc sessionStorage. SessionStorage chỉ giữ ID audit để phục hồi khi tải lại trang trong cùng phiên. Đổi tab không dừng audit. Đăng xuất hoặc đổi tài khoản hủy trạng thái giao diện; lần mở tiếp cần nhập lại key.
+API key chỉ nằm trong bộ nhớ tab và request HTTPS gửi đến backend, không nằm trong checkpoint, log đã lưu, localStorage hoặc sessionStorage. Không lưu ID để tự khôi phục audit. Rời tab AIO hoặc tải lại trang xóa trạng thái giao diện và key; lần mở tiếp bắt đầu một audit mới. Request đang xử lý có thể hoàn tất checkpoint riêng của nó, nhưng không tự đưa kết quả vào lần mở sau.
 
 ## Cấu trúc
 
@@ -69,7 +78,7 @@ POST `/api/aio`, header `Authorization: Bearer <workspace JWT>`, cùng origin.
 
 `fanout → pages → score → done`. Query fan-out được lưu trước khi lấy SERP. Các trang được tải trước với tối đa 5 kết nối song song và lưu checkpoint trước khi embedding. Mỗi request embedding một trang theo thứ tự gốc, với batch tối đa 20 input và retry có giới hạn. Khi chấm, mỗi đoạn luôn đi cùng vector của nó. AIO chọn đoạn theo query đại diện bằng cosine sau centering, mức trùng từ và các dấu hiệu ý định như chi phí, bảo hành hoặc thời gian. Gap bằng điểm đoạn đối thủ tốt nhất trừ điểm đoạn trang mục tiêu. Nếu một phía thiếu đoạn phù hợp thì không có gap; nếu bước nhận xét Gemini không chạy được thì điểm và verdict đã tính vẫn được giữ. Các kết quả đã lưu giữ nguyên phiên bản cũ. Nội dung đã tải được tái sử dụng khi tiếp tục sau lỗi quota hoặc hết thời gian. Lock RPC có lease 330 giây để tránh hai thao tác step đồng thời. Hết ngân sách xử lý sẽ báo tiếp tục, giữ stage hiện tại và vector đã hoàn tất. Một request đang chạy không bị hủy giữa lúc lưu checkpoint khi bấm Tạm dừng.
 
-Không hứa exactly-once cho API tính phí: nếu response đã tới nhưng lưu checkpoint thất bại hoặc function bị kill đột ngột, bước đang dở có thể gọi lại provider. Các bước trước đã lưu vẫn được dùng lại. Không chạy nền độc lập khi tab đã đóng; cần mở lại phiên và tiếp tục.
+Không hứa exactly-once cho API tính phí: nếu response đã tới nhưng lưu checkpoint thất bại hoặc function bị kill đột ngột, bước đang dở có thể gọi lại provider. Các bước trước đã lưu chỉ dùng lại trong cùng audit. Không chạy nền độc lập khi tab đã đóng và không tự phục hồi audit cũ khi mở lại.
 
 ## Quyền và giới hạn
 

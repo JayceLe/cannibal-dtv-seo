@@ -205,7 +205,13 @@ export default function AioWorkspace() {
   }, []);
 
   function update<K extends keyof AioConfig>(key: K, value: AioConfig[K]) {
+    if (working.current || config[key] === value) return;
     setConfig((before) => ({ ...before, [key]: value }));
+    // An edited audit must not display passages, ranks or progress from the previous input.
+    setRun(null);
+    setResult(null);
+    setError("");
+    setPaused(false);
   }
 
   async function execute() {
@@ -310,8 +316,6 @@ export default function AioWorkspace() {
         ? "SerpAPI key"
         : "Serper API key";
   const currentPhase = phase(run);
-  const configChanged =
-    !!run && JSON.stringify(config) !== JSON.stringify(run.config);
 
   return (
     <div className="aio-workspace" ref={motionRoot}>
@@ -358,7 +362,7 @@ export default function AioWorkspace() {
             </span>
           </div>
 
-          <form onSubmit={submit}>
+          <form onSubmit={submit} autoComplete="off">
             <fieldset disabled={busy} className="aio-unified-form-grid">
               <legend className="sr-only">Cấu hình audit AIO</legend>
 
@@ -380,7 +384,7 @@ export default function AioWorkspace() {
                   <input
                     required
                     type="url"
-                    placeholder="https://dienthoaivui.com.vn/..."
+                    placeholder="https://example.com/bai-viet"
                     value={config.my_url}
                     onChange={(e) => update("my_url", e.target.value)}
                   />
@@ -547,11 +551,6 @@ export default function AioWorkspace() {
                         },
                       ]}
                     />
-                    {configChanged && (
-                      <p className="aio-description">
-                        Cấu hình đã đổi. Chạy audit sẽ áp dụng model mới từ đầu.
-                      </p>
-                    )}
                     <label className="aio-field">
                       URL đối thủ để so sánh
                       <textarea
@@ -829,16 +828,15 @@ export default function AioWorkspace() {
                         : "Đo độ lệch vector embedding, xếp hạng và xác định khoảng trống nội dung."}
                   </p>
 
-                  {/* Authentic SEO Mini-Diagrams */}
+                  {/* Process labels only. Query examples and metrics must come from a real run. */}
                   {index === 0 && (
                     <div className="aio-ready-diagram aio-diagram-fanout">
                       <div className="aio-mini-search-bar">
-                        <span>⌕</span> <em>{config.keyword || "thay pin iPhone"}</em>
+                        <span>⌕</span> <em>{config.keyword || "Từ khóa mục tiêu"}</em>
                       </div>
                       <div className="aio-mini-chips">
-                        <span>giá thay pin</span>
-                        <span>ở đâu uy tín</span>
-                        <span>bảo hành</span>
+                        <span>Mở rộng query</span>
+                        <span>Gom nhóm ý định</span>
                       </div>
                     </div>
                   )}
@@ -846,29 +844,26 @@ export default function AioWorkspace() {
                     <div className="aio-ready-diagram aio-diagram-crawler">
                       <div className="aio-mini-crawl-row">
                         <span className="aio-crawl-lbl your-lbl">Trang bạn</span>
-                        <div className="aio-crawl-track"><div style={{ width: "70%" }} /></div>
-                        <span className="aio-crawl-val">2.450 từ</span>
+                        <div className="aio-crawl-track" aria-hidden="true" />
+                        <span className="aio-crawl-val">Chờ đọc</span>
                       </div>
                       <div className="aio-mini-crawl-row">
-                        <span className="aio-crawl-lbl rival-lbl">Đối thủ #1</span>
-                        <div className="aio-crawl-track"><div style={{ width: "90%" }} /></div>
-                        <span className="aio-crawl-val">3.100 từ</span>
+                        <span className="aio-crawl-lbl rival-lbl">Đối thủ</span>
+                        <div className="aio-crawl-track" aria-hidden="true" />
+                        <span className="aio-crawl-val">Chờ đọc</span>
                       </div>
                     </div>
                   )}
                   {index === 2 && (
                     <div className="aio-ready-diagram aio-diagram-vector">
                       <div className="aio-mini-vector-bar">
-                        <span className="aio-v-tag">Cosine Distance</span>
-                        <strong>0,892 vs 0,941</strong>
+                        <span className="aio-v-tag">Điểm ngữ nghĩa</span>
+                        <strong>—</strong>
                       </div>
-                      <div className="aio-mini-vector-line">
-                        <span className="aio-v-dot v-you" style={{ left: "62%" }} />
-                        <span className="aio-v-dot v-rival" style={{ left: "82%" }} />
-                      </div>
+                      <div className="aio-mini-vector-line" aria-hidden="true" />
                       <div className="aio-mini-gap-note">
-                        <span>Gap: -0.049</span>
-                        <em>Thiếu bảng giá &amp; bảo hành</em>
+                        <span>Gap: —</span>
+                        <em>Chờ đoạn đối chiếu</em>
                       </div>
                     </div>
                   )}

@@ -9,6 +9,7 @@ export async function aioRequest<T>(
   if (!session) throw new Error("Đăng nhập lại workspace để sử dụng AIO.");
   const response = await fetch("/api/aio", {
     method: "POST",
+    cache: "no-store",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${session.access_token}`,

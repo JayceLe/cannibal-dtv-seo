@@ -7,6 +7,24 @@ import "./aio-hero-scene.css";
 type ThreeModule = typeof import("three");
 type GsapModule = typeof import("gsap");
 
+// Shared by canvas and fallback: this illustration describes the process, never audit results.
+const sceneCards = {
+  ai_overview: {
+    badge: "✦ AI Overview",
+    title: "Query & nội dung",
+    subtitle: "Phân tích theo từ khóa",
+    metric: "Đối chiếu",
+    value: "Ngữ nghĩa",
+  },
+  serp_rank: {
+    badge: "SERP",
+    title: "Đối chiếu từng query",
+    subtitle: "Trang bạn và đối thủ",
+    metric: "Rank & URL",
+    value: "Theo domain",
+  },
+};
+
 type Sticker = {
   group: ThreeTypes.Group;
   baseX: number;
@@ -134,6 +152,7 @@ function createScene(
   const textures = new Set<ThreeTypes.Texture>();
 
   const createSeoTexture = (type: "ai_overview" | "serp_rank") => {
+    const copy = sceneCards[type];
     const cvs = document.createElement("canvas");
     cvs.width = 384;
     cvs.height = 256;
@@ -153,23 +172,23 @@ function createScene(
       ctx.fill();
       ctx.fillStyle = "#ffffff";
       ctx.font = "bold 18px Inter, sans-serif";
-      ctx.fillText("✦ AI Overview", 38, 44);
+      ctx.fillText(copy.badge, 38, 44);
 
       ctx.font = "bold 21px Inter, sans-serif";
-      ctx.fillText("thay pin iPhone", 24, 90);
+      ctx.fillText(copy.title, 24, 90);
 
       ctx.fillStyle = "rgba(255, 255, 255, 0.88)";
       ctx.font = "15px Inter, sans-serif";
-      ctx.fillText("dienthoaivui.com.vn · Top 1", 24, 122);
+      ctx.fillText(copy.subtitle, 24, 122);
 
       ctx.fillStyle = "rgba(0, 0, 0, 0.25)";
       ctx.roundRect(24, 150, 336, 68, 12);
       ctx.fill();
       ctx.fillStyle = "#ffffff";
       ctx.font = "bold 17px Inter, sans-serif";
-      ctx.fillText("Semantic Match", 40, 192);
+      ctx.fillText(copy.metric, 40, 192);
       ctx.fillStyle = "#edfce9";
-      ctx.fillText("94.2%", 285, 192);
+      ctx.fillText(copy.value, 245, 192);
     } else {
       const grad = ctx.createLinearGradient(0, 0, 384, 256);
       grad.addColorStop(0, "#1863dc");
@@ -183,24 +202,24 @@ function createScene(
       ctx.fill();
       ctx.fillStyle = "#ffffff";
       ctx.font = "bold 18px Inter, sans-serif";
-      ctx.fillText("TOP 1 SERP", 38, 44);
+      ctx.fillText(copy.badge, 38, 44);
 
       ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
       ctx.font = "15px Inter, sans-serif";
-      ctx.fillText("dienthoaivui.com.vn > thay-pin", 24, 88);
+      ctx.fillText(copy.subtitle, 24, 88);
 
       ctx.fillStyle = "#ffffff";
       ctx.font = "bold 20px Inter, sans-serif";
-      ctx.fillText("Thay Pin iPhone Giá Rẻ", 24, 122);
+      ctx.fillText(copy.title, 24, 122);
 
       ctx.fillStyle = "rgba(0, 0, 0, 0.25)";
       ctx.roundRect(24, 150, 336, 68, 12);
       ctx.fill();
       ctx.fillStyle = "#ffffff";
       ctx.font = "bold 17px Inter, sans-serif";
-      ctx.fillText("10.014 imp", 40, 192);
+      ctx.fillText(copy.metric, 40, 192);
       ctx.fillStyle = "#93c5fd";
-      ctx.fillText("Pos: #1", 280, 192);
+      ctx.fillText(copy.value, 235, 192);
     }
 
     const tex = new THREE.CanvasTexture(cvs);
@@ -555,40 +574,40 @@ export default function AioHeroScene() {
       <div className="aio-hero-static">
         {/* Card 1: Google AI Overview Card (Coral) */}
         <span className="aio-scene-sticker aio-scene-document aio-scene-document-coral">
-          <div className="seo-card-badge">✦ AI Overview</div>
-          <div className="seo-card-title">thay pin iPhone</div>
-          <div className="seo-card-url">dienthoaivui.com.vn · Top 1</div>
+          <div className="seo-card-badge">{sceneCards.ai_overview.badge}</div>
+          <div className="seo-card-title">{sceneCards.ai_overview.title}</div>
+          <div className="seo-card-url">{sceneCards.ai_overview.subtitle}</div>
           <div className="seo-card-metric">
-            <span>Semantic Match</span>
-            <strong>94.2%</strong>
+            <span>{sceneCards.ai_overview.metric}</span>
+            <strong>{sceneCards.ai_overview.value}</strong>
           </div>
         </span>
 
-        {/* Card 2: Top 1 Organic SERP Card (Action Blue) */}
+        {/* Card 2: Organic SERP Card (Action Blue) */}
         <span className="aio-scene-sticker aio-scene-document aio-scene-document-blue">
-          <div className="seo-card-badge">TOP 1 SERP</div>
-          <div className="seo-card-url">dienthoaivui.com.vn &gt; thay-pin</div>
-          <div className="seo-card-title">Thay Pin iPhone Giá Rẻ</div>
+          <div className="seo-card-badge">{sceneCards.serp_rank.badge}</div>
+          <div className="seo-card-url">{sceneCards.serp_rank.subtitle}</div>
+          <div className="seo-card-title">{sceneCards.serp_rank.title}</div>
           <div className="seo-card-metric">
-            <span>10.014 imp</span>
-            <strong>Pos: #1</strong>
+            <span>{sceneCards.serp_rank.metric}</span>
+            <strong>{sceneCards.serp_rank.value}</strong>
           </div>
         </span>
 
         {/* Card 3: Query Fan-out Capsule (Deep Enterprise Green) */}
         <span className="aio-scene-sticker aio-scene-query aio-scene-query-green">
-          <span>15 Query Fan-out · 10 Đối thủ</span>
+          <span>Query fan-out · Nhóm ý định</span>
         </span>
 
         {/* Card 4: Semantic Vector Capsule (Dark Navy) */}
         <span className="aio-scene-sticker aio-scene-query aio-scene-query-navy">
-          <span>Vector 768D · Cosine Match</span>
+          <span>Vector · So khớp ngữ nghĩa</span>
         </span>
 
         {/* Badge: Soft Stone */}
         <span className="aio-scene-badge-stone">
           <span>✦</span>
-          <span>AIO SEO ENGINE 2026</span>
+          <span>AIO CONTENT AUDIT</span>
         </span>
 
         <span className="aio-scene-star aio-scene-star-one">✦</span>

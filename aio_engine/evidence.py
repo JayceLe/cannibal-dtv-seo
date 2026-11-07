@@ -38,13 +38,6 @@ def passages(text, *_):
 
 _STOP = set('có của là và hay khi như thế nào để cho các một những được thì gì tại ở nếu không tôi cần với có phải nên'.split())
 _INTENT = set('giá chi phí bao nhiêu khi nào cách làm sao tốt nhất so sánh đánh giá review'.split())
-_FACETS = (
-    (r'(?<!đánh )\b(giá|chi phí|bao nhiêu tiền)\b', r'\b(giá|chi phí|phí|tiền|đồng|vnd|vnđ)\b|\d\s*₫'),
-    (r'\b(thay pin|chai pin|tuổi thọ pin)\b', r'\b(pin|battery)\b'),
-    (r'\bdữ liệu\b', r'\b(dữ liệu|sao lưu|backup|data)\b'),
-    (r'\bbảo hành\b', r'\b(bảo hành|applecare|warranty)\b'),
-    (r'\b(bao lâu|mất mấy phút)\b', r'\b(thời gian|phút|giờ|ngày|tháng|năm|bao lâu)\b'),
-)
 
 
 def normalized(text):
@@ -55,8 +48,22 @@ def normalized(text):
     return text
 
 
+# Intent checks are shared across subjects and activate only when the query asks for them.
+# Do not add a sample keyword as an intent; subject relevance is checked from the actual input.
+_FACETS = {
+    name: (re.compile(normalized(cue)), re.compile(normalized(answer)))
+    for name, cue, answer in (
+        ('price', r'(?<!đánh )\b(giá|chi phí|bao nhiêu tiền)\b', r'\b(giá|chi phí|phí|tiền|đồng|vnd|vnđ)\b|\d\s*₫'),
+        ('data', r'\bdữ liệu\b', r'\b(dữ liệu|sao lưu|backup|data)\b'),
+        ('warranty', r'\bbảo hành\b', r'\b(bảo hành|warranty)\b'),
+        ('duration', r'\b(bao lâu|mất mấy phút)\b', r'\b(thời gian|phút|giờ|ngày|tháng|năm|bao lâu)\b'),
+    )
+}
+
+
 def facet_rules(query):
-    return [normalized(answer) for cue, answer in _FACETS if re.search(normalized(cue), normalized(query))]
+    query = normalized(query)
+    return [answer for cue, answer in _FACETS.values() if cue.search(query)]
 
 
 def compatible(query, text):
@@ -81,15 +88,15 @@ def substantive(query, text):
     q, t = normalized(query), normalized(text)
     if len(text) < 20:
         return False
-    if re.search(normalized(_FACETS[0][0]), q) and not re.search(r'\d[\d.,]*\s*(?:dong|vnd|d\b|₫|trieu|nghin)|[$€£]\s*\d|mien phi', t):
+    if _FACETS['price'][0].search(q) and not re.search(r'\d[\d.,]*\s*(?:dong|vnd|d\b|₫|trieu|nghin)|[$€£]\s*\d|mien phi', t):
         return False
-    if re.search(normalized(_FACETS[4][0]), q) and not re.search(r'\d+(?:[.,]\d+)?\s*(?:phut|gio|ngay|tuan|thang|nam)\b|trong ngay|ngay lap tuc', t):
+    if _FACETS['duration'][0].search(q) and not re.search(r'\d+(?:[.,]\d+)?\s*(?:phut|gio|ngay|tuan|thang|nam)\b|trong ngay|ngay lap tuc', t):
         return False
     return True
 
 
 def cluster_doors(queries, vectors, threshold, cosine):
-    signatures = [frozenset(i for i, (cue, _) in enumerate(_FACETS) if i != 1 and re.search(normalized(cue), normalized(q))) for q in queries]
+    signatures = [frozenset(name for name, (cue, _) in _FACETS.items() if cue.search(normalized(q))) for q in queries]
     groups, assigned = [], set()
     for i, query in enumerate(queries):
         if i in assigned:
