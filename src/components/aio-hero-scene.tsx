@@ -131,6 +131,84 @@ function createScene(
     group.add(mesh);
   };
 
+  const textures = new Set<ThreeTypes.Texture>();
+
+  const createSeoTexture = (type: "ai_overview" | "serp_rank") => {
+    const cvs = document.createElement("canvas");
+    cvs.width = 384;
+    cvs.height = 256;
+    const ctx = cvs.getContext("2d");
+    if (!ctx) return null;
+
+    if (type === "ai_overview") {
+      const grad = ctx.createLinearGradient(0, 0, 384, 256);
+      grad.addColorStop(0, "#ff7759");
+      grad.addColorStop(1, "#d84e31");
+      ctx.fillStyle = grad;
+      ctx.roundRect(0, 0, 384, 256, 24);
+      ctx.fill();
+
+      ctx.fillStyle = "rgba(255, 255, 255, 0.25)";
+      ctx.roundRect(24, 20, 150, 34, 17);
+      ctx.fill();
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 18px Inter, sans-serif";
+      ctx.fillText("✦ AI Overview", 38, 44);
+
+      ctx.font = "bold 21px Inter, sans-serif";
+      ctx.fillText("thay pin iPhone", 24, 90);
+
+      ctx.fillStyle = "rgba(255, 255, 255, 0.88)";
+      ctx.font = "15px Inter, sans-serif";
+      ctx.fillText("dienthoaivui.com.vn · Top 1", 24, 122);
+
+      ctx.fillStyle = "rgba(0, 0, 0, 0.25)";
+      ctx.roundRect(24, 150, 336, 68, 12);
+      ctx.fill();
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 17px Inter, sans-serif";
+      ctx.fillText("Semantic Match", 40, 192);
+      ctx.fillStyle = "#edfce9";
+      ctx.fillText("94.2%", 285, 192);
+    } else {
+      const grad = ctx.createLinearGradient(0, 0, 384, 256);
+      grad.addColorStop(0, "#1863dc");
+      grad.addColorStop(1, "#0d429a");
+      ctx.fillStyle = grad;
+      ctx.roundRect(0, 0, 384, 256, 24);
+      ctx.fill();
+
+      ctx.fillStyle = "rgba(255, 255, 255, 0.25)";
+      ctx.roundRect(24, 20, 140, 34, 17);
+      ctx.fill();
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 18px Inter, sans-serif";
+      ctx.fillText("TOP 1 SERP", 38, 44);
+
+      ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+      ctx.font = "15px Inter, sans-serif";
+      ctx.fillText("dienthoaivui.com.vn > thay-pin", 24, 88);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 20px Inter, sans-serif";
+      ctx.fillText("Thay Pin iPhone Giá Rẻ", 24, 122);
+
+      ctx.fillStyle = "rgba(0, 0, 0, 0.25)";
+      ctx.roundRect(24, 150, 336, 68, 12);
+      ctx.fill();
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 17px Inter, sans-serif";
+      ctx.fillText("10.014 imp", 40, 192);
+      ctx.fillStyle = "#93c5fd";
+      ctx.fillText("Pos: #1", 280, 192);
+    }
+
+    const tex = new THREE.CanvasTexture(cvs);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    textures.add(tex);
+    return tex;
+  };
+
   const addBacking = (
     group: ThreeTypes.Group,
     width: number,
@@ -147,28 +225,30 @@ function createScene(
 
   const stickers: Sticker[] = [];
 
-  const addDocument = (
-    fill: ThreeTypes.Material,
+  const addSeoDocument = (
+    type: "ai_overview" | "serp_rank",
     x: number,
     y: number,
     scale: number,
     tilt: number,
     phase: number,
-    style: "answer" | "source",
   ) => {
     const group = new THREE.Group();
-    addBacking(group, 156, 114, fill, 15);
-    addPlane(group, style === "answer" ? darkNavy : white, -41, 30, 52, 7);
-    addPlane(group, style === "answer" ? paleGreen : white, -2, 10, 130, 5);
-    addPlane(group, style === "answer" ? paleGreen : white, -16, -4, 102, 5);
-    addPlane(group, style === "answer" ? paleGreen : white, -27, -18, 80, 5);
-    if (style === "source") {
-      addPlane(group, actionBlue, -44, -36, 46, 5);
-    } else {
-      const dot = new THREE.Mesh(new THREE.CircleGeometry(9, 20), paleGreen);
-      geometries.add(dot.geometry);
-      dot.position.set(52, -34, 7);
-      group.add(dot);
+    const tex = createSeoTexture(type);
+    if (tex) {
+      const cardMat = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
+      materials.add(cardMat);
+      const cardPlane = new THREE.PlaneGeometry(164, 110);
+      geometries.add(cardPlane);
+      const cardMesh = new THREE.Mesh(cardPlane, cardMat);
+      cardMesh.position.set(0, 0, 3);
+      group.add(cardMesh);
+
+      const shadowPlane = new THREE.PlaneGeometry(164, 110);
+      geometries.add(shadowPlane);
+      const shadowMesh = new THREE.Mesh(shadowPlane, softShadow);
+      shadowMesh.position.set(6, -8, -4);
+      group.add(shadowMesh);
     }
     constellation.add(group);
     stickers.push({ group, baseX: x, baseY: y, scale, tilt, phase });
@@ -183,14 +263,14 @@ function createScene(
     phase: number,
   ) => {
     const group = new THREE.Group();
-    addBacking(group, 164, 46, fill, 23);
-    const search = new THREE.Mesh(new THREE.RingGeometry(7, 9.5, 24), white);
+    addBacking(group, 172, 44, fill, 22);
+    const search = new THREE.Mesh(new THREE.RingGeometry(6, 8.5, 24), white);
     geometries.add(search.geometry);
-    search.position.set(-57, 0, 7);
+    search.position.set(-60, 0, 7);
     group.add(search);
-    addPlane(group, white, -46, -9, 14, 3.5, 7);
-    addPlane(group, white, 8, 4, 92, 5);
-    addPlane(group, white, -8, -7, 60, 4);
+    addPlane(group, white, -48, -8, 12, 3, 7);
+    addPlane(group, white, 6, 3, 98, 5);
+    addPlane(group, white, -10, -7, 66, 4);
     constellation.add(group);
     stickers.push({ group, baseX: x, baseY: y, scale, tilt, phase });
   };
@@ -204,19 +284,19 @@ function createScene(
     phase: number,
   ) => {
     const group = new THREE.Group();
-    addBacking(group, 118, 36, fill, 18);
-    addPlane(group, white, -24, 0, 14, 4, 7);
-    addPlane(group, white, 14, 0, 56, 4.5, 7);
+    addBacking(group, 126, 36, fill, 18);
+    addPlane(group, white, -26, 0, 14, 4, 7);
+    addPlane(group, white, 14, 0, 62, 4.5, 7);
     constellation.add(group);
     stickers.push({ group, baseX: x, baseY: y, scale, tilt, phase });
   };
 
-  // Cohere signature composition: Coral + Blue + Deep Green + Stone
-  addDocument(coral, -0.29, 0.21, 0.88, -0.12, 0.2, "source");
-  addDocument(actionBlue, 0.24, 0.03, 1, 0.10, 1.8, "answer");
-  addQuery(deepGreen, -0.20, -0.27, 0.94, 0.07, 3.1);
-  addQuery(darkNavy, 0.31, 0.31, 0.72, -0.08, 4.2);
-  addTag(stone, 0.18, -0.32, 0.82, 0.05, 5.0);
+  // Cohere signature composition: Coral SEO AI Overview + Blue SERP + Deep Green Query + Stone
+  addSeoDocument("ai_overview", -0.28, 0.22, 0.95, -0.10, 0.2);
+  addSeoDocument("serp_rank", 0.25, 0.04, 1.05, 0.08, 1.8);
+  addQuery(deepGreen, -0.19, -0.28, 0.96, 0.06, 3.1);
+  addQuery(darkNavy, 0.32, 0.32, 0.76, -0.07, 4.2);
+  addTag(stone, 0.18, -0.32, 0.84, 0.05, 5.0);
 
   // Star shapes
   const starShape = new THREE.Shape();
@@ -374,6 +454,7 @@ function createScene(
     hero.removeEventListener("pointermove", onPointerMove);
     hero.removeEventListener("pointerleave", onPointerLeave);
     canvas.removeEventListener("webglcontextlost", onContextLost);
+    textures.forEach((t) => t.dispose());
     geometries.forEach((g) => g.dispose());
     materials.forEach((m) => m.dispose());
     renderer.dispose();
@@ -472,27 +553,44 @@ export default function AioHeroScene() {
   return (
     <div ref={hostRef} className="aio-hero-scene" aria-hidden="true">
       <div className="aio-hero-static">
+        {/* Card 1: Google AI Overview Card (Coral) */}
         <span className="aio-scene-sticker aio-scene-document aio-scene-document-coral">
-          <div className="sticker-header" />
-          <i />
-          <i />
-          <i />
+          <div className="seo-card-badge">✦ AI Overview</div>
+          <div className="seo-card-title">thay pin iPhone</div>
+          <div className="seo-card-url">dienthoaivui.com.vn · Top 1</div>
+          <div className="seo-card-metric">
+            <span>Semantic Match</span>
+            <strong>94.2%</strong>
+          </div>
         </span>
+
+        {/* Card 2: Top 1 Organic SERP Card (Action Blue) */}
         <span className="aio-scene-sticker aio-scene-document aio-scene-document-blue">
-          <div className="sticker-header" />
-          <i />
-          <i />
-          <i />
+          <div className="seo-card-badge">TOP 1 SERP</div>
+          <div className="seo-card-url">dienthoaivui.com.vn &gt; thay-pin</div>
+          <div className="seo-card-title">Thay Pin iPhone Giá Rẻ</div>
+          <div className="seo-card-metric">
+            <span>10.014 imp</span>
+            <strong>Pos: #1</strong>
+          </div>
         </span>
+
+        {/* Card 3: Query Fan-out Capsule (Deep Enterprise Green) */}
         <span className="aio-scene-sticker aio-scene-query aio-scene-query-green">
-          <i />
-          <i />
+          <span>15 Query Fan-out · 10 Đối thủ</span>
         </span>
+
+        {/* Card 4: Semantic Vector Capsule (Dark Navy) */}
         <span className="aio-scene-sticker aio-scene-query aio-scene-query-navy">
-          <i />
-          <i />
+          <span>Vector 768D · Cosine Match</span>
         </span>
-        <span className="aio-scene-badge-stone">COHERE AIO</span>
+
+        {/* Badge: Soft Stone */}
+        <span className="aio-scene-badge-stone">
+          <span>✦</span>
+          <span>AIO SEO ENGINE 2026</span>
+        </span>
+
         <span className="aio-scene-star aio-scene-star-one">✦</span>
         <span className="aio-scene-star aio-scene-star-two">✦</span>
         <span className="aio-scene-star aio-scene-star-three">✦</span>

@@ -626,6 +626,11 @@ export default function AioWorkspace() {
                       : "AIO Engine: Analysis Harmonized"}
               </span>
             </div>
+            <div className="aio-neural-telemetry-badge">
+              <span className="aio-telemetry-pill">VECTOR 768D</span>
+              <span className="aio-telemetry-pill">SERP CRAWLER · ACTIVE</span>
+            </div>
+            <div className="aio-neural-grid-lines" aria-hidden="true" />
           </div>
 
           {run ? (
@@ -801,7 +806,7 @@ export default function AioWorkspace() {
               )}
             </>
           ) : (
-            /* Idle Ready Flow */
+            /* Idle Ready Flow with SEO & AIO Visual Miniatures */
             <div className="aio-ready-flow" aria-label="Ba bước audit">
               {stages.map((stage, index) => (
                 <div key={stage} className={`aio-ready-card aio-ready-card-${index + 1}`}>
@@ -823,6 +828,50 @@ export default function AioWorkspace() {
                         ? "Bóc tách từng đoạn văn bản so sánh từ bài của bạn và đối thủ."
                         : "Đo độ lệch vector embedding, xếp hạng và xác định khoảng trống nội dung."}
                   </p>
+
+                  {/* Authentic SEO Mini-Diagrams */}
+                  {index === 0 && (
+                    <div className="aio-ready-diagram aio-diagram-fanout">
+                      <div className="aio-mini-search-bar">
+                        <span>⌕</span> <em>{config.keyword || "thay pin iPhone"}</em>
+                      </div>
+                      <div className="aio-mini-chips">
+                        <span>giá thay pin</span>
+                        <span>ở đâu uy tín</span>
+                        <span>bảo hành</span>
+                      </div>
+                    </div>
+                  )}
+                  {index === 1 && (
+                    <div className="aio-ready-diagram aio-diagram-crawler">
+                      <div className="aio-mini-crawl-row">
+                        <span className="aio-crawl-lbl your-lbl">Trang bạn</span>
+                        <div className="aio-crawl-track"><div style={{ width: "70%" }} /></div>
+                        <span className="aio-crawl-val">2.450 từ</span>
+                      </div>
+                      <div className="aio-mini-crawl-row">
+                        <span className="aio-crawl-lbl rival-lbl">Đối thủ #1</span>
+                        <div className="aio-crawl-track"><div style={{ width: "90%" }} /></div>
+                        <span className="aio-crawl-val">3.100 từ</span>
+                      </div>
+                    </div>
+                  )}
+                  {index === 2 && (
+                    <div className="aio-ready-diagram aio-diagram-vector">
+                      <div className="aio-mini-vector-bar">
+                        <span className="aio-v-tag">Cosine Distance</span>
+                        <strong>0,892 vs 0,941</strong>
+                      </div>
+                      <div className="aio-mini-vector-line">
+                        <span className="aio-v-dot v-you" style={{ left: "62%" }} />
+                        <span className="aio-v-dot v-rival" style={{ left: "82%" }} />
+                      </div>
+                      <div className="aio-mini-gap-note">
+                        <span>Gap: -0.049</span>
+                        <em>Thiếu bảng giá &amp; bảo hành</em>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

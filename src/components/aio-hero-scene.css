@@ -32,83 +32,126 @@
   opacity: 0;
 }
 
-/* Cohere-inspired tactile media cards and sticker aesthetics for static fallback */
+/* Cohere-inspired tactile SEO & AIO media cards for static fallback */
 .aio-scene-sticker {
   position: absolute;
   display: flex;
   flex-direction: column;
   box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.45), 0 4px 12px rgba(0, 0, 0, 0.25);
   border: 1px solid rgba(255, 255, 255, 0.22);
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(8px);
   will-change: transform;
+  font-family: inherit;
+  color: #ffffff;
 }
 
 .aio-scene-document {
-  width: 164px;
-  height: 122px;
-  border-radius: 16px;
-  padding: 16px 14px;
-  gap: 8px;
+  width: 190px;
+  min-height: 126px;
+  border-radius: 14px;
+  padding: 14px 14px;
+  gap: 6px;
 }
 
-.aio-scene-document .sticker-header {
-  height: 8px;
-  width: 48%;
+.seo-card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 2px 7px;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.95);
-  margin-bottom: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  width: fit-content;
+}
+
+.seo-card-title {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #ffffff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.seo-card-url {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.82);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.seo-card-metric {
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 3px 6px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.2);
+  color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2px;
 }
 
 .aio-scene-document i,
 .aio-scene-query i {
   display: block;
-  height: 5px;
+  height: 4px;
   border-radius: 9999px;
   background: rgba(255, 255, 255, 0.85);
 }
 
-.aio-scene-document i:nth-of-type(1) { width: 90%; }
-.aio-scene-document i:nth-of-type(2) { width: 72%; }
-.aio-scene-document i:nth-of-type(3) { width: 54%; }
+.aio-scene-document i:nth-of-type(1) { width: 92%; }
+.aio-scene-document i:nth-of-type(2) { width: 70%; }
 
-/* Coral Blog / Taxonomy Card (Cohere #ff7759) */
+/* Coral Google AI Overview Card (Cohere #ff7759) */
 .aio-scene-document-coral {
-  top: 10%;
-  left: 10%;
-  background: linear-gradient(135deg, #ff7759 0%, #e05e42 100%);
-  transform: rotate(-6deg) scale(0.92);
+  top: 8%;
+  left: 6%;
+  background: linear-gradient(135deg, #ff7759 0%, #d84e31 100%);
+  transform: rotate(-6deg) scale(0.95);
   animation: aio-float-1 5.5s ease-in-out infinite;
   border-color: rgba(255, 173, 155, 0.45);
 }
 
-/* Action Blue Research Card (Cohere #1863dc) */
+/* Action Blue Top 1 Organic SERP Card (Cohere #1863dc) */
 .aio-scene-document-blue {
-  top: 32%;
-  left: 50%;
-  background: linear-gradient(135deg, #1863dc 0%, #104db0 100%);
-  transform: rotate(6deg);
+  top: 34%;
+  left: 48%;
+  background: linear-gradient(135deg, #1863dc 0%, #0d429a 100%);
+  transform: rotate(5deg);
   animation: aio-float-2 6.2s ease-in-out infinite;
-  border-color: rgba(147, 197, 253, 0.4);
+  border-color: rgba(147, 197, 253, 0.45);
 }
 
-/* Deep Green Product Capsule (Cohere #003c33) */
+/* Deep Green SEO Query Fan-out Capsule (Cohere #003c33) */
 .aio-scene-query {
-  width: 172px;
-  height: 48px;
+  width: 196px;
+  height: 44px;
   border-radius: 9999px;
-  padding: 12px 18px 12px 44px;
+  padding: 8px 14px 8px 36px;
   position: relative;
   justify-content: center;
-  gap: 4px;
+  gap: 2px;
+  font-size: 11px;
+  font-weight: 600;
 }
 
 .aio-scene-query::before {
   content: "";
   position: absolute;
-  top: 16px;
-  left: 17px;
-  width: 13px;
-  height: 13px;
+  top: 14px;
+  left: 14px;
+  width: 11px;
+  height: 11px;
   border: 2px solid #fff;
   border-radius: 50%;
 }
@@ -116,52 +159,53 @@
 .aio-scene-query::after {
   content: "";
   position: absolute;
-  top: 29px;
-  left: 29px;
-  width: 9px;
-  height: 2.5px;
+  top: 25px;
+  left: 24px;
+  width: 8px;
+  height: 2px;
   border-radius: 2px;
   background: #fff;
   transform: rotate(45deg);
   transform-origin: left center;
 }
 
-.aio-scene-query i:nth-of-type(1) { width: 85%; height: 5px; }
-.aio-scene-query i:nth-of-type(2) { width: 50%; height: 4px; }
-
 .aio-scene-query-green {
-  left: 8%;
+  left: 6%;
   bottom: 12%;
-  background: linear-gradient(135deg, #003c33 0%, #00241e 100%);
+  background: linear-gradient(135deg, #003c33 0%, #00221c 100%);
   border-color: rgba(0, 168, 132, 0.45);
   transform: rotate(4deg) scale(0.95);
   animation: aio-float-2 5.8s ease-in-out infinite 0.5s;
 }
 
+/* Dark Navy Semantic Vector Capsule (Cohere #071829) */
 .aio-scene-query-navy {
-  top: 8%;
-  right: 6%;
+  top: 6%;
+  right: 5%;
   background: linear-gradient(135deg, #071829 0%, #0d2238 100%);
-  border-color: rgba(98, 174, 240, 0.35);
-  transform: rotate(-5deg) scale(0.78);
+  border-color: rgba(98, 174, 240, 0.4);
+  transform: rotate(-5deg) scale(0.85);
   animation: aio-float-1 6.5s ease-in-out infinite 1s;
 }
 
 .aio-scene-badge-stone {
   position: absolute;
-  right: 12%;
+  right: 10%;
   bottom: 14%;
   background: #eeece7;
   color: #17171c;
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.05em;
   padding: 6px 14px;
   border-radius: 9999px;
   transform: rotate(3deg) scale(0.9);
   box-shadow: 0 10px 24px -2px rgba(0, 0, 0, 0.35);
   border: 1px solid rgba(0, 0, 0, 0.08);
   animation: aio-float-1 5s ease-in-out infinite 0.8s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .aio-scene-star {
