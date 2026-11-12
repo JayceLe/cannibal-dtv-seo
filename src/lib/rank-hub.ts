@@ -1,4 +1,4 @@
-export const MAX_RANK_KEYWORDS = 30_000;
+export const MAX_RANK_KEYWORDS = 35_000;
 
 export type RankDepth = 10 | 30 | 100;
 export type RankPoint = { at: string; rank: number | null; url: string };

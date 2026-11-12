@@ -3,11 +3,12 @@ import assert from "node:assert/strict";
 import "fake-indexeddb/auto";
 import { MAX_RANK_KEYWORDS, applyRankResult, extractKeywordColumn, listRankKeywords, listRankProjects, openRankDb, parseKeywords, rankMovement, removeRankKeywords, removeRankProject, saveRankKeywords, saveRankProject, type RankKeyword, type RankProject } from "../src/lib/rank-hub";
 
-test("imports 30,000 distinct keywords, merges duplicates and rejects the 30,001st", () => {
+test("imports 35,000 distinct keywords, merges duplicates and rejects the 35,001st", () => {
+  assert.equal(MAX_RANK_KEYWORDS, 35_000);
   const input = Array.from({ length: MAX_RANK_KEYWORDS }, (_, index) => `Từ khóa ${index + 1}`);
   assert.equal(parseKeywords(input).length, MAX_RANK_KEYWORDS);
   assert.equal(parseKeywords(["  Từ   Khóa 1 ", "từ khóa 1", "TỪ KHÓA 2"]).length, 2);
-  assert.throws(() => parseKeywords([...input, "Từ khóa 30001"]), /30\.000/);
+  assert.throws(() => parseKeywords([...input, "Từ khóa 35001"]), /35\.000/);
 });
 
 test("extracts keyword column from spreadsheet headers and numbered Spin rows", () => {
@@ -30,7 +31,7 @@ test("rank history keeps previous and best positions across updates and misses",
   assert.equal(first.url, "https://example.com/a");
 });
 
-test("persists 30,000 keywords by project without mixing account data", async () => {
+test("persists 35,000 keywords by project without mixing account data", async () => {
   const db = await openRankDb();
   const makeProject = (id: string, owner: string): RankProject => ({ id, owner, name: id, domain: "example.com", depth: 100, count: 0, cursor: 0, createdAt: "2026-11-12", updatedAt: "2026-11-12" });
   const mine = makeProject("mine", "account-a"), other = makeProject("other", "account-b");
