@@ -36,6 +36,7 @@ const OverviewWorkspace = dynamic(() => import("./overview-workspace"));
 const Comparison = dynamic(() => import("./comparison"));
 const CannibalRules = dynamic(() => import("./cannibal-rules"));
 const RankingsReport = dynamic(() => import("./rankings-report"));
+const CheckRankWorkspace = dynamic(() => import("./check-rank-workspace"));
 const AioWorkspace = dynamic(() => import("./aio-workspace"), {
   loading: () => (
     <p className="muted" role="status">
@@ -536,7 +537,7 @@ export default function Dashboard() {
         tabIndex={-1}
         aria-labelledby={view + "-tab"}
       >
-        {error && view !== "aio" ? (
+        {error && view !== "aio" && view !== "check-rank" ? (
           <div role="alert" className="error-message">
             {error}
             <button
@@ -582,6 +583,7 @@ export default function Dashboard() {
           />
         ) : null}
         {view === "aio" ? <AioWorkspace /> : null}
+        {view === "check-rank" && user ? <CheckRankWorkspace owner={user.id} /> : null}
       </main>
 
       {showRules ? <CannibalRules onClose={() => setShowRules(false)} /> : null}
