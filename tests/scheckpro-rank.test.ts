@@ -64,20 +64,3 @@ test("SCheckPro bridge checks the requested domain without a server key", async 
     window.happyDOM.abort();
   }
 });
-
-test("a large rank batch can reuse one verified extension handshake", async () => {
-  let checks = 0;
-  const onTest = () => { checks++; document.dispatchEvent(new CustomEvent("TestScheckProSuccess")); };
-  const onRequest = () => document.dispatchEvent(new CustomEvent("RequestLinkSuccess", { detail: html("hoa lan", ["https://example.com/article"]) }));
-  document.addEventListener("TestScheckPro", onTest);
-  document.addEventListener("RequestLink", onRequest);
-  try {
-    assert.equal(await detectSCheckPro(), true);
-    for (let i = 0; i < 3; i++) assert.equal((await lookupSCheckProRank("example.com", "hoa lan", 10, undefined, true)).rank, 1);
-    assert.equal(checks, 1);
-  } finally {
-    document.removeEventListener("TestScheckPro", onTest);
-    document.removeEventListener("RequestLink", onRequest);
-    await window.happyDOM.abort();
-  }
-});

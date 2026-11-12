@@ -111,10 +111,10 @@ export function parseGoogleOrganic(html: string, query: string): { urls: string[
 }
 
 export async function lookupSCheckProRank(
-  domainInput: string, door: string, depth: 10 | 30 | 100, signal?: AbortSignal, extensionReady = false,
+  domainInput: string, door: string, depth: 10 | 30 | 100, signal?: AbortSignal,
 ): Promise<AioRankLookup> {
   const domain = normalizeRankDomain(domainInput);
-  if (!extensionReady && !(await detectSCheckPro(signal))) {
+  if (!(await detectSCheckPro(signal))) {
     throw new Error(`Không tìm thấy SCheckPro trên Chrome. Cài hoặc bật tiện ích ${extensionId}, rồi tải lại trang.`);
   }
   let checked = 0;

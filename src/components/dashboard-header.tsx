@@ -9,20 +9,18 @@ import {
   LogOut,
   Upload,
   ScanSearch,
-  ListChecks,
 } from "lucide-react";
 import type { Week } from "@/lib/comparison";
 import HeaderDateSelect from "./header-date-select";
 import HeaderScene from "./header-scene";
 
-export type DashboardView = "overview" | "compare" | "rankings" | "aio" | "check-rank";
+export type DashboardView = "overview" | "compare" | "rankings" | "aio";
 
 const tabs = [
   { value: "overview", label: "Tổng quan", icon: LayoutDashboard },
   { value: "compare", label: "So sánh", icon: GitCompareArrows },
   { value: "rankings", label: "Thứ hạng", icon: ChartNoAxesCombined },
   { value: "aio", label: "AIO", icon: ScanSearch },
-  { value: "check-rank", label: "Check Rank", icon: ListChecks },
 ] as const;
 
 type Props = {
@@ -99,7 +97,7 @@ export default function DashboardHeader({
           </button>
         ))}
       </nav>
-      {view !== "aio" && view !== "check-rank" ? (
+      {view !== "aio" ? (
         <button
           className="btn secondary header-rules-button"
           aria-label="Quy tắc tính cannibal"
