@@ -8,6 +8,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import ImportProgress from "./import-progress";
+import GscSyncConnection from "./gsc-sync-connection";
 import { db } from "@/lib/supabase";
 import { number, type Keyword, type Metric } from "@/lib/engine";
 type Preview = {
@@ -462,6 +463,7 @@ export default function Importer({
         ) : null}
       </section>
       <aside>
+        <GscSyncConnection onDone={onDone} />
         <section className="panel import-guide">
           <h3>
             Một nguồn gốc.

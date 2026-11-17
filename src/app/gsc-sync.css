@@ -1,0 +1,17 @@
+.gsc-connection { margin-bottom: 20px; }
+.gsc-connection-title { display: flex; align-items: center; gap: 10px; }
+.gsc-connection-title > svg { color: var(--accent, #2459a9); flex-shrink: 0; }
+.gsc-connection-title h3 { margin: 0; }
+.gsc-connection p, .gsc-connection li { font-size: 13px; line-height: 1.65; }
+.gsc-connection > p { margin: 12px 0; }
+.gsc-connection a { color: var(--accent, #2459a9); text-decoration: underline; text-underline-offset: 3px; }
+.gsc-period { padding: 11px 13px; background: var(--surface-soft, #f3f6f9); border: 1px solid var(--border); border-radius: 9px; }
+.gsc-period span { color: var(--muted); }
+.gsc-connected { display: flex; align-items: center; gap: 7px; color: #137252; }
+.gsc-connection details { border-top: 1px solid var(--border); padding-top: 12px; margin-top: 14px; }
+.gsc-connection summary { cursor: pointer; font-size: 14px; font-weight: 650; }
+.gsc-connection ol { padding-left: 19px; margin: 12px 0 16px; }
+.gsc-connection li + li { margin-top: 8px; }
+.gsc-account { overflow-wrap: anywhere; color: var(--muted); }
+.gsc-connection .btn { display: inline-flex; align-items: center; gap: 8px; }
+.gsc-syncing { color: var(--accent, #2459a9); }
